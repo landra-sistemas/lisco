@@ -1,0 +1,14 @@
+.idea/
+logs/
+temp/
+node_modules/
+out/
+frontend/build/
+coverage/
+.nyc_output/
+mocha.json
+configuration.json
+/.history
+.env
+/.vscode/
+/dist/

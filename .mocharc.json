@@ -1,0 +1,9 @@
+{
+    "require": [
+        "esm",
+        "test/mocha.env"
+    ],
+    "file": [
+        "./test/run-enviroment.js"
+    ]
+}

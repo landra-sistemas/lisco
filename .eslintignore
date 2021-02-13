@@ -1,0 +1,4 @@
+#Ignore extjs dependences and files
+app/statics/js/*
+
+app/statics/css/*
