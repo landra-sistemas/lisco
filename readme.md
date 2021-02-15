@@ -100,6 +100,30 @@ JWT_ALGORITHM=HS256
 ```
 
 ``` json
-
+//log4js.json
+{
+    "disableClustering": true,
+    "appenders": {
+        "application": {
+            "type": "file",
+            "filename": "logs/default.log",
+            "maxLogSize": 10485760,
+            "backups": 3,
+            "compress": true
+        },
+        "out": {
+            "type": "stdout"
+        }
+    },
+    "categories": {
+        "default": {
+            "appenders": [
+                "application",
+                "out"
+            ],
+            "level": "trace"
+        }
+    }
+}
 
 ```
