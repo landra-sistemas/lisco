@@ -11,9 +11,9 @@ export default class EventHandler extends EventEmitter {
 
         if (cluster.isWorker) {
             // Levanto, en los worker, la escucha para recibir los eventos en broadcast de los demas hilos
-            process.on('message', (evt, props) => {
-                console.debug(`Receiving broadcast ${evt} - ${process.pid}`);
-                this.emit(evt, props);
+            process.on('message', (msg) => {
+                console.debug(`Receiving broadcast ${msg.event} - ${process.pid}`);
+                super.emit(msg.event, msg.props);
             });
         }
     }
@@ -28,23 +28,23 @@ export default class EventHandler extends EventEmitter {
         //Desencadenar en local
         super.emit(evt, props);
 
-        if (cluster.isWorker) {
+        if (evt && props && cluster.isWorker) {
             console.debug(`${evt} -> Firing from ${process.pid} to master`);
             if (!props) {
                 props = {};
             }
             props.owner = process.pid
-            process.send(evt, props);
+            process.send({ event: evt, props });
         }
 
-        if (cluster.isMaster && global.cluster_server) {
-            console.debug(`${evt} -> Firing from to master to workers`);
+        if (evt && props && cluster.isMaster && global.cluster_server) {
+            console.debug(`${evt} -> Firing from master to workers`);
             for (var i in global.cluster_server.workers) { //Si se recibe un evento del master
                 //Se notifica a todos los demas workers excepto al que lo ha generado
                 var current = global.cluster_server.workers[i];
-                if (current.process.pid !== props.owner) {
+                if (props && current.process.pid !== props.owner) {
                     console.debug(`${evt} -> Sending to ${current.process.pid}`)
-                    current.send(evt, props);
+                    current.send({ event: evt, props });
                 }
             }
         }

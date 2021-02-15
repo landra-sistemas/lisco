@@ -1,9 +1,10 @@
-import { ClusterServer, Server } from './server'
+import { ClusterServer, Server, loadRoutes } from './server'
 import { EventHandler } from './events'
 import { Logger } from './logger'
 import { I18nLoader, JsonResponse, Utils, TokenGenerator } from './common'
+import { AuthController, JwtAuthHandler } from './auth'
 
-const init_lisco = async (server) => {
+const run_lisco = async (server) => {
     //Gestor de eventos
     global.events = new EventHandler();
     //Carga de utilidades
@@ -12,17 +13,32 @@ const init_lisco = async (server) => {
     //Carga de utilidades
     global.utils = Utils;
     //Inicio del cluster server
-    global.cluster_server = new ClusterServer(server);
+    const test = new ClusterServer(server);
+    global.cluster_server  = test;
+}
+
+/**
+ * Initializes database connection
+ * @param {*} config 
+ */
+const load_db = (config) => {
+    if (config) {
+        global.knex = require('knex')(config);
+    }
 }
 
 export {
-    init_lisco,
+    run_lisco,
+    load_db,
     ClusterServer,
     Server,
+    loadRoutes,
     Logger,
     I18nLoader,
     JsonResponse,
     EventHandler,
     Utils,
-    TokenGenerator
+    TokenGenerator,
+    AuthController,
+    JwtAuthHandler
 }

@@ -1,9 +1,23 @@
-
-import jsonwebtoken from 'jsonwebtoken'
+import { TokenGenerator } from '../../common';
 
 export default class JwtAuthHandler {
     constructor() {
+        this.tokenGenerator = new TokenGenerator(process.env.JWT_SECRET, { audience: 'myaud', issuer: 'myissuer', subject: 'user', algorithm: process.env.JWT_ALGORITHM, expiresIn: process.env.JWT_EXPIRES })
+    }
 
+    check(request) {
+        if (request.headers.authorization) {
+            const token = (request.headers.authorization || '').split(' ')[1] || '';
+
+            var decoded = this.tokenGenerator.verify(token);
+            const { sub, username, exp } = decoded;
+
+            if (!sub || !username || moment(exp).isAfter(new Date())) {
+                return false;
+            }
+            return true;
+        }
+        return false;
     }
 
     validate(username, password) {
@@ -12,17 +26,4 @@ export default class JwtAuthHandler {
         return this.generateToken({ username });
     }
 
-    /**
-     * 
-     * @param {*} user 
-     */
-    generateToken(user) {
-        const payload = {
-            sub: user.id,
-            exp: Date.now() + parseInt(process.env.JWT_LIFETIME),
-            username: user.username
-        };
-        const token = jsonwebtoken.sign(JSON.stringify(payload), process.env.JWT_SECRET, { algorithm: process.env.JWT_ALGORITHM });
-        return token;
-    }
 }

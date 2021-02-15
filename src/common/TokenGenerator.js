@@ -6,31 +6,36 @@
  *
  * I create this gist just to help those who want to auto-refresh JWTs.
  */
+import jsonwebtoken from 'jsonwebtoken';
+import * as uuid from 'uuid';
 
-const jwt = require('jsonwebtoken');
+export default class TokenGenerator {
 
-function TokenGenerator(privateKey, options) {
-    this.privateKey = privateKey;
-    this.options = options; //algorithm + keyid + noTimestamp + expiresIn + notBefore
+    constructor(privateKey, options) {
+        this.privateKey = privateKey;
+        this.options = options;
+    }
+
+    sign(payload) {
+        const jwtSignOptions = { ...this.options, jwtid: uuid.v4() };
+        return jsonwebtoken.sign(payload, this.privateKey, jwtSignOptions);
+    }
+
+    verify(token) {
+        return jsonwebtoken.verify(token, this.privateKey, this.options);
+    }
+
+    refresh(token) {
+        const payload = jsonwebtoken.verify(token, this.privateKey, this.options);
+        delete payload.sub;
+        delete payload.iss;
+        delete payload.aud;
+        delete payload.iat;
+        delete payload.exp;
+        delete payload.nbf;
+        delete payload.jti; //We are generating a new token, if you are using jwtid during signing, pass it in refreshOptions
+        const jwtSignOptions = { ...this.options, jwtid: uuid.v4() };
+        // The first signing converted all needed options into claims, they are already in the payload
+        return jsonwebtoken.sign(payload, this.privateKey, jwtSignOptions);
+    }
 }
-
-TokenGenerator.prototype.sign = function (payload, signOptions) {
-    const jwtSignOptions = Object.assign({}, signOptions, this.options);
-    return jwt.sign(payload, this.privateKey, jwtSignOptions);
-}
-
-// refreshOptions.verify = options you would use with verify function
-// refreshOptions.jwtid = contains the id for the new token
-TokenGenerator.prototype.refresh = function (token, refreshOptions) {
-    const payload = jwt.verify(token, this.privateKey, refreshOptions.verify);
-    delete payload.iat;
-    delete payload.exp;
-    delete payload.nbf;
-    delete payload.jti; //We are generating a new token, if you are using jwtid during signing, pass it in refreshOptions
-    const jwtSignOptions = Object.assign({}, this.options, { jwtid: refreshOptions.jwtid });
-    // The first signing converted all needed options into claims, they are already in the payload
-    return jwt.sign(payload, this.privateKey, jwtSignOptions);
-}
-
-
-export default TokenGenerator;

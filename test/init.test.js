@@ -1,12 +1,12 @@
 import { expect } from 'chai';
-import { init_lisco, Server } from '../src';
+import { run_lisco, Server } from '../src';
 
 
 describe('init', async () => {
-    it('#init_lisco()', () => {
+    it('#run_lisco()', () => {
         try {
             const server = new Server();
-            init_lisco(server)
+            run_lisco(server)
 
             expect(server).not.to.be.null;
         } catch (e) {

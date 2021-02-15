@@ -65,6 +65,7 @@ export class ClusterServer extends EventEmitter {
             });
         } else {
             this.initUnclustered();
+            
 
             console.log(`Worker ${process.pid} started`);
         }
@@ -75,17 +76,18 @@ export class ClusterServer extends EventEmitter {
     initWorker() {
         let worker = cluster.fork();
         console.log(`Running worker ${worker.process.pid}`)
-        worker.on('message', (evt, props) => {
-            console.debug(`Received ${evt} on ${current.process.pid}`)
-            // for (var i in this.workers) { //Si se recibe un mensaje de un worker implica que alguno de ellos ha desencadenado un evento.
-            //     //Se notifica a todos los demas workers
-            //     var current = this.workers[i];
-            //     current.send(evt, props);
-            //     console.log("Sending to workers");
-            //     console.log(msg);
-            // }
-            //Desencadenar
-            global.events.emit(evt, props);
+        worker.on('message', (msg) => {
+            if (msg.event) {
+                console.debug(`Received ${msg.event} on ${worker.process.pid}`)
+                for (var i in this.workers) { //Si se recibe un mensaje de un worker implica que alguno de ellos ha desencadenado un evento.
+                    //Se notifica a todos los demas workers
+                    var current = this.workers[i];
+                    current.send(msg);
+                    console.log("Sending to workers");
+                }
+                //Desencadenar
+                global.events.emit(msg.event, msg.props);
+            }
         });
         this.workers.push(worker);
     }

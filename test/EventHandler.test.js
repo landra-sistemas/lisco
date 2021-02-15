@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import cluster from 'cluster';
-import { init_lisco, EventHandler, Server, Utils } from '../src';
+import { run_lisco, EventHandler, Server, Utils } from '../src';
 
 
 describe('EventHandler', () => {
@@ -28,7 +28,7 @@ describe('EventHandler', () => {
         process.env.CLUSTERED = true;
 
         const server = new Server();
-        await init_lisco(server);
+        await run_lisco(server);
         global.cluster_server.start();
 
         var testString;
