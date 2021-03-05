@@ -11,4 +11,3 @@ configuration.json
 /.history
 .env
 /.vscode/
-/dist/
