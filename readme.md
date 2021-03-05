@@ -1,5 +1,8 @@
 # Lisco Framework
 
+
+![alt](./logo.png)
+
 Framework nodejs con express y knex para el desarrollo de backends.
 
 
@@ -16,11 +19,13 @@ npm install esm dotenv
 
 Runtime
 ``` javascript
+//run.js
+
 require = require("esm")(module/*, options*/)
 
 require('dotenv').config();
 //module dependencies.
-require('./index.js')(true).then(() => {
+require('./index.js')().then(() => {
     console.log("Started");
 }).catch((ex) => {
     console.error(ex)
@@ -36,10 +41,10 @@ process.on('uncaughtException', (err) => {
 Index
 ``` javascript
 //index.js
+
 import { run_lisco, Logger, Server, ClusterServer, AuthController, JwtAuthHandler } from 'lisco'
 
-module.exports = (withLog) => {
-    return (async () => {
+module.exports = async () => {
         await Logger.configure();
 
         const statics = {
@@ -60,12 +65,10 @@ module.exports = (withLog) => {
             console.log("MainThread")
         }
 
-        ClusterServer.start(withLog);
+        ClusterServer.start();
         ClusterServer.on('listening', () => {
             console.log('listening');
         })
-
-    })();
 };
 
 ```
@@ -99,6 +102,10 @@ JWT_LIFETIME=86400
 
 # algorithm used in token signing
 JWT_ALGORITHM=HS256
+
+JWT_AUDIENCE=MyAudience
+JWT_ISSUER=Landra Sistemas
+JWT_SUBJECT=MySub
 ```
 
 ``` json

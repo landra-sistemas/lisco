@@ -30,11 +30,8 @@ class ClusterServer extends EventEmitter {
 
     /**
      * Iniciar el servidor en el puerto y con la configuración seleccionadas.
-     * 
-     * @param {*} withLog - Loguear las llamadas realizadas a la api en el appender 'debug'
      */
-    start(withLog) {
-        this.withLog = withLog;
+    start() {
         if (this.clustered == "true") {
             this.initClustered();
         } else {
@@ -104,7 +101,6 @@ class ClusterServer extends EventEmitter {
         //Initialize clustered servers
 
         this.server = this.cls;
-        this.server.withLog = this.withLog;
 
         this.server.port = this.port;
         //create http server

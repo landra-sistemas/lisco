@@ -77,10 +77,10 @@ export default class Server {
                 let pathname = url.parse(request.url).pathname;
                 let end = Date.now() - request.requestTime;
                 let user = (request && request.session && request.session.user_id) || "";
-                if (this.withLog) {
-                    console.debug('APIRequest[' + process.pid + ']::. [' + request.method + '] (user:' + user + ')  ' + pathname + ' |-> took: ' + end + ' ms');
-                    console.debug(JSON.stringify(request.body));
-                }
+
+                //TODO configure by ENV
+                console.debug('APIRequest[' + process.pid + ']::. [' + request.method + '] (user:' + user + ')  ' + pathname + ' |-> took: ' + end + ' ms');
+                console.debug(JSON.stringify(request.body));
             });
             next();
         });
@@ -107,8 +107,7 @@ export default class Server {
             let jsRes = new JsonResponse();
             jsRes.success = false;
             jsRes.message = err.message;
-            if (this.withLog)
-                console.error(err);
+            console.error(err);
 
             res.status(500).json(jsRes.toJson());
         });
