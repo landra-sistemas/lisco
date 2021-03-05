@@ -1,4 +1,4 @@
-import BaseKnexDao from "./knex";
+import BaseKnexDao from "./knex/dao/BaseKnexDao";
 
 export default class IUserDao extends BaseKnexDao{
     constructor() {

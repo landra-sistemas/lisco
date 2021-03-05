@@ -13,6 +13,8 @@ class I18nLoader {
         const readfile = util.promisify(fs.readFile);
         const lang = custom || process.env.DEFAULT_LANG;
 
+        //TODO mejorar el sistema cargando todas las traducciones del directorio i18n con chokidar esperando modificaciones
+
         let file = path.resolve(process.cwd(), "i18n/lang_" + lang + ".json")
         try {
             const data = await readfile(file, 'utf8');

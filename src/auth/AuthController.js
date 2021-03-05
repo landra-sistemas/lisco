@@ -29,7 +29,7 @@ export default class AuthController {
      * 
      * @param {*} request 
      * @param {*} response 
-     * @param {*} ne-xt 
+     * @param {*} next 
      */
     async check(request, response, next) {
         try {
