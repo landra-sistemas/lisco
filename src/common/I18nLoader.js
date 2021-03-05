@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import util from 'util';
 
-export default class I18nLoader {
+class I18nLoader {
 
     /**
      *
@@ -18,7 +18,10 @@ export default class I18nLoader {
             const data = await readfile(file, 'utf8');
             var parsedData = JSON.parse(data);
 
-            this.currentData = parsedData;
+            if (!this.currentData) {
+                this.currentData = {};
+            }
+            this.currentData[lang] = parsedData;
         } catch (ex) {
             console.log("Lang file does not exist. Create it on ./i18n/lang_{xx}.json")
         }
@@ -28,10 +31,22 @@ export default class I18nLoader {
      * 
      * @param {*} key 
      */
-    translate(key) {
-        if (this.currentData && this.currentData[key]) {
-            return this.currentData[key]
+    async translate(key, lang) {
+        if (!lang) lang = process.env.DEFAULT_LANG
+
+        if (this.currentData && this.currentData[lang] && this.currentData[lang][key]) {
+            return this.currentData[lang][key]
+        }
+
+        if (!this.currentData || !this.currentData[lang]) {
+            await this.load(lang);
+            if (this.currentData && this.currentData[lang] && this.currentData[key]) {
+                return this.currentData[lang][key]
+            }
         }
         return "undefined." + key;
     }
 }
+
+
+export default new I18nLoader();

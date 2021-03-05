@@ -5,24 +5,29 @@ import path from 'path';
 import cluster from 'cluster';
 import os from 'os'
 import { EventEmitter } from 'events';
+import EventHandler from '../events/EventHandler';
 
 /**
  * Inicializa la escucha del server en modo cluster
  */
-export class ClusterServer extends EventEmitter {
-    constructor(cls) {
+class ClusterServer extends EventEmitter {
+    constructor() {
         super();
 
         if (!process.env.PORT) {
             console.log('Using 3000 as default port. Customize via env PORT.')
         }
         this.port = this.normalizePort(process.env.PORT || 3000);
-        this.cls = cls;
         this.clustered = process.env.CLUSTERED;
         this.workers = [];
 
         this.executeOnlyMain = () => { };
     }
+
+    setServerCls(cls) {
+        this.cls = cls;
+    }
+
     /**
      * Iniciar el servidor en el puerto y con la configuración seleccionadas.
      * 
@@ -65,7 +70,7 @@ export class ClusterServer extends EventEmitter {
             });
         } else {
             this.initUnclustered();
-            
+
 
             console.log(`Worker ${process.pid} started`);
         }
@@ -86,7 +91,7 @@ export class ClusterServer extends EventEmitter {
                     console.log("Sending to workers");
                 }
                 //Desencadenar
-                global.events.emit(msg.event, msg.props);
+                EventHandler.emit(msg.event, msg.props);
             }
         });
         this.workers.push(worker);
@@ -201,3 +206,4 @@ export class ClusterServer extends EventEmitter {
         }
     } ç
 }
+export default new ClusterServer(); //Modo singleton

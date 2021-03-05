@@ -14,7 +14,7 @@ import { loadRoutes } from './loadRoutes'
  *
  * que el codigo se disperse entre diferentes proyectos.
  */
-export class Server {
+export default class Server {
 
     constructor(statics, routes) {
         this.app = express();

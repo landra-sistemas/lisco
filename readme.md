@@ -36,7 +36,7 @@ process.on('uncaughtException', (err) => {
 Index
 ``` javascript
 //index.js
-import { run_lisco, Logger, Server } from 'lisco'
+import { run_lisco, Logger, Server, ClusterServer, AuthController, JwtAuthHandler } from 'lisco'
 
 module.exports = (withLog) => {
     return (async () => {
@@ -45,7 +45,9 @@ module.exports = (withLog) => {
         const statics = {
             "/temp": "/temp"
         }
-        const routes = [];
+        const routes = [
+            new AuthController([], new JwtAuthHandler()), //JWT Auth
+        ];
         const server = new Server(statics, routes);
         server.customizeExpress = () => {
             // this.app.use(cookieParser())
@@ -53,13 +55,13 @@ module.exports = (withLog) => {
 
         run_lisco(server);
 
-        global.cluster_server.executeOnlyMain = () => {
+        ClusterServer.executeOnlyMain = () => {
             //Acciones a ejecutar sobre el mainWorker
             console.log("MainThread")
         }
 
-        global.cluster_server.start(withLog);
-        global.cluster_server.on('listening', () => {
+        ClusterServer.start(withLog);
+        ClusterServer.on('listening', () => {
             console.log('listening');
         })
 
@@ -127,3 +129,32 @@ JWT_ALGORITHM=HS256
 }
 
 ```
+
+
+
+## VSCode development
+
+Para hacer que al ejecutar una aplicación los mensajes de log del `consoleApender` aparezcan en el modo debug es necesario configurar en el `launch.json` la ejecución como:
+
+``` json
+
+{
+    "type": "node",
+    "request": "launch",
+    "name": "Launch Program",
+    "cwd": "${workspaceFolder}/../lisco_tester",
+    "program": "${workspaceFolder}/../lisco_tester/run.js",
+    "outputCapture": "std"  /// <---- Esto es lo importante
+}
+```
+
+
+
+## Ejemplos DB Connection
+
+Ficheros -> ./dbconfig
+
+KNEX -> [http://knexjs.org/#Installation](http://knexjs.org/#Installation)
+
+
+

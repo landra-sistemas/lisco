@@ -1,0 +1,12 @@
+{
+    "client": "mssql",
+    "connection": {
+      "server" : "0.0.0.0",
+      "user" : "****",
+      "password" : "****",
+      "database" : "****",
+      "options": {
+        "port": 14831
+      }
+    }
+  }

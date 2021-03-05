@@ -1,5 +1,6 @@
+import { Utils } from "../../../common";
 
-export default class FilterParser {
+export default class KnexFilterParser {
 
 
     /**
@@ -41,7 +42,7 @@ export default class FilterParser {
      *    like: filtro like
      *    likeI: filtro like ignorando mayusculas y minusculas
      */
-    parseFilters(builder, filter) {
+    static parseFilters(builder, filter) {
         let query = builder;
 
         for (let prop in filter) {
@@ -64,16 +65,16 @@ export default class FilterParser {
                         }
                         break;
                     case 'greater':
-                        query = query.where(prop, '>', elm.start);
+                        query = query.where(prop, '>', elm.value);
                         break;
                     case 'greaterEq':
-                        query = query.where(prop, '>=', elm.start);
+                        query = query.where(prop, '>=', elm.value);
                         break;
                     case 'less':
-                        query = query.where(prop, '<', elm.start);
+                        query = query.where(prop, '<', elm.value);
                         break;
                     case 'lessEq':
-                        query = query.where(prop, '<=', elm.start);
+                        query = query.where(prop, '<=', elm.value);
                         break;
                     case 'exists':
                         query = query.whereExists(prop);
@@ -99,13 +100,13 @@ export default class FilterParser {
                         query = query.whereNot(prop, elm.value);
                         break;
                     case 'like':
-                        const value = global.utils.replaceAll(elm.value, '*', '%');
-                        query = query.where(prop, 'LIKE', value);
+                        let value_like = Utils.replaceAll(elm.value, '*', '%');
+                        query = query.where(prop, 'LIKE', value_like);
                         break;
                     case 'likeI':
                         //!FIXME https://github.com/knex/knex/issues/233
-                        const value = global.utils.replaceAll(elm.value, '*', '%');
-                        query = query.where(prop, 'ILIKE', value);
+                        let value_ilike = Utils.replaceAll(elm.value, '*', '%');
+                        query = query.where(prop, 'ILIKE', value_ilike);
                         break;
                     case 'null':
                         query = query.whereNull(prop);
@@ -127,7 +128,7 @@ export default class FilterParser {
      * 
      * @param {*} sorts 
      */
-    parseSort(sort) {
+    static parseSort(sort) {
         if (!sort.field || !sort.direction) {
             return "";
         }

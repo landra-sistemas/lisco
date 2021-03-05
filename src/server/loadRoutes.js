@@ -4,17 +4,11 @@
  * @returns {*}
  */
 const loadRoutes = (app, routes) => {
+    if (!routes) return;
 
-    for (let idx in routes) {
-        const controller = routes[idx];
-        let route;
-        try {
-            route = new controller();
-        } catch (ex) {
-            console.error(`Error creating ${controller && controller.name}: ${ex}`);
-        }
+    for (const route of routes) {
         if (!route) continue;
-
+        //TODO traze?
         const router = route.configure();
         if (router) {
             app.use(router);

@@ -2,34 +2,21 @@ import { ClusterServer, Server, loadRoutes } from './server'
 import { EventHandler } from './events'
 import { Logger } from './logger'
 import { I18nLoader, JsonResponse, Utils, TokenGenerator } from './common'
-import { AuthController, JwtAuthHandler } from './auth'
+import { AuthController, JwtAuthHandler, IAuthHandler } from './auth'
+import { KnexFilterParser, BaseKnexDao, KnexConnector, IUserDao } from './db'
 
 const run_lisco = async (server) => {
     //Gestor de eventos
-    global.events = new EventHandler();
+    const events = EventHandler; //Init singleton
     //Carga de utilidades
-    global.i18n = new I18nLoader();
-    await global.i18n.load();
-    //Carga de utilidades
-    global.utils = Utils;
+    await I18nLoader.load();
     //Inicio del cluster server
-    const test = new ClusterServer(server);
-    global.cluster_server  = test;
+    ClusterServer.setServerCls(server);
 }
 
-/**
- * Initializes database connection
- * @param {*} config 
- */
-const load_db = (config) => {
-    if (config) {
-        global.knex = require('knex')(config);
-    }
-}
 
 export {
     run_lisco,
-    load_db,
     ClusterServer,
     Server,
     loadRoutes,
@@ -38,7 +25,12 @@ export {
     JsonResponse,
     EventHandler,
     Utils,
+    KnexConnector,
     TokenGenerator,
     AuthController,
-    JwtAuthHandler
+    JwtAuthHandler,
+    IAuthHandler,
+    KnexFilterParser,
+    BaseKnexDao,
+    IUserDao
 }

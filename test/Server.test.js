@@ -39,8 +39,8 @@ describe('Server', async () => {
 
     it('#configureRoutes()', () => {
         var tester;
-        const route = function () {
-            this.configure = () => {
+        const route = {
+            configure: () => {
                 tester = 'OK'
             }
         }
@@ -61,8 +61,8 @@ describe('Server', async () => {
 
     it('#emptyRoute.to.configureRoutes()', () => {
         var tester;
-        const route = function () {
-            this.configure = () => {
+        const route = {
+            configure: () => {
                 tester = 'OK'
                 return () => { };
             }
