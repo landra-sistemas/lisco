@@ -5,8 +5,8 @@ import { AuthController } from '../src';
 describe('AuthController', async () => {
     it('#configure()', () => {
         let auth = new AuthController([], {
-            UserDao: function () {
-                this.findByUsername = () => { }
+            UserDao: {
+                findByUsername: () => { }
             }
         });
 
@@ -17,8 +17,8 @@ describe('AuthController', async () => {
     it('#check#public()', () => {
 
         let auth = new AuthController(['/test'], {
-            UserDao: function () {
-                this.findByUsername = () => { }
+            UserDao: {
+                findByUsername: () => { }
             }
         });
         expect(auth).not.to.be.null;
@@ -51,9 +51,8 @@ describe('AuthController', async () => {
     it('#check#private#invalid()', async () => {
 
         let auth = new AuthController(['/test'], {
-            UserDao: function () {
-                this.findByUsername = () => { }
-
+            UserDao: {
+                findByUsername: () => { }
             },
             check: () => { return false; }
         });
@@ -89,9 +88,8 @@ describe('AuthController', async () => {
     it('#check#private#valid()', async () => {
 
         let auth = new AuthController(['/test'], {
-            UserDao: function () {
-                this.findByUsername = () => { }
-
+            UserDao: {
+                findByUsername: () => { }
             },
             check: () => { return true; }
         });
@@ -128,9 +126,8 @@ describe('AuthController', async () => {
     it('#login#invalid()', async () => {
 
         let auth = new AuthController(['/test'], {
-            UserDao: function () {
-                this.findByUsername = () => { }
-
+            UserDao: {
+                findByUsername: () => { }
             },
             authorize: () => { return false; }
         });
@@ -165,9 +162,8 @@ describe('AuthController', async () => {
     it('#login#valid()', async () => {
 
         let auth = new AuthController(['/test'], {
-            UserDao: function () {
-                this.findByUsername = () => { }
-
+            UserDao: {
+                findByUsername: () => { }
             },
             authorize: () => { return true; }
         });
@@ -204,9 +200,8 @@ describe('AuthController', async () => {
     it('#logout()', async () => {
 
         let auth = new AuthController(['/test'], {
-            UserDao: function () {
-                this.findByUsername = () => { }
-
+            UserDao: {
+                findByUsername: () => { }
             },
             logout: () => { return true; }
         });

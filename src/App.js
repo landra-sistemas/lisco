@@ -39,7 +39,7 @@ class App {
         this.server.executeOnlyMain = () => {
             if (this.executeOnlyMain) this.executeOnlyMain();
 
-            if (process.env.REPL_ENABLED) {
+            if (process.env.REPL_ENABLED == true) {
                 this.startRepl();
             }
         }

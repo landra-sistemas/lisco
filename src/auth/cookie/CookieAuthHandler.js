@@ -26,7 +26,7 @@ export default class CookieAuthHandler extends IAuthHandler {
         if (!UserDao) {
             throw new Error("Need 'UserDao' for user validation. Create 'UserDao' class extending 'IUserDao'");
         }
-        this.userDao = new UserDao();
+        this.userDao = UserDao;
     }
 
     /**

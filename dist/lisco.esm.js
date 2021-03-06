@@ -766,7 +766,7 @@ class JwtAuthHandler extends IAuthHandler {
         if (!UserDao) {
             throw new Error("Need 'UserDao' for user validation. Create 'UserDao' class extending 'IUserDao'");
         }
-        this.userDao = new UserDao();
+        this.userDao = UserDao;
     }
 
     /**
@@ -834,7 +834,7 @@ class CookieAuthHandler extends IAuthHandler {
         if (!UserDao) {
             throw new Error("Need 'UserDao' for user validation. Create 'UserDao' class extending 'IUserDao'");
         }
-        this.userDao = new UserDao();
+        this.userDao = UserDao;
     }
 
     /**
@@ -1099,11 +1099,11 @@ class BaseKnexDao {
 }
 
 class IUserDao extends BaseKnexDao {
-    constructor() {
-        super();
+    constructor(tableName) {
+        super(tableName);
 
         if (!this.findByUsername) {
-            throw new Error("AuthHandler must have 'findByUsername' vethod");
+            throw new Error("AuthHandler must have 'findByUsername' method");
         }
     }
 }
@@ -1141,7 +1141,7 @@ class App {
         this.server.executeOnlyMain = () => {
             if (this.executeOnlyMain) this.executeOnlyMain();
 
-            if (process.env.REPL_ENABLED) {
+            if (process.env.REPL_ENABLED == true) {
                 this.startRepl();
             }
         };
