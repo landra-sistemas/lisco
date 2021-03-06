@@ -7,7 +7,6 @@ import fileUpload from 'express-fileupload';
 import url from 'url';
 import { JsonResponse } from '../common';
 
-import { loadRoutes } from './loadRoutes'
 
 /**
  * Clase servidor encargada de configurar las rutas.
@@ -28,9 +27,9 @@ export default class Server {
      * @param {*} routes 
      */
     initialize() {
-        this.config(this.statics);
+        this.config();
         if (this.customizeExpress) {
-            this.customizeExpress()
+            this.customizeExpress(this.app)
         }
         this.configureRoutes(this.routes);
         this.errorHandler();
@@ -38,17 +37,18 @@ export default class Server {
 
     /**
      * Funcion sobreescribible para personalizar los componentes cargados en Express
+     * 
+     * Aqui se pueden poner cosas como:
+     * 
+     * this.app.use(cookieParser())... etc
      */
     customizeExpress() { }
 
     /**
      * Se encarga de realizar la configuración inicial del servidor
      * 
-     * statics = {
-     *     "/temp": "/temp"
-     * }
      */
-    config(statics) {
+    config() {
 
         //Security
         this.app.use(helmet());
@@ -65,25 +65,28 @@ export default class Server {
         // upload middleware
         this.app.use(fileUpload());
 
-        //add static paths
-        for (const idx in statics) {
-            this.app.use(idx, express.static(statics[idx]));
+        if (this.statics) {
+            //add static paths
+            for (const idx in this.statics) {
+                this.app.use(idx, express.static(this.statics[idx]));
+            }
         }
 
         //Logging
-        this.app.use((request, response, next) => {
-            request.requestTime = Date.now();
-            response.on("finish", () => {
-                let pathname = url.parse(request.url).pathname;
-                let end = Date.now() - request.requestTime;
-                let user = (request && request.session && request.session.user_id) || "";
+        if (!process.env.DISABLE_LOGGER) {
+            this.app.use((request, response, next) => {
+                request.requestTime = Date.now();
+                response.on("finish", () => {
+                    let pathname = url.parse(request.url).pathname;
+                    let end = Date.now() - request.requestTime;
+                    let user = (request && request.session && request.session.user_id) || "";
 
-                //TODO configure by ENV
-                console.debug('APIRequest[' + process.pid + ']::. [' + request.method + '] (user:' + user + ')  ' + pathname + ' |-> took: ' + end + ' ms');
-                console.debug(JSON.stringify(request.body));
+                    console.debug('APIRequest[' + process.pid + ']::. [' + request.method + '] (user:' + user + ')  ' + pathname + ' |-> took: ' + end + ' ms');
+                    console.debug(JSON.stringify(request.body));
+                });
+                next();
             });
-            next();
-        });
+        }
     }
 
     /**
@@ -94,9 +97,26 @@ export default class Server {
         this.app.use(router);
 
         //create controllers
-        loadRoutes(this.app, routes)
+        this.loadRoutes(this.app, routes)
     }
 
+    /**
+     * Instancia la lista de rutas disponibles
+     * @param apps
+     * @returns {*}
+     */
+    loadRoutes(app, routes) {
+        if (!routes) return;
+
+        for (const route of routes) {
+            if (!route) continue;
+            //TODO -> FIXME traze if null?
+            const router = route.configure();
+            if (router) {
+                app.use(router);
+            }
+        }
+    }
 
     /**
      * Errores

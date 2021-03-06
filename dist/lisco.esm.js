@@ -18,11 +18,16 @@ var uuid = require('uuid');
 var http = require('http');
 var https = require('https');
 var cluster = require('cluster');
+var socketio = require('socket.io');
 var os = require('os');
 var events = require('events');
 var log4js = require('log4js');
 var expressAsyncHandler = require('express-async-handler');
+var pathToRegexp = require('path-to-regexp');
 var lodash$1 = require('lodash');
+var moment = require('moment');
+var net = require('net');
+var repl = require('repl');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
@@ -41,9 +46,13 @@ var jsonwebtoken__default = /*#__PURE__*/_interopDefaultLegacy(jsonwebtoken);
 var http__default = /*#__PURE__*/_interopDefaultLegacy(http);
 var https__default = /*#__PURE__*/_interopDefaultLegacy(https);
 var cluster__default = /*#__PURE__*/_interopDefaultLegacy(cluster);
+var socketio__default = /*#__PURE__*/_interopDefaultLegacy(socketio);
 var os__default = /*#__PURE__*/_interopDefaultLegacy(os);
 var expressAsyncHandler__default = /*#__PURE__*/_interopDefaultLegacy(expressAsyncHandler);
 var lodash__default = /*#__PURE__*/_interopDefaultLegacy(lodash$1);
+var moment__default = /*#__PURE__*/_interopDefaultLegacy(moment);
+var net__default = /*#__PURE__*/_interopDefaultLegacy(net);
+var repl__default = /*#__PURE__*/_interopDefaultLegacy(repl);
 
 class I18nLoader {
 
@@ -56,6 +65,9 @@ class I18nLoader {
         const readfile = util__default['default'].promisify(fs__default['default'].readFile);
         const lang = custom || process.env.DEFAULT_LANG;
 
+        if (!this.currentData) {
+            this.currentData = {};
+        }
         //TODO mejorar el sistema cargando todas las traducciones del directorio i18n con chokidar esperando modificaciones
 
         let file = path__default['default'].resolve(process.cwd(), "i18n/lang_" + lang + ".json");
@@ -63,9 +75,7 @@ class I18nLoader {
             const data = await readfile(file, 'utf8');
             var parsedData = JSON.parse(data);
 
-            if (!this.currentData) {
-                this.currentData = {};
-            }
+
             this.currentData[lang] = parsedData;
         } catch (ex) {
             console.log("Lang file does not exist. Create it on ./i18n/lang_{xx}.json");
@@ -93,9 +103,6 @@ class I18nLoader {
     }
 }
 
-
-var I18nLoader$1 = new I18nLoader();
-
 class JsonResponse {
     constructor(success, data, message, total) {
         this.data = data;
@@ -119,6 +126,11 @@ class Utils {
         return str.replace(new RegExp(find.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'g'), replace);
     }
 
+    /**
+     * Metodo de encript para las contraseñas y demas.
+     * 
+     * @param {*} text 
+     */
     static encrypt(text) {
         const algorithm = 'aes-256-cbc';
         const secret = Buffer.from(process.env.CRYPT_SECRET, 'hex');
@@ -130,6 +142,10 @@ class Utils {
         return encrypted.toString('hex');
     }
 
+    /**
+     * Metodo de decrypt para las contraseñas y demas
+     * @param {*} text 
+     */
     static decrypt(text) {
         const algorithm = 'aes-256-cbc';
         const secret = Buffer.from(process.env.CRYPT_SECRET, 'hex');
@@ -145,6 +161,8 @@ class Utils {
 
 
     /**
+     * 
+     * Utiliza una promise para ejecutar un setTimeout y hacer un falso sleep.
      * 
      * @param {*} ms 
      */
@@ -207,25 +225,6 @@ class TokenGenerator {
 }
 
 /**
- * Instancia la lista de rutas disponibles
- * @param apps
- * @returns {*}
- */
-const loadRoutes = (app, routes) => {
-    if (!routes) return;
-
-    for (const route of routes) {
-        if (!route) continue;
-        //TODO traze?
-        const router = route.configure();
-        if (router) {
-            app.use(router);
-        }
-    }
-
-};
-
-/**
  * Clase servidor encargada de configurar las rutas.
  *
  * que el codigo se disperse entre diferentes proyectos.
@@ -244,9 +243,9 @@ class Server {
      * @param {*} routes 
      */
     initialize() {
-        this.config(this.statics);
+        this.config();
         if (this.customizeExpress) {
-            this.customizeExpress();
+            this.customizeExpress(this.app);
         }
         this.configureRoutes(this.routes);
         this.errorHandler();
@@ -254,17 +253,18 @@ class Server {
 
     /**
      * Funcion sobreescribible para personalizar los componentes cargados en Express
+     * 
+     * Aqui se pueden poner cosas como:
+     * 
+     * this.app.use(cookieParser())... etc
      */
     customizeExpress() { }
 
     /**
      * Se encarga de realizar la configuración inicial del servidor
      * 
-     * statics = {
-     *     "/temp": "/temp"
-     * }
      */
-    config(statics) {
+    config() {
 
         //Security
         this.app.use(helmet__default['default']());
@@ -281,25 +281,28 @@ class Server {
         // upload middleware
         this.app.use(fileUpload__default['default']());
 
-        //add static paths
-        for (const idx in statics) {
-            this.app.use(idx, express__default['default'].static(statics[idx]));
+        if (this.statics) {
+            //add static paths
+            for (const idx in this.statics) {
+                this.app.use(idx, express__default['default'].static(this.statics[idx]));
+            }
         }
 
         //Logging
-        this.app.use((request, response, next) => {
-            request.requestTime = Date.now();
-            response.on("finish", () => {
-                let pathname = url__default['default'].parse(request.url).pathname;
-                let end = Date.now() - request.requestTime;
-                let user = (request && request.session && request.session.user_id) || "";
+        if (!process.env.DISABLE_LOGGER) {
+            this.app.use((request, response, next) => {
+                request.requestTime = Date.now();
+                response.on("finish", () => {
+                    let pathname = url__default['default'].parse(request.url).pathname;
+                    let end = Date.now() - request.requestTime;
+                    let user = (request && request.session && request.session.user_id) || "";
 
-                //TODO configure by ENV
-                console.debug('APIRequest[' + process.pid + ']::. [' + request.method + '] (user:' + user + ')  ' + pathname + ' |-> took: ' + end + ' ms');
-                console.debug(JSON.stringify(request.body));
+                    console.debug('APIRequest[' + process.pid + ']::. [' + request.method + '] (user:' + user + ')  ' + pathname + ' |-> took: ' + end + ' ms');
+                    console.debug(JSON.stringify(request.body));
+                });
+                next();
             });
-            next();
-        });
+        }
     }
 
     /**
@@ -310,9 +313,26 @@ class Server {
         this.app.use(router);
 
         //create controllers
-        loadRoutes(this.app, routes);
+        this.loadRoutes(this.app, routes);
     }
 
+    /**
+     * Instancia la lista de rutas disponibles
+     * @param apps
+     * @returns {*}
+     */
+    loadRoutes(app, routes) {
+        if (!routes) return;
+
+        for (const route of routes) {
+            if (!route) continue;
+            //TODO -> FIXME traze if null?
+            const router = route.configure();
+            if (router) {
+                app.use(router);
+            }
+        }
+    }
 
     /**
      * Errores
@@ -331,63 +351,10 @@ class Server {
 }
 
 /**
- * Clase encargada de la generacion de eventos.
- */
-class EventHandler extends events.EventEmitter {
-
-    constructor() {
-        super();
-
-        if (cluster__default['default'].isWorker) {
-            // Levanto, en los worker, la escucha para recibir los eventos en broadcast de los demas hilos
-            process.on('message', (msg) => {
-                console.debug(`Receiving broadcast ${msg.event} - ${process.pid}`);
-                super.emit(msg.event, msg.props);
-            });
-        }
-    }
-
-    /**
-     * Sobreescribir el emitter para notificar a los hijos
-     * 
-     * @param {*} evt 
-     * @param {*} props 
-     */
-    emit(evt, props) {
-        //Desencadenar en local
-        super.emit(evt, props);
-
-        if (evt && props && cluster__default['default'].isWorker) {
-            console.debug(`${evt} -> Firing from ${process.pid} to master`);
-            if (!props) {
-                props = {};
-            }
-            props.owner = process.pid;
-            process.send({ event: evt, props });
-        }
-
-        if (evt && props && cluster__default['default'].isMaster && ClusterServer$1.workers) {
-            console.debug(`${evt} -> Firing from master to workers`);
-            for (var i in ClusterServer$1.workers) { //Si se recibe un evento del master
-                //Se notifica a todos los demas workers excepto al que lo ha generado
-                var current = ClusterServer$1.workers[i];
-                if (props && current.process.pid !== props.owner) {
-                    console.debug(`${evt} -> Sending to ${current.process.pid}`);
-                    current.send({ event: evt, props });
-                }
-            }
-        }
-    }
-}
-
-
-var EventHandler$1 = new EventHandler(); //Modo singleton
-
-/**
  * Inicializa la escucha del server en modo cluster
  */
 class ClusterServer extends events.EventEmitter {
-    constructor() {
+    constructor(app) {
         super();
 
         if (!process.env.PORT) {
@@ -396,6 +363,7 @@ class ClusterServer extends events.EventEmitter {
         this.port = this.normalizePort(process.env.PORT || 3000);
         this.clustered = process.env.CLUSTERED;
         this.workers = [];
+        this.app = app;
 
         this.executeOnlyMain = () => { };
     }
@@ -403,6 +371,7 @@ class ClusterServer extends events.EventEmitter {
     setServerCls(cls) {
         this.cls = cls;
     }
+
 
     /**
      * Iniciar el servidor en el puerto y con la configuración seleccionadas.
@@ -444,7 +413,6 @@ class ClusterServer extends events.EventEmitter {
         } else {
             this.initUnclustered();
 
-
             console.log(`Worker ${process.pid} started`);
         }
     }
@@ -463,8 +431,8 @@ class ClusterServer extends events.EventEmitter {
                     current.send(msg);
                     console.log("Sending to workers");
                 }
-                //Desencadenar
-                EventHandler$1.emit(msg.event, msg.props);
+                //Desencadenar en el proceso principal tambien
+                this.app.events.emit(msg.event, msg.props);
             }
         });
         this.workers.push(worker);
@@ -475,12 +443,13 @@ class ClusterServer extends events.EventEmitter {
      */
     initUnclustered() {
         //Initialize clustered servers
-
         this.server = this.cls;
 
         this.server.port = this.port;
         //create http server
         let server = http__default['default'].Server(this.server.app);
+
+        this.app.io = socketio__default['default'](server);
 
         this.server.initialize();
 
@@ -498,7 +467,6 @@ class ClusterServer extends events.EventEmitter {
         });
 
         if (process.env.SSL && process.env.SSL == true) {
-            //
             if (!process.env.SSL_KEY || !process.env.SSL_CERT || !process.env.SSL_PASS) {
                 console.error('Invalid SSL configuration. SLL_KEY, SSL_CERT and SSL_PASS needed');
                 process.exit(0);
@@ -576,9 +544,60 @@ class ClusterServer extends events.EventEmitter {
             default:
                 throw error;
         }
-    } ç
+    }
 }
-var ClusterServer$1 = new ClusterServer(); //Modo singleton
+
+/**
+ * Clase encargada de la generacion de eventos.
+ */
+class EventHandler extends events.EventEmitter {
+
+    constructor(app) {
+        super();
+
+        this.app = app; //Se recibe el singleton App para evitar referencias cruzadas
+
+        if (cluster__default['default'].isWorker) {
+            // Levanto, en los worker, la escucha para recibir los eventos en broadcast de los demas hilos
+            process.on('message', (msg) => {
+                console.debug(`Receiving broadcast ${msg.event} - ${process.pid}`);
+                super.emit(msg.event, msg.props);
+            });
+        }
+    }
+
+    /**
+     * Sobreescribir el emitter para notificar a los hijos
+     * 
+     * @param {*} evt 
+     * @param {*} props 
+     */
+    emit(evt, props) {
+        //Desencadenar en local
+        super.emit(evt, props);
+
+        if (evt && props && cluster__default['default'].isWorker) {
+            console.debug(`${evt} -> Firing from ${process.pid} to master`);
+            if (!props) {
+                props = {};
+            }
+            props.owner = process.pid;
+            process.send({ event: evt, props });
+        }
+
+        if (evt && props && cluster__default['default'].isMaster && this.app && this.app.server && this.app.server.workers) {
+            console.debug(`${evt} -> Firing from master to workers`);
+            for (var i in this.app.server.workers) { //Si se recibe un evento del master
+                //Se notifica a todos los demas workers excepto al que lo ha generado
+                var current = this.app.server.workers[i];
+                if (props && current.process.pid !== props.owner) {
+                    console.debug(`${evt} -> Sending to ${current.process.pid}`);
+                    current.send({ event: evt, props });
+                }
+            }
+        }
+    }
+}
 
 /**
  * 
@@ -662,20 +681,20 @@ class AuthController {
         try {
             //Rutas ublicas 
             for (let path of this.publicPathsList) {
-                const expr = pathToRegexp(path);
+                const expr = pathToRegexp.pathToRegexp(path);
                 if (expr.exec(url__default['default'].parse(request.url).pathname) !== null) {
                     return next();
                 }
             }
 
-            if (!this.AuthHandler.check(request)) {
-                return response.status(403).json(new JsonResponse(false, null, 'Unauthorized').toJson());
+            if (await this.AuthHandler.check(request)) {
+                return next()
             }
 
-            return response.status(403).json(new JsonResponse(false, null, 'Unauthorized').toJson());
+            return response.status(403).json(new JsonResponse(false, null, 'Forbidden').toJson());
         } catch (ex) {
             console.error(ex);
-            next("Error!");
+            return response.status(403).json(new JsonResponse(false, null, 'Forbidden').toJson());
         }
     }
 
@@ -683,23 +702,25 @@ class AuthController {
     /**
      * Valida los credenciales de un usuario
      * 
+     * TODO logger console.custom("access", INFO);
+     * 
      * @param {*} request 
      * @param {*} response 
      */
     async loginPost(request, response) {
         if (request.body.username) {
             try {
-                let data = await this.AuthHandler.authorize(request.body.username, request.body.password);
+                let data = await this.AuthHandler.authorize(request, request.body.username, request.body.password);
                 if (data) {
                     return response.status(200).json(new JsonResponse(true, data).toJson());
                 }
                 return response.status(401).json(new JsonResponse(false, null, 'Unauthorized').toJson());
             } catch (ex) {
                 console.error(ex);
-                return response.status(403).json(new JsonResponse(false, null, "Unauthorized").toJson());
+                return response.status(401).json(new JsonResponse(false, null, "Unauthorized").toJson());
             }
         }
-        return response.status(403).json(new JsonResponse(false, null, "Unauthorized").toJson());
+        return response.status(401).json(new JsonResponse(false, null, "Unauthorized").toJson());
     }
 
     /**
@@ -711,8 +732,8 @@ class AuthController {
     async logout(request, response) {
         if (this.AuthHandler.logout) { //Depende de que el authHandler implementado pueda realizar esta accion
             try {
-                await this.AuthHandler.logout(request.session);
-                return response.status(200).json(new JsonResponse(true, data).toJson());
+                await this.AuthHandler.logout(request);
+                return response.status(200).json(new JsonResponse(true).toJson());
             } catch (ex) {
                 console.error(ex);
                 return response.status(500).json(new JsonResponse(false, null, ex).toJson());
@@ -738,9 +759,11 @@ class IAuthHandler {
 
 class JwtAuthHandler extends IAuthHandler {
     constructor(UserDao) {
+        super();
+
         this.tokenGenerator = new TokenGenerator(process.env.JWT_SECRET, { audience: process.env.JWT_AUDIENCE, issuer: process.env.JWT_ISSUER, subject: process.env.JWT_SUBJECT, algorithm: process.env.JWT_ALGORITHM, expiresIn: process.env.JWT_EXPIRES });
 
-        if(!UserDao){
+        if (!UserDao) {
             throw new Error("Need 'UserDao' for user validation. Create 'UserDao' class extending 'IUserDao'");
         }
         this.userDao = new UserDao();
@@ -751,16 +774,19 @@ class JwtAuthHandler extends IAuthHandler {
      * 
      * @param {*} request 
      */
-    check(request) {
+    async check(request) {
         if (request.headers.authorization) {
             const token = (request.headers.authorization || '').split(' ')[1] || '';
 
             var decoded = this.tokenGenerator.verify(token);
             const { sub, username, exp } = decoded;
 
-            if (!sub || !username || moment(exp).isAfter(new Date())) {
+            if (!sub || !username || moment__default['default'](exp).isAfter(new Date())) {
                 return false;
             }
+
+            //Si la sesion es valida, lo introducimos en el contexto de la solicitud
+            request.session = { ...request.session, ...decoded };
             return true;
         }
         return false;
@@ -772,18 +798,101 @@ class JwtAuthHandler extends IAuthHandler {
      * @param {*} username 
      * @param {*} password 
      */
-    async validate(username, password) {
+    async validate(request, username, password) {
+
+        const user = await this.userDao.findByUsername(username);
+
+        if (user.username === username && user.password === Utils.encrypt(password)) {
+            return this.tokenGenerator.sign(lodash__default['default'].omit(user, ['password']));
+        }
+
+        return false;
+    }
+
+}
+
+/**
+ * Necesario:
+ *  Instalar -->   express-session y algun session store
+ * 
+ *  Mas info: https://www.npmjs.com/package/express-session
+ * 
+ *  App.customizeExpress = () => {
+       this.app.use(session({
+            secret: 'keyboard cat',
+            resave: false,
+            saveUninitialized: true,
+            cookie: { secure: true }
+        }));
+    }
+ */
+
+class CookieAuthHandler extends IAuthHandler {
+    constructor(UserDao) {
+        super();
+
+        if (!UserDao) {
+            throw new Error("Need 'UserDao' for user validation. Create 'UserDao' class extending 'IUserDao'");
+        }
+        this.userDao = new UserDao();
+    }
+
+    /**
+     * Metodo encargado de realizar la comprobacion para validar si la sesion del usuario es válida
+     * 
+     * @param {*} request 
+     */
+    async check(request) {
+        if (request.headers.authorization) { //Si se recibe por Auth Basic
+            const token = (request.headers.authorization || '').split(' ')[1] || '';
+
+            const creds = Buffer.from(token, 'base64').toString().split(':');
+            const login = creds[0];
+            const password = creds[1];
+
+            if (!await this.validate(request, login, password)) {
+                return false;
+            }
+            return true;
+        }
+        if (request.session && request.session.username) {//Si hay sesion almacenada
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Método encargado de realizar la validación de un usuario. Utiliza IUserDao como interfaz para la realización de la query a BD.
+     * 
+     * @param {*} username 
+     * @param {*} password 
+     */
+    async validate(request, username, password) {
 
         const user = await this.userDao.findByUsername(username);
 
         //TODO quizas poder configurar los nombres de username y password
 
         if (user.username === username && user.password === Utils.encrypt(password)) {
-            return this.generateToken(lodash__default['default'].omit(user, ['password']));
-        }
+            request.session = { ...request.session, ...lodash__default['default'].omit(user, ['password']) };
 
+            return true;
+        }
+        return false;
     }
 
+
+    /**
+     * 
+     * @param {*} request 
+     */
+    logout(request) {
+        return new Promise((resolve) => {
+            if (request.session) {
+                request.session.destroy(resolve);
+            }
+        })
+    }
 
 }
 
@@ -989,26 +1098,106 @@ class BaseKnexDao {
     }
 }
 
-class IUserDao extends BaseKnexDao{
+class IUserDao extends BaseKnexDao {
     constructor() {
+        super();
+
         if (!this.findByUsername) {
             throw new Error("AuthHandler must have 'findByUsername' vethod");
         }
     }
 }
 
-const run_lisco = async (server) => {
-    //Carga de utilidades
-    await I18nLoader$1.load();
-    //Inicio del cluster server
-    ClusterServer$1.setServerCls(server);
-};
+class App {
 
+    /**
+     * Initializa las configuraciones para la app
+     * 
+     * @param {*} serverClass 
+     */
+    async init(serverClass) {
+        if (process.env.DISABLE_LOGGER != true) {
+            await Logger.configure();
+        }
+
+        if (!serverClass) {
+            serverClass = Server;
+        }
+        //Instanciar la clase server
+        const server = new serverClass(this.statics, this.routes);
+        if (this.customizeExpress) {
+            server.customizeExpress = this.customizeExpress;
+        }
+
+        //Gestor de eventos
+        this.events = new EventHandler(this);
+        //Carga de utilidades
+        this.i18n = new I18nLoader();
+        await this.i18n.load();
+        //Inicio del cluster server
+        this.server = new ClusterServer(this);
+
+        this.server.setServerCls(server);
+        this.server.executeOnlyMain = () => {
+            if (this.executeOnlyMain) this.executeOnlyMain();
+
+            if (process.env.REPL_ENABLED) {
+                this.startRepl();
+            }
+        };
+    }
+
+    /**
+     * Ejecuta el servidor con la configuracion de #init()
+     */
+    start() {
+        if (!this.server) {
+            throw new Error("Call init first");
+        }
+        this.server.start();
+    }
+
+
+    /**
+     * Inicia el server replify para poder conectar terminales remotas
+     * 
+     * 
+     * Para que arranque es necesario especificar REPL_ENABLED en el archivo .env
+     */
+    startRepl() {
+        try {
+            net__default['default'].createServer((socket) => {
+                const remote = repl__default['default'].start({
+                    prompt: "lisco::remote> ",
+                    input: socket,
+                    output: socket,
+                    terminal: true,
+                    useColors: true,
+                    preview: false
+                });
+                remote.context.app = this;
+                remote.context.Utils = Utils;
+                remote.on('exit', socket.end.bind(socket));
+            }).listen(process.env.REPL_PORT || 5001);
+        } catch (e) {
+            console.log("Remote REPL Conn: " + e);
+        }
+
+        console.log(`Remote REPL started on port ${(process.env.REPL_PORT || 5001)}`);
+
+    }
+}
+
+
+var App$1 = new App();
+
+exports.App = App$1;
 exports.AuthController = AuthController;
 exports.BaseKnexDao = BaseKnexDao;
-exports.ClusterServer = ClusterServer$1;
-exports.EventHandler = EventHandler$1;
-exports.I18nLoader = I18nLoader$1;
+exports.ClusterServer = ClusterServer;
+exports.CookieAuthHandler = CookieAuthHandler;
+exports.EventHandler = EventHandler;
+exports.I18nLoader = I18nLoader;
 exports.IAuthHandler = IAuthHandler;
 exports.IUserDao = IUserDao;
 exports.JsonResponse = JsonResponse;
@@ -1019,5 +1208,3 @@ exports.Logger = Logger;
 exports.Server = Server;
 exports.TokenGenerator = TokenGenerator;
 exports.Utils = Utils;
-exports.loadRoutes = loadRoutes;
-exports.run_lisco = run_lisco;

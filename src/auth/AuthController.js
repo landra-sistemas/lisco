@@ -5,6 +5,7 @@ import { JsonResponse } from '../common';
 import expressAsyncHandler from 'express-async-handler'
 
 
+import { pathToRegexp } from 'path-to-regexp';
 
 export default class AuthController {
 
@@ -41,14 +42,14 @@ export default class AuthController {
                 }
             }
 
-            if (!this.AuthHandler.check(request)) {
-                return response.status(403).json(new JsonResponse(false, null, 'Unauthorized').toJson());
+            if (await this.AuthHandler.check(request)) {
+                return next()
             }
 
-            return response.status(403).json(new JsonResponse(false, null, 'Unauthorized').toJson());
+            return response.status(403).json(new JsonResponse(false, null, 'Forbidden').toJson());
         } catch (ex) {
             console.error(ex);
-            next("Error!");
+            return response.status(403).json(new JsonResponse(false, null, 'Forbidden').toJson());
         }
     }
 
@@ -56,23 +57,25 @@ export default class AuthController {
     /**
      * Valida los credenciales de un usuario
      * 
+     * TODO logger console.custom("access", INFO);
+     * 
      * @param {*} request 
      * @param {*} response 
      */
     async loginPost(request, response) {
         if (request.body.username) {
             try {
-                let data = await this.AuthHandler.authorize(request.body.username, request.body.password)
+                let data = await this.AuthHandler.authorize(request, request.body.username, request.body.password)
                 if (data) {
                     return response.status(200).json(new JsonResponse(true, data).toJson());
                 }
                 return response.status(401).json(new JsonResponse(false, null, 'Unauthorized').toJson());
             } catch (ex) {
                 console.error(ex);
-                return response.status(403).json(new JsonResponse(false, null, "Unauthorized").toJson());
+                return response.status(401).json(new JsonResponse(false, null, "Unauthorized").toJson());
             }
         }
-        return response.status(403).json(new JsonResponse(false, null, "Unauthorized").toJson());
+        return response.status(401).json(new JsonResponse(false, null, "Unauthorized").toJson());
     }
 
     /**
@@ -84,8 +87,8 @@ export default class AuthController {
     async logout(request, response) {
         if (this.AuthHandler.logout) { //Depende de que el authHandler implementado pueda realizar esta accion
             try {
-                await this.AuthHandler.logout(request.session)
-                return response.status(200).json(new JsonResponse(true, data).toJson());
+                await this.AuthHandler.logout(request)
+                return response.status(200).json(new JsonResponse(true).toJson());
             } catch (ex) {
                 console.error(ex);
                 return response.status(500).json(new JsonResponse(false, null, ex).toJson());

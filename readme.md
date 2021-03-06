@@ -42,35 +42,31 @@ Index
 ``` javascript
 //index.js
 
-import { run_lisco, Logger, Server, ClusterServer, AuthController, JwtAuthHandler } from 'lisco'
+import { App, AuthController, JwtAuthHandler } from 'lisco'
 
 module.exports = async () => {
-        await Logger.configure();
 
-        const statics = {
-            "/temp": "/temp"
-        }
-        const routes = [
-            new AuthController([], new JwtAuthHandler()), //JWT Auth
-        ];
-        const server = new Server(statics, routes);
-        server.customizeExpress = () => {
-            // this.app.use(cookieParser())
-        }
+    App.customizeExpress = (app) => { };
+    App.statics = {
+        "/temp": "/temp"
+    }
+    App.routes = [
+        //new AuthController([], new JwtAuthHandler()),
+    ]
 
-        run_lisco(server);
+    App.executeOnlyMain = () => {
+        //Acciones a ejecutar sobre el mainWorker
+        console.log("MainThread")
+    }
 
-        ClusterServer.executeOnlyMain = () => {
-            //Acciones a ejecutar sobre el mainWorker
-            console.log("MainThread")
-        }
+    await App.init();
 
-        ClusterServer.start();
-        ClusterServer.on('listening', () => {
-            console.log('listening');
-        })
+    App.start();
+    App.server.on('listening', () => {
+        console.log('listening');
+    })
+
 };
-
 ```
 
 
@@ -81,6 +77,9 @@ PORT=3700
 CLUSTERED=false
 
 DEFAULT_LANG='es'
+
+DISABLE_LOGGER=false
+REPL_ENABLED=true
 
 # SSL
 SSL=false
@@ -165,3 +164,13 @@ KNEX -> [http://knexjs.org/#Installation](http://knexjs.org/#Installation)
 
 
 
+
+
+
+### Monitoring
+
+TODO intentar adaptar, aunque sea con un fork esto:
+
+https://github.com/RafalWilinski/express-status-monitor
+
+Al utilizar CDN's limita bastante el deploy del proyecto, pero con un fork podríamos hacer que utilizase dependencias locales.

@@ -21,7 +21,7 @@ export default [
             // }), // tells Rollup how to find date-fns in node_modules
             localResolve(),
             // commonjs(), // converts date-fns to ES modules
-            //production && terser() // minify, but only in production
+            production && terser() // minify, but only in production
         ]
     }
 ];

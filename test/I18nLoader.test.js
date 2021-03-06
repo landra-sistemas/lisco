@@ -6,7 +6,7 @@ describe('I18nLoader', () => {
 
     it('#load()', async () => {
 
-        let i18n = I18nLoader;
+        let i18n = new I18nLoader();
         await i18n.load();
 
         expect(i18n).not.to.be.undefined;
@@ -17,7 +17,7 @@ describe('I18nLoader', () => {
 
     it('#load(unexisting)', async () => {
 
-        let i18n = I18nLoader;
+        let i18n = new I18nLoader();
         await i18n.load("ru");
 
         expect(i18n).not.to.be.undefined;
@@ -26,7 +26,7 @@ describe('I18nLoader', () => {
     })
     it('#translate()', async () => {
 
-        let i18n = I18nLoader;
+        let i18n = new I18nLoader();
         await i18n.load();
 
         let translated = await i18n.translate('test');
@@ -40,7 +40,7 @@ describe('I18nLoader', () => {
 
     it('#unexisting.translate()', async () => {
 
-        let i18n = I18nLoader;
+        let i18n = new I18nLoader();
         await i18n.load();
 
         let translated = await await i18n.translate('test2');

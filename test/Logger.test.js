@@ -6,11 +6,6 @@ import { Logger, Utils } from '../src';
 
 
 describe('Logger', () => {
-    before(() => {
-        try {
-            fs.unlinkSync('logs/default.log');
-        } catch (ex) { }
-    })
 
 
     it('#log()', async () => {

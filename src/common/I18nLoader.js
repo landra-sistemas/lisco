@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import util from 'util';
 
-class I18nLoader {
+export default class I18nLoader {
 
     /**
      *
@@ -13,6 +13,9 @@ class I18nLoader {
         const readfile = util.promisify(fs.readFile);
         const lang = custom || process.env.DEFAULT_LANG;
 
+        if (!this.currentData) {
+            this.currentData = {};
+        }
         //TODO mejorar el sistema cargando todas las traducciones del directorio i18n con chokidar esperando modificaciones
 
         let file = path.resolve(process.cwd(), "i18n/lang_" + lang + ".json")
@@ -20,9 +23,7 @@ class I18nLoader {
             const data = await readfile(file, 'utf8');
             var parsedData = JSON.parse(data);
 
-            if (!this.currentData) {
-                this.currentData = {};
-            }
+
             this.currentData[lang] = parsedData;
         } catch (ex) {
             console.log("Lang file does not exist. Create it on ./i18n/lang_{xx}.json")
@@ -50,5 +51,3 @@ class I18nLoader {
     }
 }
 
-
-export default new I18nLoader();

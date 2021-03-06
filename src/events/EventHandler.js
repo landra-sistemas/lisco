@@ -1,14 +1,15 @@
 import cluster from 'cluster';
 import { EventEmitter } from 'events';
-import ClusterServer from '../server/ClusterServer';
 
 /**
  * Clase encargada de la generacion de eventos.
  */
-class EventHandler extends EventEmitter {
+export default class EventHandler extends EventEmitter {
 
-    constructor() {
+    constructor(app) {
         super();
+
+        this.app = app; //Se recibe el singleton App para evitar referencias cruzadas
 
         if (cluster.isWorker) {
             // Levanto, en los worker, la escucha para recibir los eventos en broadcast de los demas hilos
@@ -38,11 +39,11 @@ class EventHandler extends EventEmitter {
             process.send({ event: evt, props });
         }
 
-        if (evt && props && cluster.isMaster && ClusterServer.workers) {
+        if (evt && props && cluster.isMaster && this.app && this.app.server && this.app.server.workers) {
             console.debug(`${evt} -> Firing from master to workers`);
-            for (var i in ClusterServer.workers) { //Si se recibe un evento del master
+            for (var i in this.app.server.workers) { //Si se recibe un evento del master
                 //Se notifica a todos los demas workers excepto al que lo ha generado
-                var current = ClusterServer.workers[i];
+                var current = this.app.server.workers[i];
                 if (props && current.process.pid !== props.owner) {
                     console.debug(`${evt} -> Sending to ${current.process.pid}`)
                     current.send({ event: evt, props });
@@ -51,6 +52,3 @@ class EventHandler extends EventEmitter {
         }
     }
 }
-
-
-export default new EventHandler(); //Modo singleton

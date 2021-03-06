@@ -3,15 +3,15 @@ import https from 'https';
 import fs from 'fs';
 import path from 'path';
 import cluster from 'cluster';
+import socketio from 'socket.io';
 import os from 'os'
 import { EventEmitter } from 'events';
-import EventHandler from '../events/EventHandler';
 
 /**
  * Inicializa la escucha del server en modo cluster
  */
-class ClusterServer extends EventEmitter {
-    constructor() {
+export default class ClusterServer extends EventEmitter {
+    constructor(app) {
         super();
 
         if (!process.env.PORT) {
@@ -20,6 +20,7 @@ class ClusterServer extends EventEmitter {
         this.port = this.normalizePort(process.env.PORT || 3000);
         this.clustered = process.env.CLUSTERED;
         this.workers = [];
+        this.app = app;
 
         this.executeOnlyMain = () => { };
     }
@@ -27,6 +28,7 @@ class ClusterServer extends EventEmitter {
     setServerCls(cls) {
         this.cls = cls;
     }
+
 
     /**
      * Iniciar el servidor en el puerto y con la configuración seleccionadas.
@@ -68,7 +70,6 @@ class ClusterServer extends EventEmitter {
         } else {
             this.initUnclustered();
 
-
             console.log(`Worker ${process.pid} started`);
         }
     }
@@ -87,8 +88,8 @@ class ClusterServer extends EventEmitter {
                     current.send(msg);
                     console.log("Sending to workers");
                 }
-                //Desencadenar
-                EventHandler.emit(msg.event, msg.props);
+                //Desencadenar en el proceso principal tambien
+                this.app.events.emit(msg.event, msg.props);
             }
         });
         this.workers.push(worker);
@@ -99,12 +100,13 @@ class ClusterServer extends EventEmitter {
      */
     initUnclustered() {
         //Initialize clustered servers
-
         this.server = this.cls;
 
         this.server.port = this.port;
         //create http server
         let server = http.Server(this.server.app);
+
+        this.app.io = socketio(server);
 
         this.server.initialize();
 
@@ -122,7 +124,6 @@ class ClusterServer extends EventEmitter {
         });
 
         if (process.env.SSL && process.env.SSL == true) {
-            //
             if (!process.env.SSL_KEY || !process.env.SSL_CERT || !process.env.SSL_PASS) {
                 console.error('Invalid SSL configuration. SLL_KEY, SSL_CERT and SSL_PASS needed');
                 process.exit(0);
@@ -200,6 +201,5 @@ class ClusterServer extends EventEmitter {
             default:
                 throw error;
         }
-    } ç
+    }
 }
-export default new ClusterServer(); //Modo singleton

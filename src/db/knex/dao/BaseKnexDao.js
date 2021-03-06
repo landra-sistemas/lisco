@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from 'uuid';
 import KnexFilterParser from '../filters/KnexFilterParser';
 import KnexConnector from '../KnexConnector';
 

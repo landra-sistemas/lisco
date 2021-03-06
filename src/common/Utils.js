@@ -11,6 +11,11 @@ export default class Utils {
         return str.replace(new RegExp(find.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'g'), replace);
     }
 
+    /**
+     * Metodo de encript para las contraseñas y demas.
+     * 
+     * @param {*} text 
+     */
     static encrypt(text) {
         const algorithm = 'aes-256-cbc';
         const secret = Buffer.from(process.env.CRYPT_SECRET, 'hex');
@@ -22,6 +27,10 @@ export default class Utils {
         return encrypted.toString('hex');
     }
 
+    /**
+     * Metodo de decrypt para las contraseñas y demas
+     * @param {*} text 
+     */
     static decrypt(text) {
         const algorithm = 'aes-256-cbc';
         const secret = Buffer.from(process.env.CRYPT_SECRET, 'hex');
@@ -37,6 +46,8 @@ export default class Utils {
 
 
     /**
+     * 
+     * Utiliza una promise para ejecutar un setTimeout y hacer un falso sleep.
      * 
      * @param {*} ms 
      */

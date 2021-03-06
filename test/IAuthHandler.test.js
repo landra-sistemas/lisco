@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import { IAuthHandler } from '../src';
 
 
+
 describe('IAuthHandler', () => {
 
     it('#construct()', async () => {
@@ -13,8 +14,8 @@ describe('IAuthHandler', () => {
     })
     it('#construct2()', async () => {
         try {
-            class test extends IAuthHandler{
-                check () {
+            class test extends IAuthHandler {
+                check() {
 
                 }
             }

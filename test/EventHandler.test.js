@@ -1,20 +1,21 @@
 import { expect } from 'chai';
 import cluster from 'cluster';
-import { run_lisco, EventHandler, Server, Utils, ClusterServer } from '../src';
+import { EventHandler, App } from '../src';
 
 
 describe('EventHandler', () => {
 
     it('#simple()', async () => {
 
+        let events = new EventHandler();
 
         var testString;
 
-        EventHandler.on('test', function test({ str }) {
+        events.on('test', function test({ str }) {
             testString = str;
         });
 
-        EventHandler.emit('test', { str: 'asdf' })
+        events.emit('test', { str: 'asdf' })
         expect(testString).not.to.be.undefined;
         expect(testString).to.eq('asdf');
     })
@@ -26,19 +27,18 @@ describe('EventHandler', () => {
 
         process.env.CLUSTERED = true;
 
-        const server = new Server();
-        await run_lisco(server);
-        ClusterServer.start();
+        await App.init();
+        App.server.start();
 
         var testString;
 
-        EventHandler.on('test', function test({ str }) {
+        App.events.on('test', function test({ str }) {
             testString = str;
             console.log(str)
         });
 
         try {
-            EventHandler.emit('test', { str: 'asdf' })
+            App.events.emit('test', { str: 'asdf' })
         } catch (ex) {
 
         }
@@ -54,16 +54,17 @@ describe('EventHandler', () => {
         cluster.isMaster = false;
         cluster.isWorker = true;
 
+        let events = new EventHandler();
 
         var testString;
 
-        EventHandler.on('test', function test({ str }) {
+        events.on('test', function test({ str }) {
             testString = str;
             console.log(str)
         });
 
         try {
-            EventHandler.emit('test', { str: 'asdf' })
+            events.emit('test', { str: 'asdf' })
         } catch (ex) {
 
         }

@@ -7,7 +7,7 @@ describe('JsonResponse', () => {
     it('#create()', async () => {
 
         let response = new JsonResponse(true, []);
-
+ 
         expect(response).not.to.be.undefined;
     })
 
