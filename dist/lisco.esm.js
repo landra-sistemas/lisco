@@ -466,7 +466,7 @@ class ClusterServer extends events.EventEmitter {
             this.emit('listening', this.port);
         });
 
-        if (process.env.SSL && process.env.SSL == true) {
+        if (process.env.SSL && process.env.SSL == "true") {
             if (!process.env.SSL_KEY || !process.env.SSL_CERT || !process.env.SSL_PASS) {
                 console.error('Invalid SSL configuration. SLL_KEY, SSL_CERT and SSL_PASS needed');
                 process.exit(0);
@@ -656,7 +656,7 @@ class AuthController {
 
     constructor(publicPathsList, AuthHandler) {
         this.router = express__default['default'].Router();
-        this.publicPathsList = publicPathsList;
+        this.publicPathsList = [...publicPathsList, '/login'];
 
         this.AuthHandler = AuthHandler;
     }
@@ -710,17 +710,17 @@ class AuthController {
     async loginPost(request, response) {
         if (request.body.username) {
             try {
-                let data = await this.AuthHandler.authorize(request, request.body.username, request.body.password);
+                let data = await this.AuthHandler.validate(request, request.body.username, request.body.password);
                 if (data) {
                     return response.status(200).json(new JsonResponse(true, data).toJson());
                 }
-                return response.status(401).json(new JsonResponse(false, null, 'Unauthorized').toJson());
+                return response.status(401).json(new JsonResponse(false, null, 'Unauthorized - Incorrect credentials').toJson());
             } catch (ex) {
                 console.error(ex);
-                return response.status(401).json(new JsonResponse(false, null, "Unauthorized").toJson());
+                return response.status(401).json(new JsonResponse(false, null, "Unauthorized - Error, check log").toJson());
             }
         }
-        return response.status(401).json(new JsonResponse(false, null, "Unauthorized").toJson());
+        return response.status(401).json(new JsonResponse(false, null, "Unauthorized - Missing parameters").toJson());
     }
 
     /**
@@ -802,7 +802,7 @@ class JwtAuthHandler extends IAuthHandler {
 
         const user = await this.userDao.findByUsername(username);
 
-        if (user.username === username && user.password === Utils.encrypt(password)) {
+        if (user && user.username === username && user.password === Utils.encrypt(password)) {
             return this.tokenGenerator.sign(lodash__default['default'].omit(user, ['password']));
         }
 
@@ -873,7 +873,7 @@ class CookieAuthHandler extends IAuthHandler {
 
         //TODO quizas poder configurar los nombres de username y password
 
-        if (user.username === username && user.password === Utils.encrypt(password)) {
+        if (user && user.username === username && user.password === Utils.encrypt(password)) {
             request.session = { ...request.session, ...lodash__default['default'].omit(user, ['password']) };
 
             return true;
@@ -1093,7 +1093,7 @@ class BaseKnexDao {
     update(objectId, newObject) {
         return KnexConnector$1.connection.from(this.tableName).where("id", objectId).update(newObject);
     }
-    remove(objectId) {
+    delete(objectId) {
         return KnexConnector$1.connection.from(this.tableName).where("id", objectId).delete()
     }
 }
@@ -1174,7 +1174,7 @@ class BaseController {
     async getEntidad(request, response, next) {
         try {
             let service = new this.service(this.table);
-            let data = await service.getById(request.params.id);
+            let data = await service.loadById(request.params.id);
             let jsRes = new JsonResponse(true, data);
 
             response.json(jsRes.toJson());
@@ -1200,9 +1200,8 @@ class BaseController {
     async saveEntidad(request, response, next) {
         try {
             let service = new this.service(this.table);
-            let object = this.model.fromObject(this.model, request.body);
 
-            let data = await service.save(object);
+            let data = await service.save(request.body);
             let jsRes = new JsonResponse(true, { id: request.body.id || data[0] });
 
             response.json(jsRes.toJson());
@@ -1228,9 +1227,8 @@ class BaseController {
     async updateEntidad(request, response, next) {
         try {
             let service = new this.service(this.table);
-            let object = this.model.fromObject(this.model, request.body);
 
-            let data = await service.update(request.params.id, object);
+            let data = await service.update(request.params.id, request.body);
             let jsRes = new JsonResponse(true, { id: request.body.id || data[0] });
 
             response.json(jsRes.toJson());
@@ -1256,7 +1254,7 @@ class BaseController {
     async deleteEntidad(request, response, next) {
         try {
             let service = new this.service(this.table);
-            let data = await service.remove(request.params.id);
+            let data = await service.delete(request.params.id);
             let jsRes = new JsonResponse(true, data);
 
             response.json(jsRes.toJson());
@@ -1301,7 +1299,7 @@ class BaseService {
      * Obtencion de un elemento mediante su identificador
      */
     loadById(id) {
-        return this.dato.loadById(id);
+        return this.dao.loadById(id);
     }
     /**
      * Metodo de creacion.
@@ -1330,7 +1328,7 @@ class BaseService {
      *
      * El identificador es obligatorio para poder localizar el elemento a eliminar.
      */
-    remove(id) {
+    delete(id) {
         if (id) {
             return this.dao.delete(id);
         }
@@ -1345,7 +1343,7 @@ class App {
      * @param {*} serverClass 
      */
     async init(serverClass) {
-        if (process.env.DISABLE_LOGGER != true) {
+        if (process.env.DISABLE_LOGGER != "true") {
             await Logger.configure();
         }
 
@@ -1370,7 +1368,7 @@ class App {
         this.server.executeOnlyMain = () => {
             if (this.executeOnlyMain) this.executeOnlyMain();
 
-            if (process.env.REPL_ENABLED == true) {
+            if (process.env.REPL_ENABLED == "true") {
                 this.startRepl();
             }
         };

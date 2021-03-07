@@ -106,8 +106,8 @@ CRYPT_SECRET=XXXX
 
 # secret for encryption of jwt signature
 JWT_SECRET=XXXXXX
-# lifetime of the token (in seconds)
-JWT_LIFETIME=86400
+# lifetime of the token (in seconds or string representing time)
+JWT_EXPIRES="2 days"
 # algorithm used in token signing
 JWT_ALGORITHM=HS256
 # audience for the token 
@@ -310,12 +310,17 @@ module.exports = {
 Conectarse a la base de datos añadiendo al `index.js` de la aplicaciión:
 
 ``` javascript
+//index.js
+
+//Antes de App.start()
 
     KnexConnector.init(require('./knexfile').development);
 
     //Esto habilita una conexión (o pool) accesible mediante el singleton KnexConnector. Para ello:
 
     KnexConnector.connection.[...] // Insert, Where, etc...
+
+
 ```
 
 

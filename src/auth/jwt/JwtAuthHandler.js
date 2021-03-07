@@ -48,7 +48,7 @@ export default class JwtAuthHandler extends IAuthHandler {
 
         const user = await this.userDao.findByUsername(username);
 
-        if (user.username === username && user.password === Utils.encrypt(password)) {
+        if (user && user.username === username && user.password === Utils.encrypt(password)) {
             return this.tokenGenerator.sign(lodash.omit(user, ['password']));
         }
 

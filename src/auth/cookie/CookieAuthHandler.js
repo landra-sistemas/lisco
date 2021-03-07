@@ -65,7 +65,7 @@ export default class CookieAuthHandler extends IAuthHandler {
 
         //TODO quizas poder configurar los nombres de username y password
 
-        if (user.username === username && user.password === Utils.encrypt(password)) {
+        if (user && user.username === username && user.password === Utils.encrypt(password)) {
             request.session = { ...request.session, ...lodash.omit(user, ['password']) };
 
             return true;

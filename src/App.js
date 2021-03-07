@@ -14,7 +14,7 @@ class App {
      * @param {*} serverClass 
      */
     async init(serverClass) {
-        if (process.env.DISABLE_LOGGER != true) {
+        if (process.env.DISABLE_LOGGER != "true") {
             await Logger.configure();
         }
 
@@ -39,7 +39,7 @@ class App {
         this.server.executeOnlyMain = () => {
             if (this.executeOnlyMain) this.executeOnlyMain();
 
-            if (process.env.REPL_ENABLED == true) {
+            if (process.env.REPL_ENABLED == "true") {
                 this.startRepl();
             }
         }

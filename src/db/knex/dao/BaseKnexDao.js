@@ -45,7 +45,7 @@ export default class BaseKnexDao {
     update(objectId, newObject) {
         return KnexConnector.connection.from(this.tableName).where("id", objectId).update(newObject);
     }
-    remove(objectId) {
+    delete(objectId) {
         return KnexConnector.connection.from(this.tableName).where("id", objectId).delete()
     }
 }

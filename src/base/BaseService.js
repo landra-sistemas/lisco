@@ -33,7 +33,7 @@ export class BaseService {
      * Obtencion de un elemento mediante su identificador
      */
     loadById(id) {
-        return this.dato.loadById(id);
+        return this.dao.loadById(id);
     }
     /**
      * Metodo de creacion.
@@ -62,7 +62,7 @@ export class BaseService {
      *
      * El identificador es obligatorio para poder localizar el elemento a eliminar.
      */
-    remove(id) {
+    delete(id) {
         if (id) {
             return this.dao.delete(id);
         }

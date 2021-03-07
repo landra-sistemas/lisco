@@ -67,7 +67,7 @@ export class BaseController {
     async getEntidad(request, response, next) {
         try {
             let service = new this.service(this.table);
-            let data = await service.getById(request.params.id);
+            let data = await service.loadById(request.params.id);
             let jsRes = new JsonResponse(true, data);
 
             response.json(jsRes.toJson());
@@ -93,9 +93,8 @@ export class BaseController {
     async saveEntidad(request, response, next) {
         try {
             let service = new this.service(this.table);
-            let object = this.model.fromObject(this.model, request.body);
 
-            let data = await service.save(object);
+            let data = await service.save(request.body);
             let jsRes = new JsonResponse(true, { id: request.body.id || data[0] });
 
             response.json(jsRes.toJson());
@@ -121,9 +120,8 @@ export class BaseController {
     async updateEntidad(request, response, next) {
         try {
             let service = new this.service(this.table);
-            let object = this.model.fromObject(this.model, request.body);
 
-            let data = await service.update(request.params.id, object);
+            let data = await service.update(request.params.id, request.body);
             let jsRes = new JsonResponse(true, { id: request.body.id || data[0] });
 
             response.json(jsRes.toJson());
@@ -149,7 +147,7 @@ export class BaseController {
     async deleteEntidad(request, response, next) {
         try {
             let service = new this.service(this.table);
-            let data = await service.remove(request.params.id);
+            let data = await service.delete(request.params.id);
             let jsRes = new JsonResponse(true, data);
 
             response.json(jsRes.toJson());

@@ -11,7 +11,7 @@ export default class AuthController {
 
     constructor(publicPathsList, AuthHandler) {
         this.router = express.Router();
-        this.publicPathsList = publicPathsList;
+        this.publicPathsList = [...publicPathsList, '/login'];
 
         this.AuthHandler = AuthHandler;
     }
@@ -65,17 +65,17 @@ export default class AuthController {
     async loginPost(request, response) {
         if (request.body.username) {
             try {
-                let data = await this.AuthHandler.authorize(request, request.body.username, request.body.password)
+                let data = await this.AuthHandler.validate(request, request.body.username, request.body.password)
                 if (data) {
                     return response.status(200).json(new JsonResponse(true, data).toJson());
                 }
-                return response.status(401).json(new JsonResponse(false, null, 'Unauthorized').toJson());
+                return response.status(401).json(new JsonResponse(false, null, 'Unauthorized - Incorrect credentials').toJson());
             } catch (ex) {
                 console.error(ex);
-                return response.status(401).json(new JsonResponse(false, null, "Unauthorized").toJson());
+                return response.status(401).json(new JsonResponse(false, null, "Unauthorized - Error, check log").toJson());
             }
         }
-        return response.status(401).json(new JsonResponse(false, null, "Unauthorized").toJson());
+        return response.status(401).json(new JsonResponse(false, null, "Unauthorized - Missing parameters").toJson());
     }
 
     /**

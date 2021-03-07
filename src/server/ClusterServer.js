@@ -123,7 +123,7 @@ export default class ClusterServer extends EventEmitter {
             this.emit('listening', this.port);
         });
 
-        if (process.env.SSL && process.env.SSL == true) {
+        if (process.env.SSL && process.env.SSL == "true") {
             if (!process.env.SSL_KEY || !process.env.SSL_CERT || !process.env.SSL_PASS) {
                 console.error('Invalid SSL configuration. SLL_KEY, SSL_CERT and SSL_PASS needed');
                 process.exit(0);
