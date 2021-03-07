@@ -5,6 +5,8 @@ import { I18nLoader, JsonResponse, Utils, TokenGenerator } from './common'
 import { AuthController, JwtAuthHandler, IAuthHandler, CookieAuthHandler } from './auth'
 import { KnexFilterParser, BaseKnexDao, KnexConnector, IUserDao } from './db'
 
+import { BaseController, BaseService } from './base'
+
 import App from './App'
 
 
@@ -25,5 +27,7 @@ export {
     IAuthHandler,
     KnexFilterParser,
     BaseKnexDao,
-    IUserDao
+    IUserDao,
+    BaseController,
+    BaseService
 }
