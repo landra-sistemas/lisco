@@ -231,8 +231,9 @@ class TokenGenerator {
  */
 class Server {
 
-    constructor(statics, routes) {
+    constructor(config, statics, routes) {
         this.app = express__default['default']();
+        this.express_config = config;
         this.statics = statics;
         this.routes = routes;
     }
@@ -243,7 +244,7 @@ class Server {
      * @param {*} routes 
      */
     initialize() {
-        this.config();
+        this.config(this.express_config);
         if (this.customizeExpress) {
             this.customizeExpress(this.app);
         }
@@ -264,10 +265,11 @@ class Server {
      * Se encarga de realizar la configuración inicial del servidor
      * 
      */
-    config() {
+    config(config) {
+        //TODO apply config to all other components
 
         //Security
-        this.app.use(helmet__default['default']());
+        this.app.use(helmet__default['default'](config && config.helmet));
         //mount json form parser
         this.app.use(bodyParser__default['default'].json({ limit: '100mb' }));
         //mount query string parser
@@ -1340,18 +1342,14 @@ class App {
     /**
      * Initializa las configuraciones para la app
      * 
-     * @param {*} serverClass 
      */
-    async init(serverClass) {
+    async init(serverConfig) {
         if (process.env.DISABLE_LOGGER != "true") {
             await Logger.configure();
         }
 
-        if (!serverClass) {
-            serverClass = Server;
-        }
         //Instanciar la clase server
-        const server = new serverClass(this.statics, this.routes);
+        const server = new Server(serverConfig, this.statics, this.routes);
         if (this.customizeExpress) {
             server.customizeExpress = this.customizeExpress;
         }

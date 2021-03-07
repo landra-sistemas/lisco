@@ -11,18 +11,14 @@ class App {
     /**
      * Initializa las configuraciones para la app
      * 
-     * @param {*} serverClass 
      */
-    async init(serverClass) {
+    async init(serverConfig) {
         if (process.env.DISABLE_LOGGER != "true") {
             await Logger.configure();
         }
 
-        if (!serverClass) {
-            serverClass = Server;
-        }
         //Instanciar la clase server
-        const server = new serverClass(this.statics, this.routes);
+        const server = new Server(serverConfig, this.statics, this.routes);
         if (this.customizeExpress) {
             server.customizeExpress = this.customizeExpress;
         }

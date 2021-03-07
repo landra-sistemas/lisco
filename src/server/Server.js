@@ -15,8 +15,9 @@ import { JsonResponse } from '../common';
  */
 export default class Server {
 
-    constructor(statics, routes) {
+    constructor(config, statics, routes) {
         this.app = express();
+        this.express_config = config;
         this.statics = statics;
         this.routes = routes;
     }
@@ -27,7 +28,7 @@ export default class Server {
      * @param {*} routes 
      */
     initialize() {
-        this.config();
+        this.config(this.express_config);
         if (this.customizeExpress) {
             this.customizeExpress(this.app)
         }
@@ -48,10 +49,11 @@ export default class Server {
      * Se encarga de realizar la configuración inicial del servidor
      * 
      */
-    config() {
+    config(config) {
+        //TODO apply config to all other components
 
         //Security
-        this.app.use(helmet());
+        this.app.use(helmet(config && config.helmet));
         //mount json form parser
         this.app.use(bodyParser.json({ limit: '100mb' }));
         //mount query string parser
