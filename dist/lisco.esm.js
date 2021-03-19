@@ -3,12 +3,12 @@
 Object.defineProperty(exports, '__esModule', { value: true });
 
 var helmet = require('helmet');
-var bodyParser = require('body-parser');
 var express = require('express');
 var compression = require('compression');
 var cors = require('cors');
 var fileUpload = require('express-fileupload');
 var url = require('url');
+var lodash$1 = require('lodash');
 var fs = require('fs');
 var path = require('path');
 var util = require('util');
@@ -24,7 +24,6 @@ var events = require('events');
 var log4js = require('log4js');
 var expressAsyncHandler = require('express-async-handler');
 var pathToRegexp = require('path-to-regexp');
-var lodash$1 = require('lodash');
 var moment = require('moment');
 var net = require('net');
 var repl = require('repl');
@@ -32,12 +31,12 @@ var repl = require('repl');
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
 var helmet__default = /*#__PURE__*/_interopDefaultLegacy(helmet);
-var bodyParser__default = /*#__PURE__*/_interopDefaultLegacy(bodyParser);
 var express__default = /*#__PURE__*/_interopDefaultLegacy(express);
 var compression__default = /*#__PURE__*/_interopDefaultLegacy(compression);
 var cors__default = /*#__PURE__*/_interopDefaultLegacy(cors);
 var fileUpload__default = /*#__PURE__*/_interopDefaultLegacy(fileUpload);
 var url__default = /*#__PURE__*/_interopDefaultLegacy(url);
+var lodash__default = /*#__PURE__*/_interopDefaultLegacy(lodash$1);
 var fs__default = /*#__PURE__*/_interopDefaultLegacy(fs);
 var path__default = /*#__PURE__*/_interopDefaultLegacy(path);
 var util__default = /*#__PURE__*/_interopDefaultLegacy(util);
@@ -49,7 +48,6 @@ var cluster__default = /*#__PURE__*/_interopDefaultLegacy(cluster);
 var socketio__default = /*#__PURE__*/_interopDefaultLegacy(socketio);
 var os__default = /*#__PURE__*/_interopDefaultLegacy(os);
 var expressAsyncHandler__default = /*#__PURE__*/_interopDefaultLegacy(expressAsyncHandler);
-var lodash__default = /*#__PURE__*/_interopDefaultLegacy(lodash$1);
 var moment__default = /*#__PURE__*/_interopDefaultLegacy(moment);
 var net__default = /*#__PURE__*/_interopDefaultLegacy(net);
 var repl__default = /*#__PURE__*/_interopDefaultLegacy(repl);
@@ -233,20 +231,28 @@ class Server {
 
     constructor(config, statics, routes) {
         this.app = express__default['default']();
-        this.express_config = config;
+        this.express_config = lodash__default['default'].defaultsDeep(config, {
+            helmet: true,
+            json: true,
+            urlencoded: true,
+            compression: true,
+            cors: { origin: true, credentials: true },
+            fileupload: true
+        });
         this.statics = statics;
         this.routes = routes;
     }
+
 
     /**
      * Inicializa el servidor
      * @param {*} statics 
      * @param {*} routes 
      */
-    initialize() {
+    async initialize() {
         this.config(this.express_config);
         if (this.customizeExpress) {
-            this.customizeExpress(this.app);
+            await this.customizeExpress(this.app);
         }
         this.configureRoutes(this.routes);
         this.errorHandler();
@@ -266,22 +272,33 @@ class Server {
      * 
      */
     config(config) {
-        //TODO apply config to all other components
 
-        //Security
-        this.app.use(helmet__default['default'](config && config.helmet));
-        //mount json form parser
-        this.app.use(bodyParser__default['default'].json({ limit: '100mb' }));
-        //mount query string parser
-        this.app.use(bodyParser__default['default'].urlencoded({ extended: true }));
-        // compress responses
-        this.app.use(compression__default['default']());
-        //Enable cors to allow external references
-        this.app.options('*', cors__default['default']({ origin: true, credentials: true }));
-        this.app.use(cors__default['default']({ origin: true, credentials: true }));
+        if (config && config.helmet) {
+            //Security
+            this.app.use(helmet__default['default'](config && lodash__default['default'].isObject(config.helmet) && config.helmet));
+        }
+        if (config && config.json) {
+            //mount json form parser
+            this.app.use(express__default['default'].json());
+        }
 
-        // upload middleware
-        this.app.use(fileUpload__default['default']());
+        if (config && config.urlencoded) {
+            //mount query string parser
+            this.app.use(express__default['default'].urlencoded({ extended: true }));
+        }
+        if (config && config.compression) {
+            // compress responses
+            this.app.use(compression__default['default']());
+        }
+        if (config && config.cors) {
+            //Enable cors to allow external references
+            this.app.options('*', cors__default['default'](config && lodash__default['default'].isObject(config.cors) && config.cors));
+            this.app.use(cors__default['default'](config && lodash__default['default'].isObject(config.cors) && config.cors));
+        }
+        if (config && config.fileupload) {
+            // upload middleware
+            this.app.use(fileUpload__default['default']());
+        }
 
         if (this.statics) {
             //add static paths
@@ -378,13 +395,13 @@ class ClusterServer extends events.EventEmitter {
     /**
      * Iniciar el servidor en el puerto y con la configuración seleccionadas.
      */
-    start() {
+    async start() {
         if (this.clustered == "true") {
             this.initClustered();
         } else {
 
             this.executeOnlyMain();
-            this.initUnclustered();
+            await this.initUnclustered();
         }
     }
 
@@ -392,7 +409,7 @@ class ClusterServer extends events.EventEmitter {
      * Inicializa la clase server encargada del control de las solicitudes en forma multiproceso.
      *
      */
-    initClustered() {
+    async initClustered() {
         //Launch cluster
         if (cluster__default['default'].isMaster) {
             this.executeOnlyMain();
@@ -413,7 +430,7 @@ class ClusterServer extends events.EventEmitter {
 
             });
         } else {
-            this.initUnclustered();
+            await this.initUnclustered();
 
             console.log(`Worker ${process.pid} started`);
         }
@@ -443,7 +460,7 @@ class ClusterServer extends events.EventEmitter {
      * Inicializa la clase server encargada del control de las solicitudes en un unico proceso.
      *
      */
-    initUnclustered() {
+    async initUnclustered() {
         //Initialize clustered servers
         this.server = this.cls;
 
@@ -453,7 +470,7 @@ class ClusterServer extends events.EventEmitter {
 
         this.app.io = socketio__default['default'](server);
 
-        this.server.initialize();
+        await this.server.initialize();
 
         //listen on provided ports
         server.listen(this.server.port);
@@ -1375,11 +1392,11 @@ class App {
     /**
      * Ejecuta el servidor con la configuracion de #init()
      */
-    start() {
+    async start() {
         if (!this.server) {
             throw new Error("Call init first");
         }
-        this.server.start();
+        await this.server.start();
     }
 
 

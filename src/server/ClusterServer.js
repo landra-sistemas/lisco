@@ -33,13 +33,13 @@ export default class ClusterServer extends EventEmitter {
     /**
      * Iniciar el servidor en el puerto y con la configuración seleccionadas.
      */
-    start() {
+    async start() {
         if (this.clustered == "true") {
             this.initClustered();
         } else {
 
             this.executeOnlyMain();
-            this.initUnclustered();
+            await this.initUnclustered();
         }
     }
 
@@ -47,7 +47,7 @@ export default class ClusterServer extends EventEmitter {
      * Inicializa la clase server encargada del control de las solicitudes en forma multiproceso.
      *
      */
-    initClustered() {
+    async initClustered() {
         //Launch cluster
         if (cluster.isMaster) {
             this.executeOnlyMain();
@@ -68,7 +68,7 @@ export default class ClusterServer extends EventEmitter {
 
             });
         } else {
-            this.initUnclustered();
+            await this.initUnclustered();
 
             console.log(`Worker ${process.pid} started`);
         }
@@ -98,7 +98,7 @@ export default class ClusterServer extends EventEmitter {
      * Inicializa la clase server encargada del control de las solicitudes en un unico proceso.
      *
      */
-    initUnclustered() {
+    async initUnclustered() {
         //Initialize clustered servers
         this.server = this.cls;
 
@@ -108,7 +108,7 @@ export default class ClusterServer extends EventEmitter {
 
         this.app.io = socketio(server);
 
-        this.server.initialize();
+        await this.server.initialize();
 
         //listen on provided ports
         server.listen(this.server.port);

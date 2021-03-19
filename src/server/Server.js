@@ -1,10 +1,10 @@
 import helmet from 'helmet';
-import bodyParser from 'body-parser';
 import express from 'express';
 import compression from 'compression';
 import cors from 'cors';
 import fileUpload from 'express-fileupload';
 import url from 'url';
+import lodash from 'lodash';
 import { JsonResponse } from '../common';
 
 
@@ -17,20 +17,28 @@ export default class Server {
 
     constructor(config, statics, routes) {
         this.app = express();
-        this.express_config = config;
+        this.express_config = lodash.defaultsDeep(config, {
+            helmet: true,
+            json: true,
+            urlencoded: true,
+            compression: true,
+            cors: { origin: true, credentials: true },
+            fileupload: true
+        });
         this.statics = statics;
         this.routes = routes;
     }
+
 
     /**
      * Inicializa el servidor
      * @param {*} statics 
      * @param {*} routes 
      */
-    initialize() {
+    async initialize() {
         this.config(this.express_config);
         if (this.customizeExpress) {
-            this.customizeExpress(this.app)
+            await this.customizeExpress(this.app)
         }
         this.configureRoutes(this.routes);
         this.errorHandler();
@@ -50,22 +58,33 @@ export default class Server {
      * 
      */
     config(config) {
-        //TODO apply config to all other components
 
-        //Security
-        this.app.use(helmet(config && config.helmet));
-        //mount json form parser
-        this.app.use(bodyParser.json({ limit: '100mb' }));
-        //mount query string parser
-        this.app.use(bodyParser.urlencoded({ extended: true }));
-        // compress responses
-        this.app.use(compression());
-        //Enable cors to allow external references
-        this.app.options('*', cors({ origin: true, credentials: true }));
-        this.app.use(cors({ origin: true, credentials: true }));
+        if (config && config.helmet) {
+            //Security
+            this.app.use(helmet(config && lodash.isObject(config.helmet) && config.helmet));
+        }
+        if (config && config.json) {
+            //mount json form parser
+            this.app.use(express.json());
+        }
 
-        // upload middleware
-        this.app.use(fileUpload());
+        if (config && config.urlencoded) {
+            //mount query string parser
+            this.app.use(express.urlencoded({ extended: true }));
+        }
+        if (config && config.compression) {
+            // compress responses
+            this.app.use(compression());
+        }
+        if (config && config.cors) {
+            //Enable cors to allow external references
+            this.app.options('*', cors(config && lodash.isObject(config.cors) && config.cors));
+            this.app.use(cors(config && lodash.isObject(config.cors) && config.cors));
+        }
+        if (config && config.fileupload) {
+            // upload middleware
+            this.app.use(fileUpload());
+        }
 
         if (this.statics) {
             //add static paths

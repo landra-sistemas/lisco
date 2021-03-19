@@ -44,11 +44,11 @@ class App {
     /**
      * Ejecuta el servidor con la configuracion de #init()
      */
-    start() {
+    async start() {
         if (!this.server) {
             throw new Error("Call init first");
         }
-        this.server.start();
+        await this.server.start();
     }
 
 
