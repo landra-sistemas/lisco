@@ -1,13 +1,13 @@
 {
     "name": "lisco",
-    "version": "1.0.0",
-    "author": "Thorin8k",
+    "version": "1.0.4",
+    "author": "iago.sardina",
     "description": "Framework nodejs ",
-    "license": "MIT",
-    "private": true,
+    "license": "Landra",
     "main": "dist/lisco.esm.js",
     "dependencies": {
         "compression": "^1.7.4",
+        "cookie-parser": "^1.4.5",
         "cors": "^2.8.5",
         "dotenv": "^8.2.0",
         "esm": "^3.2.25",
@@ -20,6 +20,7 @@
         "log4js": "^6.3.0",
         "moment": "^2.29.1",
         "path-to-regexp": "^6.2.0",
+        "pg": "^8.6.0",
         "socket.io": "^3.1.2",
         "uuid": "^8.3.2"
     },

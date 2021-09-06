@@ -8,7 +8,7 @@ var compression = require('compression');
 var cors = require('cors');
 var fileUpload = require('express-fileupload');
 var url = require('url');
-var lodash$1 = require('lodash');
+var lodash = require('lodash');
 var fs = require('fs');
 var path = require('path');
 var util = require('util');
@@ -36,7 +36,7 @@ var compression__default = /*#__PURE__*/_interopDefaultLegacy(compression);
 var cors__default = /*#__PURE__*/_interopDefaultLegacy(cors);
 var fileUpload__default = /*#__PURE__*/_interopDefaultLegacy(fileUpload);
 var url__default = /*#__PURE__*/_interopDefaultLegacy(url);
-var lodash__default = /*#__PURE__*/_interopDefaultLegacy(lodash$1);
+var lodash__default = /*#__PURE__*/_interopDefaultLegacy(lodash);
 var fs__default = /*#__PURE__*/_interopDefaultLegacy(fs);
 var path__default = /*#__PURE__*/_interopDefaultLegacy(path);
 var util__default = /*#__PURE__*/_interopDefaultLegacy(util);
@@ -1073,33 +1073,35 @@ var KnexConnector$1 = new KnexConnector();
  */
 class BaseKnexDao {
 
-    constructor(tableName) {
-        this.tableName = tableName;
+    tableName = "";
+
+    constructor() {
+
     }
 
 
     loadAllData(start, limit) {
-        return KnexConnector$1.connection.select('*').from(this.tableName).limit(limit).offset(start)
+        return KnexConnector$1.connection.select('*').from(this.tableName).limit(limit || 10000).offset(start)
     }
 
     async loadFilteredData(filters, start, limit) {
-        let parser = new KnexFilterParser();
         let sorts = [];
         if (filters.sort) {
-            sorts = parser.parseSort(filters.sort);
+            sorts = KnexFilterParser.parseSort(filters.sort);
         }
 
         return KnexConnector$1.connection.from(this.tableName).where((builder) => (
-            parser.parseFilters(builder, lodash.omit(filters, ['sort']))
+            KnexFilterParser.parseFilters(builder, lodash__default['default'].omit(filters, ['sort']))
         )).orderBy(sorts).limit(limit).offset(start);
 
     }
 
     async countFilteredData(filters) {
-        let parser = new KnexFilterParser();
-        return KnexConnector$1.connection.from(this.tableName).where((builder) => (
-            parser.parseFilters(builder, lodash.omit(filters, ['sort']))
-        ));
+        let data = await KnexConnector$1.connection.from(this.tableName).where((builder) => (
+            KnexFilterParser.parseFilters(builder, lodash__default['default'].omit(filters, ['sort']))
+        )).count('id', { as: 'total' });
+
+        return data && data[0].total;
     }
 
     async loadById(objectId) {
@@ -1145,7 +1147,6 @@ class BaseController {
         this.router.delete(`/${entity}/:id`, asyncHandler((res, req, next) => { this.deleteEntidad(res, req, next); }));
 
         this.service = config.service;
-        this.table = config.table;
 
         return this.router;
     }
@@ -1166,7 +1167,7 @@ class BaseController {
      */
     async listEntidad(request, response, next) {
         try {
-            let service = new this.service(this.table);
+            let service = new this.service();
             let filters = request.body;
 
             let data = await service.list(filters, filters.start, filters.limit);
@@ -1192,7 +1193,7 @@ class BaseController {
      */
     async getEntidad(request, response, next) {
         try {
-            let service = new this.service(this.table);
+            let service = new this.service();
             let data = await service.loadById(request.params.id);
             let jsRes = new JsonResponse(true, data);
 
@@ -1218,7 +1219,7 @@ class BaseController {
      */
     async saveEntidad(request, response, next) {
         try {
-            let service = new this.service(this.table);
+            let service = new this.service();
 
             let data = await service.save(request.body);
             let jsRes = new JsonResponse(true, { id: request.body.id || data[0] });
@@ -1245,7 +1246,7 @@ class BaseController {
      */
     async updateEntidad(request, response, next) {
         try {
-            let service = new this.service(this.table);
+            let service = new this.service();
 
             let data = await service.update(request.params.id, request.body);
             let jsRes = new JsonResponse(true, { id: request.body.id || data[0] });
@@ -1272,7 +1273,7 @@ class BaseController {
      */
     async deleteEntidad(request, response, next) {
         try {
-            let service = new this.service(this.table);
+            let service = new this.service();
             let data = await service.delete(request.params.id);
             let jsRes = new JsonResponse(true, data);
 
@@ -1287,12 +1288,12 @@ class BaseController {
 
 class BaseService {
 
-    constructor(tableName, cls) {
-        this.tableName = tableName;
+
+    constructor(cls) {
         if (cls) {
-            this.dao = new cls(tableName);
+            this.dao = new cls();
         } else {
-            this.dao = new BaseKnexDao(tableName); //El sistema por defecto utiliza knex, si se pasa un dao personalizado se puede sobreescribir este comportamiento
+            this.dao = new BaseKnexDao(); //El sistema por defecto utiliza knex, si se pasa un dao personalizado se puede sobreescribir este comportamiento
         }
     }
     /**
@@ -1356,6 +1357,9 @@ class BaseService {
 
 class App {
 
+    serverClass = Server
+    clusterClass = ClusterServer
+
     /**
      * Initializa las configuraciones para la app
      * 
@@ -1366,7 +1370,7 @@ class App {
         }
 
         //Instanciar la clase server
-        const server = new Server(serverConfig, this.statics, this.routes);
+        const server = new this.serverClass(serverConfig, this.statics, this.routes);
         if (this.customizeExpress) {
             server.customizeExpress = this.customizeExpress;
         }
@@ -1377,7 +1381,7 @@ class App {
         this.i18n = new I18nLoader();
         await this.i18n.load();
         //Inicio del cluster server
-        this.server = new ClusterServer(this);
+        this.server = new this.clusterClass(this);
 
         this.server.setServerCls(server);
         this.server.executeOnlyMain = () => {

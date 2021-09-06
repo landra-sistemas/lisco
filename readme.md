@@ -11,7 +11,7 @@ Framework nodejs con express y knex para el desarrollo de backends.
 Install
 ``` shell
 
-> npm install github:landra-sistemas/lisco
+> npm install lisco
 
 > npm install esm dotenv
 
