@@ -9,14 +9,14 @@
         "compression": "^1.7.4",
         "cookie-parser": "^1.4.5",
         "cors": "^2.8.5",
-        "dotenv": "^8.2.0",
+        "dotenv": "^10.0.0",
         "esm": "^3.2.25",
         "express": "^4.17.1",
         "express-async-handler": "^1.1.4",
         "express-fileupload": "^1.2.1",
         "helmet": "^4.4.1",
         "jsonwebtoken": "^8.5.1",
-        "knex": "^0.95.1",
+        "knex": "^0.95.6",
         "log4js": "^6.3.0",
         "moment": "^2.29.1",
         "path-to-regexp": "^6.2.0",
@@ -31,17 +31,17 @@
         "test": "nyc --reporter=lcov --reporter=html mocha --exit || exit 0"
     },
     "devDependencies": {
-        "@haensl/rollup-plugin-local-resolve": "^1.1.1",
-        "@rollup/plugin-commonjs": "^17.1.0",
+        "@haensl/rollup-plugin-local-resolve": "^1.1.3",
+        "@rollup/plugin-commonjs": "^19.0.0",
         "@rollup/plugin-json": "^4.1.0",
-        "@rollup/plugin-node-resolve": "^11.2.0",
+        "@rollup/plugin-node-resolve": "^13.0.0",
         "rollup-plugin-terser": "^7.0.2",
         "sqlite3": "^5.0.2",
-        "chai": "^4.3.3",
+        "chai": "^4.3.4",
         "chai-http": "^4.3.0",
-        "eslint": "^7.21.0",
-        "mocha": "^8.3.1",
+        "eslint": "^7.28.0",
+        "mocha": "^9.0.0",
         "nyc": "^15.1.0",
-        "rollup": "^2.41.0"
+        "rollup": "^2.52.1"
     }
 }
