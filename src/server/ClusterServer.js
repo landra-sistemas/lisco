@@ -110,8 +110,11 @@ export default class ClusterServer extends EventEmitter {
 
         await this.server.initialize();
 
+        if (this.server.beforeListen) await this.server.beforeListen();
         //listen on provided ports
         server.listen(this.server.port);
+
+        if (this.server.afterListen) await this.server.afterListen();
 
         //add error handler
         server.on("error", (err) => {

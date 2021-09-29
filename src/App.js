@@ -25,6 +25,12 @@ class App {
         if (this.customizeExpress) {
             server.customizeExpress = this.customizeExpress;
         }
+        if (this.beforeListen) {
+            server.beforeListen = this.beforeListen;
+        }
+        if (this.afterListen) {
+            server.afterListen = this.afterListen;
+        }
 
         //Gestor de eventos
         this.events = new EventHandler(this);

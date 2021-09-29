@@ -30,6 +30,26 @@ var repl = require('repl');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
+function _interopNamespace(e) {
+    if (e && e.__esModule) return e;
+    var n = Object.create(null);
+    if (e) {
+        Object.keys(e).forEach(function (k) {
+            if (k !== 'default') {
+                var d = Object.getOwnPropertyDescriptor(e, k);
+                Object.defineProperty(n, k, d.get ? d : {
+                    enumerable: true,
+                    get: function () {
+                        return e[k];
+                    }
+                });
+            }
+        });
+    }
+    n['default'] = e;
+    return Object.freeze(n);
+}
+
 var helmet__default = /*#__PURE__*/_interopDefaultLegacy(helmet);
 var express__default = /*#__PURE__*/_interopDefaultLegacy(express);
 var compression__default = /*#__PURE__*/_interopDefaultLegacy(compression);
@@ -42,6 +62,7 @@ var path__default = /*#__PURE__*/_interopDefaultLegacy(path);
 var util__default = /*#__PURE__*/_interopDefaultLegacy(util);
 var crypto__default = /*#__PURE__*/_interopDefaultLegacy(crypto);
 var jsonwebtoken__default = /*#__PURE__*/_interopDefaultLegacy(jsonwebtoken);
+var uuid__namespace = /*#__PURE__*/_interopNamespace(uuid);
 var http__default = /*#__PURE__*/_interopDefaultLegacy(http);
 var https__default = /*#__PURE__*/_interopDefaultLegacy(https);
 var cluster__default = /*#__PURE__*/_interopDefaultLegacy(cluster);
@@ -199,7 +220,7 @@ class TokenGenerator {
     }
 
     sign(payload) {
-        const jwtSignOptions = { ...this.options, jwtid: uuid.v4() };
+        const jwtSignOptions = { ...this.options, jwtid: uuid__namespace.v4() };
         return jsonwebtoken__default['default'].sign(payload, this.privateKey, jwtSignOptions);
     }
 
@@ -216,7 +237,7 @@ class TokenGenerator {
         delete payload.exp;
         delete payload.nbf;
         delete payload.jti; //We are generating a new token, if you are using jwtid during signing, pass it in refreshOptions
-        const jwtSignOptions = { ...this.options, jwtid: uuid.v4() };
+        const jwtSignOptions = { ...this.options, jwtid: uuid__namespace.v4() };
         // The first signing converted all needed options into claims, they are already in the payload
         return jsonwebtoken__default['default'].sign(payload, this.privateKey, jwtSignOptions);
     }
@@ -472,8 +493,11 @@ class ClusterServer extends events.EventEmitter {
 
         await this.server.initialize();
 
+        if (this.server.beforeListen) await this.server.beforeListen();
         //listen on provided ports
         server.listen(this.server.port);
+
+        if (this.server.afterListen) await this.server.afterListen();
 
         //add error handler
         server.on("error", (err) => {
@@ -797,6 +821,11 @@ class JwtAuthHandler extends IAuthHandler {
         if (request.headers.authorization) {
             const token = (request.headers.authorization || '').split(' ')[1] || '';
 
+            if (!token) {
+                console.error("Token needed");
+                return false;
+            }
+            
             var decoded = this.tokenGenerator.verify(token);
             const { sub, username, exp } = decoded;
 
@@ -1063,6 +1092,10 @@ class KnexConnector {
         this.connection = require('knex')(config);
     }
 
+
+    test() {
+        return this.connection.raw('select 1+1 as result');
+    }
 }
 
 
@@ -1373,6 +1406,12 @@ class App {
         const server = new this.serverClass(serverConfig, this.statics, this.routes);
         if (this.customizeExpress) {
             server.customizeExpress = this.customizeExpress;
+        }
+        if (this.beforeListen) {
+            server.beforeListen = this.beforeListen;
+        }
+        if (this.afterListen) {
+            server.afterListen = this.afterListen;
         }
 
         //Gestor de eventos
