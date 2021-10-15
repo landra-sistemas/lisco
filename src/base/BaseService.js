@@ -2,12 +2,12 @@ import { BaseKnexDao } from '../db';
 
 export class BaseService {
 
-    constructor(tableName, cls) {
-        this.tableName = tableName;
+
+    constructor(cls) {
         if (cls) {
-            this.dao = new cls(tableName);
+            this.dao = new cls();
         } else {
-            this.dao = new BaseKnexDao(tableName); //El sistema por defecto utiliza knex, si se pasa un dao personalizado se puede sobreescribir este comportamiento
+            this.dao = new BaseKnexDao(); //El sistema por defecto utiliza knex, si se pasa un dao personalizado se puede sobreescribir este comportamiento
         }
     }
     /**

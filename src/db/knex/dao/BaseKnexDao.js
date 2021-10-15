@@ -1,38 +1,42 @@
 import KnexFilterParser from '../filters/KnexFilterParser';
 import KnexConnector from '../KnexConnector';
 
+import lodash from 'lodash';
+
 /**
  * Crear un dao con los métodos básicos
  */
 export default class BaseKnexDao {
 
-    constructor(tableName) {
-        this.tableName = tableName;
+    tableName = "";
+
+    constructor() {
+
     }
 
 
     loadAllData(start, limit) {
-        return KnexConnector.connection.select('*').from(this.tableName).limit(limit).offset(start)
+        return KnexConnector.connection.select('*').from(this.tableName).limit(limit || 10000).offset(start)
     }
 
     async loadFilteredData(filters, start, limit) {
-        let parser = new KnexFilterParser();
         let sorts = [];
         if (filters.sort) {
-            sorts = parser.parseSort(filters.sort);
+            sorts = KnexFilterParser.parseSort(filters.sort);
         }
 
         return KnexConnector.connection.from(this.tableName).where((builder) => (
-            parser.parseFilters(builder, lodash.omit(filters, ['sort']))
+            KnexFilterParser.parseFilters(builder, lodash.omit(filters, ['sort']))
         )).orderBy(sorts).limit(limit).offset(start);
 
     }
 
     async countFilteredData(filters) {
-        let parser = new KnexFilterParser();
-        return KnexConnector.connection.from(this.tableName).where((builder) => (
-            parser.parseFilters(builder, lodash.omit(filters, ['sort']))
-        ));
+        let data = await KnexConnector.connection.from(this.tableName).where((builder) => (
+            KnexFilterParser.parseFilters(builder, lodash.omit(filters, ['sort']))
+        )).count('id', { as: 'total' });
+
+        return data && data[0].total;
     }
 
     async loadById(objectId) {

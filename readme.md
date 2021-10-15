@@ -11,7 +11,7 @@ Framework nodejs con express y knex para el desarrollo de backends.
 Install
 ``` shell
 
-> npm install github:landra-sistemas/lisco
+> npm install lisco
 
 > npm install esm dotenv
 
@@ -179,80 +179,6 @@ Para hacer que al ejecutar una aplicación los mensajes de log del `consoleApend
 }
 ```
 
-
-## Siguientes pasos
-
-### Creación de controladores
-
-Un controlador se encarga de desplegar rutas para construir la Api. Existen dos formas de crear un controlador:
-
-- Extender de **BaseController**
-- Crear uno **personalizado**
-
-
-Al extender de BaseController se proporciona una interfaz genérica CRUD sobre una entidad concreta.
-
-Por ejemplo si hablamos de la tabla `user` crearíamos
-
-``` javascript
-import { BaseController, BaseService } from 'lisco'
-
-export default class UserController extends BaseController {
-    configure() { //Necesario
-        super.configure('user', { service: BaseService, table: 'user' });
-
-        
-        return this.router;
-    }
-}
-```
-
-Mediante estas cuatro lineas dispondríamos de los siguientes métodos:
-
-- `POST` /user/list -> Listar usuarios
-- `GET` /user/:id -> Obtener usuario
-- `POST` /user -> Crear usuario
-- `PUT` /user/:id -> Modificar usuario
-- `DELETE` /user/:id -> Borrar usuario
-
-
-Sobre este controlador se podrían crear nuevas rutas para la realización de acciones personalizadas o incluso sobreescribir algunas de ellas.
-
-Ejemplo
-
-``` javascript
-export default class UserController extends BaseController {
-    configure() { //Necesario
-        super.configure('user', { service: BaseService, table: 'user' });
-
-        this.router.get('/session', asyncHandler((res, req, next) => { this.getSession(res, req, next); }));
-
-        return this.router;
-    }
-
-    async getSession(request, response) {
-        if (request.session.username) {
-            /* CUSTOM CODE */
-            response.json(jsRes.toJson());
-        }
-    }
-}
-```
-
-El proceso de creación de un controlador **personalizado** es el mismo que el descrito anteriormente. La única diferencia es que este no tendría que extender de `BaseController` ni llamar al método `super.configure`.
-
-El único criterio para que un controlador pueda ser utilizado por la aplicación es que disponga de un método `configure` y este devuelva un `router` de express (`this.router = express.Router();`)
-
-Visualizar el código de `BaseController` puede ayudar a la creación de controladores personalizados.
-
-
-Durante estos ejemplos se ha utilizado `BaseService` su funcionamiento es similar a lo descrito con el `BaseController` este utiliza el `BaseDaoKnex` para la ejecución de los métodos CRUD básicos.
-
-
-
-
-
-
 ## Configuración de BD y migraciones
 
 Crear un archivo `knex-cli.js` en la raíz del proyecto con el siguiente contenido:
@@ -339,3 +265,224 @@ TODO intentar adaptar, aunque sea con un fork esto:
 https://github.com/RafalWilinski/express-status-monitor
 
 Al utilizar CDN's limita bastante el deploy del proyecto, pero con un fork podríamos hacer que utilizase dependencias locales.
+
+
+
+# Descripción de Componentes
+
+## Rutas y Controladores
+
+La aplicación carga todos los controladores añadidos a `App.routes` de forma secuencial.
+
+Un controlador se encarga de desplegar rutas para construir la Api. Existen dos formas de crear un controlador:
+
+- Extender de **BaseController**
+- Crear uno **personalizado**
+
+
+Al extender de BaseController se proporciona una interfaz genérica CRUD sobre una entidad concreta.
+
+Por ejemplo si hablamos de la tabla `user` crearíamos
+
+``` javascript
+import { BaseController, BaseService } from 'lisco'
+
+export default class UserController extends BaseController {
+    configure() { //Necesario
+        super.configure('user', { service: BaseService, table: 'user' });
+
+        
+        return this.router;
+    }
+}
+```
+
+Mediante estas cuatro lineas dispondríamos de los siguientes métodos:
+
+- `POST` /user/list -> Listar usuarios
+- `GET` /user/:id -> Obtener usuario
+- `POST` /user -> Crear usuario
+- `PUT` /user/:id -> Modificar usuario
+- `DELETE` /user/:id -> Borrar usuario
+
+
+Sobre este controlador se podrían crear nuevas rutas para la realización de acciones personalizadas o incluso sobreescribir algunas de ellas.
+
+Ejemplo
+
+``` javascript
+export default class UserController extends BaseController {
+    configure() { //Necesario
+        super.configure('user', { service: BaseService, table: 'user' });
+
+        this.router.get('/session', asyncHandler((res, req, next) => { this.getSession(res, req, next); }));
+
+        return this.router;
+    }
+
+    async getSession(request, response) {
+        if (request.session.username) {
+            /* CUSTOM CODE */
+            response.json(jsRes.toJson());
+        }
+    }
+}
+```
+
+El proceso de creación de un controlador **personalizado** es el mismo que el descrito anteriormente. La única diferencia es que este no tendría que extender de `BaseController` ni llamar al método `super.configure`.
+
+El único criterio para que un controlador pueda ser utilizado por la aplicación es que disponga de un método `configure` y este devuelva un `router` de express (`this.router = express.Router();`)
+
+Visualizar el código de `BaseController` puede ayudar a la creación de controladores personalizados.
+
+
+Durante estos ejemplos se ha utilizado `BaseService` su funcionamiento es similar a lo descrito con el `BaseController` este utiliza el `BaseDaoKnex` para la ejecución de los métodos CRUD básicos.
+
+## Autenticación
+
+El framework implementa un sistema de validación de usuarios de forma nativa. Este sistema permite cargar múltiples métodos de autenticación en base a clases que cumplan un determinado patrón.
+
+Actualmente existen dos implementaciones: JWT y Cookie
+
+
+El controlador `AuthController` es el encargado de proporcionar la funcionalidad para la validación. Dispone de las siguientes rutas:
+
+- `POST`: **/login** `{"username": "", "password": ""}` | Inicia Sesión validando los credenciales
+- `POST`: **/logout** | Cierra la sesión
+
+De forma automática, una vez configurado, este controlador escucha todas las solicitudes recibidas (a excepción de las marcadas como ignoradas) comprobando que la sesión proporcionada es válida.
+
+Para habilitar el sistema es necesario añadir, como primera ruta, lo siguiente:
+
+``` javascript
+//index.js 
+
+[...]
+
+const publicPaths = [
+    "/",
+    "/login",
+    "/translation",
+    "/settings/load",
+    "/menu",
+    "/external"
+]
+
+App.routes = [
+    new AuthController(publicPaths, new IAuthHandler(new UserDao())),
+    [...]
+]
+
+[...]
+``` 
+
+- PublicPaths: Sirve para especificar aquellas rutas que no necesitan haber iniciado sesión para ejecutarse.
+- `new AuthController`: Construye el controlador básico que recibe como parámetros la lista de rutas publicas y el manejador para la autenticación
+- `new IAuthHandler`: Es necesario proporcionar una clase que extienda de IAuthHandler e implemente los métodos `validate` y `check`. 
+- `new UserDao`: Es necesario proporcionar un Dao encargado del acceso a la tabla de usuarios y que como mínimo disponga de las columnas **username** y **password**.
+
+
+
+### JWT Authentication
+
+La implementación JWT utiliza los Json Web Token enviados como cabecera en la solicitud para validar los datos del usuario.
+
+Basa su funcionamiento en la librería **jsonwebtoken** y utiliza los parámetros definidos en el archivo `.env` para funcionar.
+
+Para utilizarla es necesario especificar como manejador la clase JwtAuthHandler:
+
+``` javascript
+App.routes = [
+    new AuthController(publicPaths, new JwtAuthHandler(new UserDao())),
+]
+```
+
+#### Token
+
+El token será devuelto mediante la llamada `POST /login` descrita anteriormente. 
+
+Este token será necesario proporcionarlo en la cabecera `Authorization: Bearer <token>` en todas las llamadas posteriores a la aplicación.
+
+Este token almacena toda la información de la entidad usuario devuelta por la clase UserDao a excepción del campo `password`
+
+### Cookie Authentication
+
+Este sistema utiliza cookies para la gestión de las sesiones de la aplicación.
+
+Utiliza el `cookie-parser` de express y para configurarlo es necesario:
+
+1. Instalar:  connect-session-knex y express-session
+2. Cargar la cookie store en express mediante el método `customizeExpress`
+``` javascript
+//Configurar la gestion de cookies
+App.customizeExpress = (app) => {
+    const KnexSessionStore = knexStore(session);
+
+    app.use(session({
+        store: new KnexSessionStore({
+            knex: KnexConnector.connection,
+            tablename: 'sessions_knex'
+        }),
+        secret: process.env.COOKIE_PASS,
+        resave: true,
+        rolling: true,
+        httpOnly: true,
+        saveUninitialized: true,
+        cookie: { maxAge: (process.env.COOKIE_TIMEOUT || 3 * 60 * 60) * 1000 } // 1 Hour [30 days -> (30 * 24 * 60 * 60 * 1000)]
+    }));
+};
+```
+3. Añadir al archivo `.env` los parámetros `COOKIE_PASS` y `COOKIE_TIMEOUT`
+4. Cargar el controlador:
+``` javascript
+App.routes = [
+    new AuthController(publicPaths, new CookieAuthHandler(new UserDao()))
+]
+``` 
+
+#### Cookie
+
+La cookie se almacenará, mediante esta configuración, en una tabla de postgre. Esto permitirá desplegar la aplicación en cluster ya que se comparte una store común.
+
+Esta cookie dispondrá de los datos devueltos por la clase UserDao a excepción del campo `password`.
+
+
+
+## Logger
+
+El sistema de log de la aplicación utiliza `log4js` como base. Se ha simplificado el uso de la aplicación sobreescribiendo el objeto global `console`.
+
+El sistema esta habilitado por defecto y se utiliza de la siguiente forma:
+
+```
+console.log(mensaje)
+console.error(mensaje)
+console.info(mensaje)
+console.debug(mensaje)
+console.custom(level, mensaje)
+```
+
+
+El sistema se configura mediante el fichero `log4js.json` situado en la raíz del proyecto el cual permite configurar los appender y los niveles de log para cada uno. Mas información sobre la configuración: [https://log4js-node.github.io/log4js-node/index.html](https://log4js-node.github.io/log4js-node/index.html)
+
+
+## Traducciones
+
+El sistema de traducciones utiliza archivos `json` en los que se almacenan las claves y los valores de las traducciones.
+
+Este sistema dispone del parámetro **DEFAULT_LANG** el cual define el idioma por defecto y permite cargar cualquier archivo json situado en la carpeta **i18n** del proyecto.
+
+Los archivos han de nombrarse de la siguiente forma: `lang_[XX].json`
+
+Siendo `[XX]` el código del idioma
+
+El método `App.i18n.load(XX)` carga el idioma recibido como parámetro.
+
+El método `App.i18n.translate(key, [lang])` traduce una clave en base al idioma proporcionado. Se usa el idioma por defecto en caso de no proporcionarlo.
+
+
+## Eventos
+
+ [WIP]
+
+ 
