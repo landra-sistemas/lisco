@@ -19,7 +19,6 @@ export class BaseController {
         this.router.delete(`/${entity}/:id`, asyncHandler((res, req, next) => { this.deleteEntidad(res, req, next); }));
 
         this.service = config.service;
-        this.table = config.table;
 
         return this.router;
     }
@@ -40,7 +39,7 @@ export class BaseController {
      */
     async listEntidad(request, response, next) {
         try {
-            let service = new this.service(this.table);
+            let service = new this.service();
             let filters = request.body;
 
             let data = await service.list(filters, filters.start, filters.limit);
@@ -66,7 +65,7 @@ export class BaseController {
      */
     async getEntidad(request, response, next) {
         try {
-            let service = new this.service(this.table);
+            let service = new this.service();
             let data = await service.loadById(request.params.id);
             let jsRes = new JsonResponse(true, data);
 
@@ -92,7 +91,7 @@ export class BaseController {
      */
     async saveEntidad(request, response, next) {
         try {
-            let service = new this.service(this.table);
+            let service = new this.service();
 
             let data = await service.save(request.body);
             let jsRes = new JsonResponse(true, { id: request.body.id || data[0] });
@@ -119,7 +118,7 @@ export class BaseController {
      */
     async updateEntidad(request, response, next) {
         try {
-            let service = new this.service(this.table);
+            let service = new this.service();
 
             let data = await service.update(request.params.id, request.body);
             let jsRes = new JsonResponse(true, { id: request.body.id || data[0] });
@@ -146,7 +145,7 @@ export class BaseController {
      */
     async deleteEntidad(request, response, next) {
         try {
-            let service = new this.service(this.table);
+            let service = new this.service();
             let data = await service.delete(request.params.id);
             let jsRes = new JsonResponse(true, data);
 

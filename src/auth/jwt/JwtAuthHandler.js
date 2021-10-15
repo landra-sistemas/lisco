@@ -24,6 +24,11 @@ export default class JwtAuthHandler extends IAuthHandler {
         if (request.headers.authorization) {
             const token = (request.headers.authorization || '').split(' ')[1] || '';
 
+            if (!token) {
+                console.error("Token needed");
+                return false;
+            }
+            
             var decoded = this.tokenGenerator.verify(token);
             const { sub, username, exp } = decoded;
 
