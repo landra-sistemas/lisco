@@ -8,6 +8,9 @@ import repl from 'repl';
 
 class App {
 
+    serverClass = Server
+    clusterClass = ClusterServer
+
     /**
      * Initializa las configuraciones para la app
      * 
@@ -18,9 +21,15 @@ class App {
         }
 
         //Instanciar la clase server
-        const server = new Server(serverConfig, this.statics, this.routes);
+        const server = new this.serverClass(serverConfig, this.statics, this.routes);
         if (this.customizeExpress) {
             server.customizeExpress = this.customizeExpress;
+        }
+        if (this.beforeListen) {
+            server.beforeListen = this.beforeListen;
+        }
+        if (this.afterListen) {
+            server.afterListen = this.afterListen;
         }
 
         //Gestor de eventos
@@ -29,7 +38,7 @@ class App {
         this.i18n = new I18nLoader();
         await this.i18n.load();
         //Inicio del cluster server
-        this.server = new ClusterServer(this);
+        this.server = new this.clusterClass(this);
 
         this.server.setServerCls(server);
         this.server.executeOnlyMain = () => {

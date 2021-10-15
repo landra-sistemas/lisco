@@ -54,7 +54,8 @@ describe('AuthController', async () => {
             UserDao: {
                 findByUsername: () => { }
             },
-            check: () => { return false; }
+            check: () => { return false; },
+            validate: () => { return false; }
         });
         expect(auth).not.to.be.null;
 
@@ -91,7 +92,8 @@ describe('AuthController', async () => {
             UserDao: {
                 findByUsername: () => { }
             },
-            check: () => { return true; }
+            check: () => { return true; },
+            validate: () => { return true; }
         });
         expect(auth).not.to.be.null;
 

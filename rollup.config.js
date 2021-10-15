@@ -6,6 +6,9 @@ import localResolve from '@haensl/rollup-plugin-local-resolve';
 import pkg from './package.json';
 
 const production = !process.env.ROLLUP_WATCH;
+
+
+
 export default [
 
     {
@@ -17,7 +20,8 @@ export default [
         plugins: [
             json(),
             // nodeResolve({
-            //     preferBuiltins: true
+            //     preferBuiltins: true,
+            //     skip: Object.keys(EXTERNALS)
             // }), // tells Rollup how to find date-fns in node_modules
             localResolve(),
             // commonjs(), // converts date-fns to ES modules
