@@ -73,68 +73,6 @@ var moment__default = /*#__PURE__*/_interopDefaultLegacy(moment);
 var net__default = /*#__PURE__*/_interopDefaultLegacy(net);
 var repl__default = /*#__PURE__*/_interopDefaultLegacy(repl);
 
-class I18nLoader {
-
-    /**
-     *
-     * @param lang
-     * @param callback
-     */
-    async load(custom) {
-        const readfile = util__default['default'].promisify(fs__default['default'].readFile);
-        const lang = custom || process.env.DEFAULT_LANG;
-
-        if (!this.currentData) {
-            this.currentData = {};
-        }
-        //TODO mejorar el sistema cargando todas las traducciones del directorio i18n con chokidar esperando modificaciones
-
-        let file = path__default['default'].resolve(process.cwd(), "i18n/lang_" + lang + ".json");
-        try {
-            const data = await readfile(file, 'utf8');
-            var parsedData = JSON.parse(data);
-
-
-            this.currentData[lang] = parsedData;
-        } catch (ex) {
-            console.log("Lang file does not exist. Create it on ./i18n/lang_{xx}.json");
-        }
-    }
-
-    /**
-     * 
-     * @param {*} key 
-     */
-    async translate(key, lang) {
-        if (!lang) lang = process.env.DEFAULT_LANG;
-
-        if (this.currentData && this.currentData[lang] && this.currentData[lang][key]) {
-            return this.currentData[lang][key]
-        }
-
-        if (!this.currentData || !this.currentData[lang]) {
-            await this.load(lang);
-            if (this.currentData && this.currentData[lang] && this.currentData[key]) {
-                return this.currentData[lang][key]
-            }
-        }
-        return "undefined." + key;
-    }
-}
-
-class JsonResponse {
-    constructor(success, data, message, total) {
-        this.data = data;
-        this.success = success;
-        this.total = total;
-        this.message = message || '';
-    }
-
-    toJson() {
-        return (this);
-    }
-}
-
 class Utils {
     static arrayToLower(mcArray) {
         let tmp = mcArray.join('~').toLowerCase();
@@ -201,6 +139,115 @@ class Utils {
         }
     }
 
+
+
+    static flattenObject(ob) {
+        let toReturn = {};
+        let flatObject;
+        for (let i in ob) {
+            if (!ob.hasOwnProperty(i)) {
+                continue;
+            }
+            //Devolver los arrays tal cual
+            if (ob[i] && Array === ob[i].constructor) {
+                toReturn[i] = ob[i];
+                continue;
+            }
+            if ((typeof ob[i]) === 'object') {
+                flatObject = Utils.flattenObject(ob[i]);
+                for (let x in flatObject) {
+                    if (!flatObject.hasOwnProperty(x)) {
+                        continue;
+                    }
+                    //Exclude arrays from the final result
+                    if (flatObject[x] && Array === flatObject.constructor) {
+                        continue;
+                    }
+                    toReturn[i + (!!isNaN(x) ? '.' + x : '')] = flatObject[x];
+                }
+            } else {
+                toReturn[i] = ob[i];
+            }
+        }
+        return toReturn;
+    }
+
+    static unflatten(data) {
+        var result = {};
+        for (var i in data) {
+            var keys = i.split('.');
+            keys.reduce(function (r, e, j) {
+                return r[e] || (r[e] = isNaN(Number(keys[j + 1])) ? (keys.length - 1 == j ? data[i] : {}) : [])
+            }, result);
+        }
+        return result
+    }
+
+}
+
+class I18nLoader {
+
+    /**
+     *
+     * @param lang
+     * @param callback
+     */
+    async load(custom) {
+        const readfile = util__default['default'].promisify(fs__default['default'].readFile);
+        const lang = custom || process.env.DEFAULT_LANG;
+
+        if (!this.currentData) {
+            this.currentData = {};
+        }
+        if (!this.currentDataRaw) {
+            this.currentDataRaw = {};
+        }
+        //TODO mejorar el sistema cargando todas las traducciones del directorio i18n con chokidar esperando modificaciones
+
+        let file = path__default['default'].resolve(process.cwd(), "i18n/lang_" + lang + ".json");
+        try {
+            const data = await readfile(file, 'utf8');
+            var parsedData = JSON.parse(data);
+
+            this.currentData[lang] = Utils.flattenObject(parsedData);
+            this.currentDataRaw[lang] = parsedData;
+        } catch (ex) {
+            console.log("Lang file does not exist. Create it on ./i18n/lang_{xx}.json");
+        }
+    }
+
+    /**
+     * 
+     * @param {*} key 
+     */
+    async translate(key, lang) {
+        if (!lang) lang = process.env.DEFAULT_LANG;
+
+        if (this.currentData && this.currentData[lang] && this.currentData[lang][key]) {
+            return this.currentData[lang][key]
+        }
+
+        if (!this.currentData || !this.currentData[lang]) {
+            await this.load(lang);
+            if (this.currentData && this.currentData[lang] && this.currentData[key]) {
+                return this.currentData[lang][key]
+            }
+        }
+        return "undefined." + key;
+    }
+}
+
+class JsonResponse {
+    constructor(success, data, message, total) {
+        this.data = data;
+        this.success = success;
+        this.total = total;
+        this.message = message || '';
+    }
+
+    toJson() {
+        return (this);
+    }
 }
 
 /**
@@ -1124,14 +1171,14 @@ class BaseKnexDao {
         }
 
         return KnexConnector$1.connection.from(this.tableName).where((builder) => (
-            KnexFilterParser.parseFilters(builder, lodash__default['default'].omit(filters, ['sort']))
+            KnexFilterParser.parseFilters(builder, lodash__default['default'].omit(filters, ['sort', 'start', 'limit']))
         )).orderBy(sorts).limit(limit).offset(start);
 
     }
 
     async countFilteredData(filters) {
         let data = await KnexConnector$1.connection.from(this.tableName).where((builder) => (
-            KnexFilterParser.parseFilters(builder, lodash__default['default'].omit(filters, ['sort']))
+            KnexFilterParser.parseFilters(builder, lodash__default['default'].omit(filters, ['sort', 'start', 'limit']))
         )).count('id', { as: 'total' });
 
         return data && data[0].total;

@@ -26,14 +26,14 @@ export default class BaseKnexDao {
         }
 
         return KnexConnector.connection.from(this.tableName).where((builder) => (
-            KnexFilterParser.parseFilters(builder, lodash.omit(filters, ['sort']))
+            KnexFilterParser.parseFilters(builder, lodash.omit(filters, ['sort', 'start', 'limit']))
         )).orderBy(sorts).limit(limit).offset(start);
 
     }
 
     async countFilteredData(filters) {
         let data = await KnexConnector.connection.from(this.tableName).where((builder) => (
-            KnexFilterParser.parseFilters(builder, lodash.omit(filters, ['sort']))
+            KnexFilterParser.parseFilters(builder, lodash.omit(filters, ['sort', 'start', 'limit']))
         )).count('id', { as: 'total' });
 
         return data && data[0].total;

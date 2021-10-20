@@ -1,10 +1,10 @@
 import fs from 'fs';
 import path from 'path';
 import util from 'util';
-import { Utils } from '.';
+import Utils from './Utils';
 
 export default class I18nLoader {
-    
+
     /**
      *
      * @param lang
@@ -17,6 +17,9 @@ export default class I18nLoader {
         if (!this.currentData) {
             this.currentData = {};
         }
+        if (!this.currentDataRaw) {
+            this.currentDataRaw = {};
+        }
         //TODO mejorar el sistema cargando todas las traducciones del directorio i18n con chokidar esperando modificaciones
 
         let file = path.resolve(process.cwd(), "i18n/lang_" + lang + ".json")
@@ -25,6 +28,7 @@ export default class I18nLoader {
             var parsedData = JSON.parse(data);
 
             this.currentData[lang] = Utils.flattenObject(parsedData);
+            this.currentDataRaw[lang] = parsedData;
         } catch (ex) {
             console.log("Lang file does not exist. Create it on ./i18n/lang_{xx}.json")
         }
