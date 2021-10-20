@@ -1,9 +1,10 @@
 import fs from 'fs';
 import path from 'path';
 import util from 'util';
+import { Utils } from '.';
 
 export default class I18nLoader {
-
+    
     /**
      *
      * @param lang
@@ -23,8 +24,7 @@ export default class I18nLoader {
             const data = await readfile(file, 'utf8');
             var parsedData = JSON.parse(data);
 
-
-            this.currentData[lang] = parsedData;
+            this.currentData[lang] = Utils.flattenObject(parsedData);
         } catch (ex) {
             console.log("Lang file does not exist. Create it on ./i18n/lang_{xx}.json")
         }
