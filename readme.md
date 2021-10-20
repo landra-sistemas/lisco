@@ -485,4 +485,51 @@ El método `App.i18n.translate(key, [lang])` traduce una clave en base al idioma
 
  [WIP]
 
+
+## Filtros
+
+La clase `KnexFilterParser`  convierte un objeto clave valor en un conjunto de filtros.
+     
+- Filtro estandar:
+``` json
+"filters": {
+    "column": "value" // filtro generico exact
+}
+```
+- Filtro Objeto:
+``` json
+"filters": {
+    "column": {
+        "type": "date|between|exists|notexists|greater|greaterEq|less|lessEq|exact|exactI|not|null|notnull|like|likeI",
+        "start": "xxx", //inicio de rango para el filtro de date y between
+        "end": "xxx", //fin de rango para el filtro date y between
+        "value": "xxx" //valor a utilizar para el resto de filtros
+    }
+}
+```
+- Filtro Lista:
+``` json
+"filters": {
+    "column": [1, 2, 3]
+}
+// Filtro de tipo IN, todos los elementos que coincidan
+```
+
+      
+- Definicion de tipos:
+    - **date**: filtro de fechas desde y hasta
+    - **between**: filtro entre dos valores concretos
+    - **exists**: busca si existe la propiedad
+    - **notexists**: busca si existe la propiedad
+    - **greater**: mayor que
+    - **greaterEq**: mayor o igual que
+    - **less**: menor que
+    - **lessEq**: menor o igual que
+    - **exact**: valor exacto
+    - **exactI**: valor exacto ignorando mayusculas y minusculas
+    - **not**: distinto de
+    - **null**: igual a null
+    - **notnull**: distinto de null
+    - **like**: filtro like
+    - **likeI**: filtro like ignorando mayusculas y minusculas
  
