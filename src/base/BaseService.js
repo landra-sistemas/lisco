@@ -15,20 +15,28 @@ export class BaseService {
      *
      * filters, es opcional. Si no se pasan se devuelve lo que hay ;
      */
-    list(filters, start, limit) {
+     async list(filters, start, limit) {
         //Pagination
         var start = start || 0;
         var limit = limit || 1000;//Default limit
-
-        //TODO  count;
+        
+        let total = await this.dao.countFilteredData(filters, start, limit);
 
         if (filters && Object.keys(filters).length !== 0) {
-
-            return this.dao.loadFilteredData(filters, start, limit);
+            let response = {};
+            let filteredData = await this.dao.loadFilteredData(filters, start, limit) 
+            response.data = filteredData
+            response.total = total;
+            return response;
         }
-        return this.dao.loadAllData(start, limit);
-    }
 
+        let response =  {}
+        let data = await this.dao.loadAllData(start, limit);
+        response.data = data
+        response.total = total
+        return data;
+    }
+    
     /**
      * Obtencion de un elemento mediante su identificador
      */

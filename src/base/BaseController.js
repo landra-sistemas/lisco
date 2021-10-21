@@ -43,7 +43,7 @@ export class BaseController {
             let filters = request.body;
 
             let data = await service.list(filters, filters.start, filters.limit);
-            let jsRes = new JsonResponse(true, data, null, data.total);
+            let jsRes = new JsonResponse(true, data.data, null, data.total);
 
             response.json(jsRes.toJson());
         } catch (e) {
