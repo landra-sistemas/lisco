@@ -30,6 +30,26 @@ var repl = require('repl');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
+function _interopNamespace(e) {
+    if (e && e.__esModule) return e;
+    var n = Object.create(null);
+    if (e) {
+        Object.keys(e).forEach(function (k) {
+            if (k !== 'default') {
+                var d = Object.getOwnPropertyDescriptor(e, k);
+                Object.defineProperty(n, k, d.get ? d : {
+                    enumerable: true,
+                    get: function () {
+                        return e[k];
+                    }
+                });
+            }
+        });
+    }
+    n['default'] = e;
+    return Object.freeze(n);
+}
+
 var helmet__default = /*#__PURE__*/_interopDefaultLegacy(helmet);
 var express__default = /*#__PURE__*/_interopDefaultLegacy(express);
 var compression__default = /*#__PURE__*/_interopDefaultLegacy(compression);
@@ -42,6 +62,7 @@ var path__default = /*#__PURE__*/_interopDefaultLegacy(path);
 var util__default = /*#__PURE__*/_interopDefaultLegacy(util);
 var crypto__default = /*#__PURE__*/_interopDefaultLegacy(crypto);
 var jsonwebtoken__default = /*#__PURE__*/_interopDefaultLegacy(jsonwebtoken);
+var uuid__namespace = /*#__PURE__*/_interopNamespace(uuid);
 var http__default = /*#__PURE__*/_interopDefaultLegacy(http);
 var https__default = /*#__PURE__*/_interopDefaultLegacy(https);
 var cluster__default = /*#__PURE__*/_interopDefaultLegacy(cluster);
@@ -51,68 +72,6 @@ var expressAsyncHandler__default = /*#__PURE__*/_interopDefaultLegacy(expressAsy
 var moment__default = /*#__PURE__*/_interopDefaultLegacy(moment);
 var net__default = /*#__PURE__*/_interopDefaultLegacy(net);
 var repl__default = /*#__PURE__*/_interopDefaultLegacy(repl);
-
-class I18nLoader {
-
-    /**
-     *
-     * @param lang
-     * @param callback
-     */
-    async load(custom) {
-        const readfile = util__default['default'].promisify(fs__default['default'].readFile);
-        const lang = custom || process.env.DEFAULT_LANG;
-
-        if (!this.currentData) {
-            this.currentData = {};
-        }
-        //TODO mejorar el sistema cargando todas las traducciones del directorio i18n con chokidar esperando modificaciones
-
-        let file = path__default['default'].resolve(process.cwd(), "i18n/lang_" + lang + ".json");
-        try {
-            const data = await readfile(file, 'utf8');
-            var parsedData = JSON.parse(data);
-
-
-            this.currentData[lang] = parsedData;
-        } catch (ex) {
-            console.log("Lang file does not exist. Create it on ./i18n/lang_{xx}.json");
-        }
-    }
-
-    /**
-     * 
-     * @param {*} key 
-     */
-    async translate(key, lang) {
-        if (!lang) lang = process.env.DEFAULT_LANG;
-
-        if (this.currentData && this.currentData[lang] && this.currentData[lang][key]) {
-            return this.currentData[lang][key]
-        }
-
-        if (!this.currentData || !this.currentData[lang]) {
-            await this.load(lang);
-            if (this.currentData && this.currentData[lang] && this.currentData[key]) {
-                return this.currentData[lang][key]
-            }
-        }
-        return "undefined." + key;
-    }
-}
-
-class JsonResponse {
-    constructor(success, data, message, total) {
-        this.data = data;
-        this.success = success;
-        this.total = total;
-        this.message = message || '';
-    }
-
-    toJson() {
-        return (this);
-    }
-}
 
 class Utils {
     static arrayToLower(mcArray) {
@@ -171,7 +130,7 @@ class Utils {
     }
 
     /**
-     * 
+     * Genera dos claves para los metodos crypt y decrypt
      */
     static generateKeys() {
         return {
@@ -180,6 +139,126 @@ class Utils {
         }
     }
 
+
+    /**
+     * "aplana" un objeto jerarquico en una estructura clave-valor.
+     * 
+     * @param {*} ob 
+     * @returns 
+     */
+    static flattenObject(ob) {
+        let toReturn = {};
+        let flatObject;
+        for (let i in ob) {
+            if (!ob.hasOwnProperty(i)) {
+                continue;
+            }
+            //Devolver los arrays tal cual
+            if (ob[i] && Array === ob[i].constructor) {
+                toReturn[i] = ob[i];
+                continue;
+            }
+            if ((typeof ob[i]) === 'object') {
+                flatObject = Utils.flattenObject(ob[i]);
+                for (let x in flatObject) {
+                    if (!flatObject.hasOwnProperty(x)) {
+                        continue;
+                    }
+                    //Exclude arrays from the final result
+                    if (flatObject[x] && Array === flatObject.constructor) {
+                        continue;
+                    }
+                    toReturn[i + (!!isNaN(x) ? '.' + x : '')] = flatObject[x];
+                }
+            } else {
+                toReturn[i] = ob[i];
+            }
+        }
+        return toReturn;
+    }
+
+    /**
+     * Invierte un objeto aplanado recuperando su forma original
+     * 
+     * @param {*} data 
+     * @returns 
+     */
+    static unflatten(data) {
+        var result = {};
+        for (var i in data) {
+            var keys = i.split('.');
+            keys.reduce(function (r, e, j) {
+                return r[e] || (r[e] = isNaN(Number(keys[j + 1])) ? (keys.length - 1 == j ? data[i] : {}) : [])
+            }, result);
+        }
+        return result
+    }
+
+}
+
+class I18nLoader {
+
+    /**
+     *
+     * @param lang
+     * @param callback
+     */
+    async load(custom) {
+        const readfile = util__default['default'].promisify(fs__default['default'].readFile);
+        const lang = custom || process.env.DEFAULT_LANG;
+
+        if (!this.currentData) {
+            this.currentData = {};
+        }
+        if (!this.currentDataFlat) {
+            this.currentDataFlat = {};
+        }
+        //TODO mejorar el sistema cargando todas las traducciones del directorio i18n con chokidar esperando modificaciones
+
+        let file = path__default['default'].resolve(process.cwd(), "i18n/lang_" + lang + ".json");
+        try {
+            const data = await readfile(file, 'utf8');
+            var parsedData = JSON.parse(data);
+
+            this.currentDataFlat[lang] = Utils.flattenObject(parsedData);
+            this.currentData[lang] = parsedData;
+        } catch (ex) {
+            console.log("Lang file does not exist. Create it on ./i18n/lang_{xx}.json");
+        }
+    }
+
+    /**
+     * 
+     * @param {*} key 
+     */
+    async translate(key, lang) {
+        if (!lang) lang = process.env.DEFAULT_LANG;
+
+        if (this.currentDataFlat && this.currentDataFlat[lang] && this.currentDataFlat[lang][key]) {
+            return this.currentData[lang][key]
+        }
+
+        if (!this.currentDataFlat || !this.currentDataFlat[lang]) {
+            await this.load(lang);
+            if (this.currentDataFlat && this.currentDataFlat[lang] && this.currentDataFlat[key]) {
+                return this.currentDataFlat[lang][key]
+            }
+        }
+        return "undefined." + key;
+    }
+}
+
+class JsonResponse {
+    constructor(success, data, message, total) {
+        this.data = data;
+        this.success = success;
+        this.total = total;
+        this.message = message || '';
+    }
+
+    toJson() {
+        return (this);
+    }
 }
 
 /**
@@ -199,7 +278,7 @@ class TokenGenerator {
     }
 
     sign(payload) {
-        const jwtSignOptions = { ...this.options, jwtid: uuid.v4() };
+        const jwtSignOptions = { ...this.options, jwtid: uuid__namespace.v4() };
         return jsonwebtoken__default['default'].sign(payload, this.privateKey, jwtSignOptions);
     }
 
@@ -216,7 +295,7 @@ class TokenGenerator {
         delete payload.exp;
         delete payload.nbf;
         delete payload.jti; //We are generating a new token, if you are using jwtid during signing, pass it in refreshOptions
-        const jwtSignOptions = { ...this.options, jwtid: uuid.v4() };
+        const jwtSignOptions = { ...this.options, jwtid: uuid__namespace.v4() };
         // The first signing converted all needed options into claims, they are already in the payload
         return jsonwebtoken__default['default'].sign(payload, this.privateKey, jwtSignOptions);
     }
@@ -472,8 +551,11 @@ class ClusterServer extends events.EventEmitter {
 
         await this.server.initialize();
 
+        if (this.server.beforeListen) await this.server.beforeListen();
         //listen on provided ports
         server.listen(this.server.port);
+
+        if (this.server.afterListen) await this.server.afterListen();
 
         //add error handler
         server.on("error", (err) => {
@@ -797,6 +879,11 @@ class JwtAuthHandler extends IAuthHandler {
         if (request.headers.authorization) {
             const token = (request.headers.authorization || '').split(' ')[1] || '';
 
+            if (!token) {
+                console.error("Token needed");
+                return false;
+            }
+            
             var decoded = this.tokenGenerator.verify(token);
             const { sub, username, exp } = decoded;
 
@@ -1063,6 +1150,10 @@ class KnexConnector {
         this.connection = require('knex')(config);
     }
 
+
+    test() {
+        return this.connection.raw('select 1+1 as result');
+    }
 }
 
 
@@ -1091,14 +1182,14 @@ class BaseKnexDao {
         }
 
         return KnexConnector$1.connection.from(this.tableName).where((builder) => (
-            KnexFilterParser.parseFilters(builder, lodash__default['default'].omit(filters, ['sort']))
+            KnexFilterParser.parseFilters(builder, lodash__default['default'].omit(filters, ['sort', 'start', 'limit']))
         )).orderBy(sorts).limit(limit).offset(start);
 
     }
 
     async countFilteredData(filters) {
         let data = await KnexConnector$1.connection.from(this.tableName).where((builder) => (
-            KnexFilterParser.parseFilters(builder, lodash__default['default'].omit(filters, ['sort']))
+            KnexFilterParser.parseFilters(builder, lodash__default['default'].omit(filters, ['sort', 'start', 'limit']))
         )).count('id', { as: 'total' });
 
         return data && data[0].total;
@@ -1373,6 +1464,12 @@ class App {
         const server = new this.serverClass(serverConfig, this.statics, this.routes);
         if (this.customizeExpress) {
             server.customizeExpress = this.customizeExpress;
+        }
+        if (this.beforeListen) {
+            server.beforeListen = this.beforeListen;
+        }
+        if (this.afterListen) {
+            server.afterListen = this.afterListen;
         }
 
         //Gestor de eventos
