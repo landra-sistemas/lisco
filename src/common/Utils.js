@@ -58,7 +58,7 @@ export default class Utils {
     }
 
     /**
-     * 
+     * Genera dos claves para los metodos crypt y decrypt
      */
     static generateKeys() {
         return {
@@ -68,7 +68,12 @@ export default class Utils {
     }
 
 
-
+    /**
+     * "aplana" un objeto jerarquico en una estructura clave-valor.
+     * 
+     * @param {*} ob 
+     * @returns 
+     */
     static flattenObject(ob) {
         let toReturn = {};
         let flatObject;
@@ -100,6 +105,12 @@ export default class Utils {
         return toReturn;
     }
 
+    /**
+     * Invierte un objeto aplanado recuperando su forma original
+     * 
+     * @param {*} data 
+     * @returns 
+     */
     static unflatten(data) {
         var result = {}
         for (var i in data) {

@@ -130,7 +130,7 @@ class Utils {
     }
 
     /**
-     * 
+     * Genera dos claves para los metodos crypt y decrypt
      */
     static generateKeys() {
         return {
@@ -140,7 +140,12 @@ class Utils {
     }
 
 
-
+    /**
+     * "aplana" un objeto jerarquico en una estructura clave-valor.
+     * 
+     * @param {*} ob 
+     * @returns 
+     */
     static flattenObject(ob) {
         let toReturn = {};
         let flatObject;
@@ -172,6 +177,12 @@ class Utils {
         return toReturn;
     }
 
+    /**
+     * Invierte un objeto aplanado recuperando su forma original
+     * 
+     * @param {*} data 
+     * @returns 
+     */
     static unflatten(data) {
         var result = {};
         for (var i in data) {
@@ -199,8 +210,8 @@ class I18nLoader {
         if (!this.currentData) {
             this.currentData = {};
         }
-        if (!this.currentDataRaw) {
-            this.currentDataRaw = {};
+        if (!this.currentDataFlat) {
+            this.currentDataFlat = {};
         }
         //TODO mejorar el sistema cargando todas las traducciones del directorio i18n con chokidar esperando modificaciones
 
@@ -209,8 +220,8 @@ class I18nLoader {
             const data = await readfile(file, 'utf8');
             var parsedData = JSON.parse(data);
 
-            this.currentData[lang] = Utils.flattenObject(parsedData);
-            this.currentDataRaw[lang] = parsedData;
+            this.currentDataFlat[lang] = Utils.flattenObject(parsedData);
+            this.currentData[lang] = parsedData;
         } catch (ex) {
             console.log("Lang file does not exist. Create it on ./i18n/lang_{xx}.json");
         }
@@ -223,14 +234,14 @@ class I18nLoader {
     async translate(key, lang) {
         if (!lang) lang = process.env.DEFAULT_LANG;
 
-        if (this.currentData && this.currentData[lang] && this.currentData[lang][key]) {
+        if (this.currentDataFlat && this.currentDataFlat[lang] && this.currentDataFlat[lang][key]) {
             return this.currentData[lang][key]
         }
 
-        if (!this.currentData || !this.currentData[lang]) {
+        if (!this.currentDataFlat || !this.currentDataFlat[lang]) {
             await this.load(lang);
-            if (this.currentData && this.currentData[lang] && this.currentData[key]) {
-                return this.currentData[lang][key]
+            if (this.currentDataFlat && this.currentDataFlat[lang] && this.currentDataFlat[key]) {
+                return this.currentDataFlat[lang][key]
             }
         }
         return "undefined." + key;
