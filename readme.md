@@ -240,11 +240,11 @@ Conectarse a la base de datos añadiendo al `index.js` de la aplicaciión:
 
 //Antes de App.start()
 
-    KnexConnector.init(require('./knexfile').development);
+KnexConnector.init(require('./knexfile').development);
 
-    //Esto habilita una conexión (o pool) accesible mediante el singleton KnexConnector. Para ello:
+//Esto habilita una conexión (o pool) accesible mediante el singleton KnexConnector. Para ello:
 
-    KnexConnector.connection.[...] // Insert, Where, etc...
+KnexConnector.connection.[...] // Insert, Where, etc...
 
 
 ```
@@ -483,8 +483,28 @@ El método `App.i18n.translate(key, [lang])` traduce una clave en base al idioma
 
 ## Eventos
 
- [WIP]
+ La aplicación dispone de un sistema encargado de gestionar eventos. Este sistema permite que los diferentes procesos del modo `clustered` se comuniquen entre si.
 
+ Para iniciar la escucha de un evento es necesario:
+ ``` javascript
+import { App } from 'lisco'
+
+App.events.on('custom', function cosa(props) {
+    console.log(props);
+})
+ ```
+
+Esto implica que la aplicación comienza a escuchar el evento 'custom' con unos parámetros y los mostrará en el log.
+
+Para ejecutar un evento desde otro punto de la aplicación es necesario:
+
+ ``` javascript
+import { App } from 'lisco'
+
+App.events.emit('custom', { test: "test" })
+ ```
+
+ Esto lanza el evento con los parámetros `{ test: "test" }`.
 
 ## Filtros
 
