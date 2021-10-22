@@ -1231,11 +1231,12 @@ class BaseController {
     }
 
     configure(entity, config) {
-        this.router.post(`/${entity}/list`, asyncHandler((res, req, next) => { this.listEntidad(res, req, next); }));
-        this.router.get(`/${entity}/:id`, asyncHandler((res, req, next) => { this.getEntidad(res, req, next); }));
-        this.router.post(`/${entity}`, asyncHandler((res, req, next) => { this.saveEntidad(res, req, next); }));
-        this.router.put(`/${entity}/:id`, asyncHandler((res, req, next) => { this.updateEntidad(res, req, next); }));
-        this.router.delete(`/${entity}/:id`, asyncHandler((res, req, next) => { this.deleteEntidad(res, req, next); }));
+        this.router.get(`/${entity}`, asyncHandler((request, response, next) => { this.listEntidad(request, response, next); }));
+        this.router.post(`/${entity}/list`, asyncHandler((request, response, next) => { this.listEntidad(request, response, next); }));
+        this.router.get(`/${entity}/:id`, asyncHandler((request, response, next) => { this.getEntidad(request, response, next); }));
+        this.router.post(`/${entity}`, asyncHandler((request, response, next) => { this.saveEntidad(request, response, next); }));
+        this.router.put(`/${entity}/:id`, asyncHandler((request, response, next) => { this.updateEntidad(request, response, next); }));
+        this.router.delete(`/${entity}/:id`, asyncHandler((request, response, next) => { this.deleteEntidad(request, response, next); }));
 
         this.service = config.service;
 
@@ -1259,7 +1260,7 @@ class BaseController {
     async listEntidad(request, response, next) {
         try {
             let service = new this.service();
-            let filters = request.body;
+            let filters = request.method === 'POST' ? request.body : request.query;
 
             let data = await service.list(filters, filters.start, filters.limit);
             let jsRes = new JsonResponse(true, data.data, null, data.total);
@@ -1315,7 +1316,7 @@ class BaseController {
             let data = await service.save(request.body);
             let jsRes = new JsonResponse(true, { id: request.body.id || data[0] });
 
-            response.json(jsRes.toJson());
+            response.status(201).json(jsRes.toJson());
 
         } catch (e) {
             next(e);
