@@ -25,6 +25,7 @@ var log4js = require('log4js');
 var expressAsyncHandler = require('express-async-handler');
 var pathToRegexp = require('path-to-regexp');
 var moment = require('moment');
+require('knex');
 var net = require('net');
 var repl = require('repl');
 
@@ -56,7 +57,7 @@ var compression__default = /*#__PURE__*/_interopDefaultLegacy(compression);
 var cors__default = /*#__PURE__*/_interopDefaultLegacy(cors);
 var fileUpload__default = /*#__PURE__*/_interopDefaultLegacy(fileUpload);
 var url__default = /*#__PURE__*/_interopDefaultLegacy(url);
-var lodash__default = /*#__PURE__*/_interopDefaultLegacy(lodash);
+var lodash__default$1 = /*#__PURE__*/_interopDefaultLegacy(lodash);
 var fs__default = /*#__PURE__*/_interopDefaultLegacy(fs);
 var path__default = /*#__PURE__*/_interopDefaultLegacy(path);
 var util__default = /*#__PURE__*/_interopDefaultLegacy(util);
@@ -310,7 +311,7 @@ class Server {
 
     constructor(config, statics, routes) {
         this.app = express__default['default']();
-        this.express_config = lodash__default['default'].defaultsDeep(config, {
+        this.express_config = lodash__default$1['default'].defaultsDeep(config, {
             helmet: true,
             json: true,
             urlencoded: true,
@@ -354,7 +355,7 @@ class Server {
 
         if (config && config.helmet) {
             //Security
-            this.app.use(helmet__default['default'](config && lodash__default['default'].isObject(config.helmet) && config.helmet));
+            this.app.use(helmet__default['default'](config && lodash__default$1['default'].isObject(config.helmet) && config.helmet));
         }
         if (config && config.json) {
             //mount json form parser
@@ -371,8 +372,8 @@ class Server {
         }
         if (config && config.cors) {
             //Enable cors to allow external references
-            this.app.options('*', cors__default['default'](config && lodash__default['default'].isObject(config.cors) && config.cors));
-            this.app.use(cors__default['default'](config && lodash__default['default'].isObject(config.cors) && config.cors));
+            this.app.options('*', cors__default['default'](config && lodash__default$1['default'].isObject(config.cors) && config.cors));
+            this.app.use(cors__default['default'](config && lodash__default$1['default'].isObject(config.cors) && config.cors));
         }
         if (config && config.fileupload) {
             // upload middleware
@@ -909,7 +910,7 @@ class JwtAuthHandler extends IAuthHandler {
         const user = await this.userDao.findByUsername(username);
 
         if (user && user.username === username && user.password === Utils.encrypt(password)) {
-            return this.tokenGenerator.sign(lodash__default['default'].omit(user, ['password']));
+            return this.tokenGenerator.sign(lodash__default$1['default'].omit(user, ['password']));
         }
 
         return false;
@@ -980,7 +981,7 @@ class CookieAuthHandler extends IAuthHandler {
         //TODO quizas poder configurar los nombres de username y password
 
         if (user && user.username === username && user.password === Utils.encrypt(password)) {
-            request.session = { ...request.session, ...lodash__default['default'].omit(user, ['password']) };
+            request.session = { ...request.session, ...lodash__default$1['default'].omit(user, ['password']) };
 
             return true;
         }
@@ -1066,6 +1067,9 @@ class KnexFilterParser {
                             query = query.where(prop, '>=', elm.end);
                         }
                         break;
+                    case 'jsonb':
+                        query = query.whereRaw("data::text like ?", ["%"+elm.value+"%"]);
+                        break;      
                     case 'greater':
                         query = query.where(prop, '>', elm.value);
                         break;
@@ -1139,6 +1143,10 @@ class KnexFilterParser {
         if (sort.direction === 'descend') {
             direction = "DESC";
         }
+        
+        if(sort.type == "jsonb"){
+            return  sort.field +" " + direction
+        }
         return { column: sort.field, order: direction };
     }
 
@@ -1180,16 +1188,22 @@ class BaseKnexDao {
         if (filters.sort) {
             sorts = KnexFilterParser.parseSort(filters.sort);
         }
+        
+        if( filters && filters.sort && filters.sort.type == "jsonb"){
+            return KnexConnector$1.connection.from(this.tableName).where((builder) => (
+                KnexFilterParser.parseFilters(builder, lodash__default['default'].omit(filters, ['sort', 'start', 'limit']))
+            )).orderByRaw(sorts).limit(limit).offset(start);
+        }
 
         return KnexConnector$1.connection.from(this.tableName).where((builder) => (
-            KnexFilterParser.parseFilters(builder, lodash__default['default'].omit(filters, ['sort', 'start', 'limit']))
+            KnexFilterParser.parseFilters(builder, lodash__default$1['default'].omit(filters, ['sort', 'start', 'limit']))
         )).orderBy(sorts).limit(limit).offset(start);
 
     }
 
     async countFilteredData(filters) {
         let data = await KnexConnector$1.connection.from(this.tableName).where((builder) => (
-            KnexFilterParser.parseFilters(builder, lodash__default['default'].omit(filters, ['sort', 'start', 'limit']))
+            KnexFilterParser.parseFilters(builder, lodash__default$1['default'].omit(filters, ['sort', 'start', 'limit']))
         )).count('id', { as: 'total' });
 
         return data && data[0].total;

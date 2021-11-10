@@ -64,6 +64,9 @@ export default class KnexFilterParser {
                             query = query.where(prop, '>=', elm.end);
                         }
                         break;
+                    case 'jsonb':
+                        query = query.whereRaw("data::text like ?", ["%"+elm.value+"%"]);
+                        break;      
                     case 'greater':
                         query = query.where(prop, '>', elm.value);
                         break;
@@ -136,6 +139,10 @@ export default class KnexFilterParser {
         let direction = "ASC";
         if (sort.direction === 'descend') {
             direction = "DESC";
+        }
+        
+        if(sort.type == "jsonb"){
+            return  sort.field +" " + direction
         }
         return { column: sort.field, order: direction };
     }
