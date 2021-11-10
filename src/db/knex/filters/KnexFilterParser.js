@@ -137,7 +137,7 @@ export default class KnexFilterParser {
         if (sort.direction === 'descend') {
             direction = "DESC";
         }
-        return { column: sort.field, order: direction };
+        return [{ column: sort.field, order: direction }];
     }
 
 }

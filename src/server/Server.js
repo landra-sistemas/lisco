@@ -15,6 +15,12 @@ import { JsonResponse } from '../common';
  */
 export default class Server {
 
+    /**
+     * 
+     * @param {*} config 
+     * @param {*} statics 
+     * @param {*} routes 
+     */
     constructor(config, statics, routes) {
         this.app = express();
         this.express_config = lodash.defaultsDeep(config, {
@@ -32,8 +38,6 @@ export default class Server {
 
     /**
      * Inicializa el servidor
-     * @param {*} statics 
-     * @param {*} routes 
      */
     async initialize() {
         this.config(this.express_config);

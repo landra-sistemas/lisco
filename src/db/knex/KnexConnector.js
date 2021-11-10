@@ -1,7 +1,16 @@
+import Knex from 'knex'
+
 class KnexConnector {
 
+    
     init(config) {
-        this.connection = require('knex')(config)
+
+        /**
+         * References the current connection of the app
+         * @type {Knex}
+         * @public
+         */
+        this.connection = Knex(config)
     }
 
 

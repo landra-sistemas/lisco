@@ -25,6 +25,7 @@ var log4js = require('log4js');
 var expressAsyncHandler = require('express-async-handler');
 var pathToRegexp = require('path-to-regexp');
 var moment = require('moment');
+var Knex = require('knex');
 var net = require('net');
 var repl = require('repl');
 
@@ -70,6 +71,7 @@ var socketio__default = /*#__PURE__*/_interopDefaultLegacy(socketio);
 var os__default = /*#__PURE__*/_interopDefaultLegacy(os);
 var expressAsyncHandler__default = /*#__PURE__*/_interopDefaultLegacy(expressAsyncHandler);
 var moment__default = /*#__PURE__*/_interopDefaultLegacy(moment);
+var Knex__default = /*#__PURE__*/_interopDefaultLegacy(Knex);
 var net__default = /*#__PURE__*/_interopDefaultLegacy(net);
 var repl__default = /*#__PURE__*/_interopDefaultLegacy(repl);
 
@@ -308,6 +310,12 @@ class TokenGenerator {
  */
 class Server {
 
+    /**
+     * 
+     * @param {*} config 
+     * @param {*} statics 
+     * @param {*} routes 
+     */
     constructor(config, statics, routes) {
         this.app = express__default['default']();
         this.express_config = lodash__default['default'].defaultsDeep(config, {
@@ -325,8 +333,6 @@ class Server {
 
     /**
      * Inicializa el servidor
-     * @param {*} statics 
-     * @param {*} routes 
      */
     async initialize() {
         this.config(this.express_config);
@@ -1139,15 +1145,22 @@ class KnexFilterParser {
         if (sort.direction === 'descend') {
             direction = "DESC";
         }
-        return { column: sort.field, order: direction };
+        return [{ column: sort.field, order: direction }];
     }
 
 }
 
 class KnexConnector {
 
+    
     init(config) {
-        this.connection = require('knex')(config);
+
+        /**
+         * References the current connection of the app
+         * @type {Knex}
+         * @public
+         */
+        this.connection = Knex__default['default'](config);
     }
 
 
@@ -1477,12 +1490,25 @@ class App {
             server.afterListen = this.afterListen;
         }
 
-        //Gestor de eventos
+        /**
+         * Gestor de eventos
+         * @type {EventHandler}
+         * @public
+         */
         this.events = new EventHandler(this);
-        //Carga de utilidades
+        
+        /**
+         * Gestor de traducciones
+         * @type {I18nLoader}
+         * @public
+         */
         this.i18n = new I18nLoader();
         await this.i18n.load();
-        //Inicio del cluster server
+        /**
+         * Servidor actual
+         * @type {ClusterServer}
+         * @public
+         */
         this.server = new this.clusterClass(this);
 
         this.server.setServerCls(server);
