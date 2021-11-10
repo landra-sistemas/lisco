@@ -133,7 +133,7 @@ export default class KnexFilterParser {
      */
     static parseSort(sort) {
         if (!sort.field || !sort.direction) {
-            return "";
+            return 1;
         }
 
         let direction = "ASC";
