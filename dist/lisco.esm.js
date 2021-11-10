@@ -25,7 +25,7 @@ var log4js = require('log4js');
 var expressAsyncHandler = require('express-async-handler');
 var pathToRegexp = require('path-to-regexp');
 var moment = require('moment');
-require('knex');
+var Knex = require('knex');
 var net = require('net');
 var repl = require('repl');
 
@@ -57,7 +57,7 @@ var compression__default = /*#__PURE__*/_interopDefaultLegacy(compression);
 var cors__default = /*#__PURE__*/_interopDefaultLegacy(cors);
 var fileUpload__default = /*#__PURE__*/_interopDefaultLegacy(fileUpload);
 var url__default = /*#__PURE__*/_interopDefaultLegacy(url);
-var lodash__default$1 = /*#__PURE__*/_interopDefaultLegacy(lodash);
+var lodash__default = /*#__PURE__*/_interopDefaultLegacy(lodash);
 var fs__default = /*#__PURE__*/_interopDefaultLegacy(fs);
 var path__default = /*#__PURE__*/_interopDefaultLegacy(path);
 var util__default = /*#__PURE__*/_interopDefaultLegacy(util);
@@ -71,6 +71,7 @@ var socketio__default = /*#__PURE__*/_interopDefaultLegacy(socketio);
 var os__default = /*#__PURE__*/_interopDefaultLegacy(os);
 var expressAsyncHandler__default = /*#__PURE__*/_interopDefaultLegacy(expressAsyncHandler);
 var moment__default = /*#__PURE__*/_interopDefaultLegacy(moment);
+var Knex__default = /*#__PURE__*/_interopDefaultLegacy(Knex);
 var net__default = /*#__PURE__*/_interopDefaultLegacy(net);
 var repl__default = /*#__PURE__*/_interopDefaultLegacy(repl);
 
@@ -309,9 +310,15 @@ class TokenGenerator {
  */
 class Server {
 
+    /**
+     * 
+     * @param {*} config 
+     * @param {*} statics 
+     * @param {*} routes 
+     */
     constructor(config, statics, routes) {
         this.app = express__default['default']();
-        this.express_config = lodash__default$1['default'].defaultsDeep(config, {
+        this.express_config = lodash__default['default'].defaultsDeep(config, {
             helmet: true,
             json: true,
             urlencoded: true,
@@ -326,8 +333,6 @@ class Server {
 
     /**
      * Inicializa el servidor
-     * @param {*} statics 
-     * @param {*} routes 
      */
     async initialize() {
         this.config(this.express_config);
@@ -355,7 +360,7 @@ class Server {
 
         if (config && config.helmet) {
             //Security
-            this.app.use(helmet__default['default'](config && lodash__default$1['default'].isObject(config.helmet) && config.helmet));
+            this.app.use(helmet__default['default'](config && lodash__default['default'].isObject(config.helmet) && config.helmet));
         }
         if (config && config.json) {
             //mount json form parser
@@ -372,8 +377,8 @@ class Server {
         }
         if (config && config.cors) {
             //Enable cors to allow external references
-            this.app.options('*', cors__default['default'](config && lodash__default$1['default'].isObject(config.cors) && config.cors));
-            this.app.use(cors__default['default'](config && lodash__default$1['default'].isObject(config.cors) && config.cors));
+            this.app.options('*', cors__default['default'](config && lodash__default['default'].isObject(config.cors) && config.cors));
+            this.app.use(cors__default['default'](config && lodash__default['default'].isObject(config.cors) && config.cors));
         }
         if (config && config.fileupload) {
             // upload middleware
@@ -910,7 +915,7 @@ class JwtAuthHandler extends IAuthHandler {
         const user = await this.userDao.findByUsername(username);
 
         if (user && user.username === username && user.password === Utils.encrypt(password)) {
-            return this.tokenGenerator.sign(lodash__default$1['default'].omit(user, ['password']));
+            return this.tokenGenerator.sign(lodash__default['default'].omit(user, ['password']));
         }
 
         return false;
@@ -981,7 +986,7 @@ class CookieAuthHandler extends IAuthHandler {
         //TODO quizas poder configurar los nombres de username y password
 
         if (user && user.username === username && user.password === Utils.encrypt(password)) {
-            request.session = { ...request.session, ...lodash__default$1['default'].omit(user, ['password']) };
+            request.session = { ...request.session, ...lodash__default['default'].omit(user, ['password']) };
 
             return true;
         }
@@ -1144,18 +1149,23 @@ class KnexFilterParser {
             direction = "DESC";
         }
         
-        if(sort.type == "jsonb"){
-            return  sort.field +" " + direction
-        }
-        return { column: sort.field, order: direction };
+     
+        return sort.field +" " + direction;
     }
 
 }
 
 class KnexConnector {
 
+    
     init(config) {
-        this.connection = require('knex')(config);
+
+        /**
+         * References the current connection of the app
+         * @type {Knex}
+         * @public
+         */
+        this.connection = Knex__default['default'](config);
     }
 
 
@@ -1188,22 +1198,16 @@ class BaseKnexDao {
         if (filters.sort) {
             sorts = KnexFilterParser.parseSort(filters.sort);
         }
-        
-        if( filters && filters.sort && filters.sort.type == "jsonb"){
-            return KnexConnector$1.connection.from(this.tableName).where((builder) => (
-                KnexFilterParser.parseFilters(builder, lodash__default['default'].omit(filters, ['sort', 'start', 'limit']))
-            )).orderByRaw(sorts).limit(limit).offset(start);
-        }
 
         return KnexConnector$1.connection.from(this.tableName).where((builder) => (
-            KnexFilterParser.parseFilters(builder, lodash__default$1['default'].omit(filters, ['sort', 'start', 'limit']))
-        )).orderBy(sorts).limit(limit).offset(start);
+            KnexFilterParser.parseFilters(builder, lodash__default['default'].omit(filters, ['sort', 'start', 'limit']))
+        )).orderByRaw(sorts).limit(limit).offset(start);
 
     }
 
     async countFilteredData(filters) {
         let data = await KnexConnector$1.connection.from(this.tableName).where((builder) => (
-            KnexFilterParser.parseFilters(builder, lodash__default$1['default'].omit(filters, ['sort', 'start', 'limit']))
+            KnexFilterParser.parseFilters(builder, lodash__default['default'].omit(filters, ['sort', 'start', 'limit']))
         )).count('id', { as: 'total' });
 
         return data && data[0].total;
@@ -1245,11 +1249,12 @@ class BaseController {
     }
 
     configure(entity, config) {
-        this.router.post(`/${entity}/list`, asyncHandler((res, req, next) => { this.listEntidad(res, req, next); }));
-        this.router.get(`/${entity}/:id`, asyncHandler((res, req, next) => { this.getEntidad(res, req, next); }));
-        this.router.post(`/${entity}`, asyncHandler((res, req, next) => { this.saveEntidad(res, req, next); }));
-        this.router.put(`/${entity}/:id`, asyncHandler((res, req, next) => { this.updateEntidad(res, req, next); }));
-        this.router.delete(`/${entity}/:id`, asyncHandler((res, req, next) => { this.deleteEntidad(res, req, next); }));
+        this.router.get(`/${entity}`, asyncHandler((request, response, next) => { this.listEntidad(request, response, next); }));
+        this.router.post(`/${entity}/list`, asyncHandler((request, response, next) => { this.listEntidad(request, response, next); }));
+        this.router.get(`/${entity}/:id`, asyncHandler((request, response, next) => { this.getEntidad(request, response, next); }));
+        this.router.post(`/${entity}`, asyncHandler((request, response, next) => { this.saveEntidad(request, response, next); }));
+        this.router.put(`/${entity}/:id`, asyncHandler((request, response, next) => { this.updateEntidad(request, response, next); }));
+        this.router.delete(`/${entity}/:id`, asyncHandler((request, response, next) => { this.deleteEntidad(request, response, next); }));
 
         this.service = config.service;
 
@@ -1273,7 +1278,7 @@ class BaseController {
     async listEntidad(request, response, next) {
         try {
             let service = new this.service();
-            let filters = request.body;
+            let filters = request.method === 'POST' ? request.body : request.query;
 
             let data = await service.list(filters, filters.start, filters.limit);
             let jsRes = new JsonResponse(true, data.data, null, data.total);
@@ -1329,7 +1334,7 @@ class BaseController {
             let data = await service.save(request.body);
             let jsRes = new JsonResponse(true, { id: request.body.id || data[0] });
 
-            response.json(jsRes.toJson());
+            response.status(201).json(jsRes.toJson());
 
         } catch (e) {
             next(e);
@@ -1490,12 +1495,25 @@ class App {
             server.afterListen = this.afterListen;
         }
 
-        //Gestor de eventos
+        /**
+         * Gestor de eventos
+         * @type {EventHandler}
+         * @public
+         */
         this.events = new EventHandler(this);
-        //Carga de utilidades
+        
+        /**
+         * Gestor de traducciones
+         * @type {I18nLoader}
+         * @public
+         */
         this.i18n = new I18nLoader();
         await this.i18n.load();
-        //Inicio del cluster server
+        /**
+         * Servidor actual
+         * @type {ClusterServer}
+         * @public
+         */
         this.server = new this.clusterClass(this);
 
         this.server.setServerCls(server);

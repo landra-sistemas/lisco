@@ -141,10 +141,8 @@ export default class KnexFilterParser {
             direction = "DESC";
         }
         
-        if(sort.type == "jsonb"){
-            return  sort.field +" " + direction
-        }
-        return { column: sort.field, order: direction };
+     
+        return sort.field +" " + direction;
     }
 
 }

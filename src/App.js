@@ -32,12 +32,25 @@ class App {
             server.afterListen = this.afterListen;
         }
 
-        //Gestor de eventos
+        /**
+         * Gestor de eventos
+         * @type {EventHandler}
+         * @public
+         */
         this.events = new EventHandler(this);
-        //Carga de utilidades
+        
+        /**
+         * Gestor de traducciones
+         * @type {I18nLoader}
+         * @public
+         */
         this.i18n = new I18nLoader();
         await this.i18n.load();
-        //Inicio del cluster server
+        /**
+         * Servidor actual
+         * @type {ClusterServer}
+         * @public
+         */
         this.server = new this.clusterClass(this);
 
         this.server.setServerCls(server);

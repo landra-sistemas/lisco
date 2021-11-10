@@ -24,16 +24,10 @@ export default class BaseKnexDao {
         if (filters.sort) {
             sorts = KnexFilterParser.parseSort(filters.sort);
         }
-        
-        if( filters && filters.sort && filters.sort.type == "jsonb"){
-            return KnexConnector.connection.from(this.tableName).where((builder) => (
-                KnexFilterParser.parseFilters(builder, lodash__default['default'].omit(filters, ['sort', 'start', 'limit']))
-            )).orderByRaw(sorts).limit(limit).offset(start);
-        }
 
         return KnexConnector.connection.from(this.tableName).where((builder) => (
             KnexFilterParser.parseFilters(builder, lodash.omit(filters, ['sort', 'start', 'limit']))
-        )).orderBy(sorts).limit(limit).offset(start);
+        )).orderByRaw(sorts).limit(limit).offset(start);
 
     }
 
