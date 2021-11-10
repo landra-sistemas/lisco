@@ -1141,7 +1141,7 @@ class KnexFilterParser {
      */
     static parseSort(sort) {
         if (!sort.field || !sort.direction) {
-            return "";
+            return 1;
         }
 
         let direction = "ASC";
@@ -1197,6 +1197,8 @@ class BaseKnexDao {
         let sorts = [];
         if (filters.sort) {
             sorts = KnexFilterParser.parseSort(filters.sort);
+        }else {
+            sorts = 1;
         }
 
         return KnexConnector$1.connection.from(this.tableName).where((builder) => (
