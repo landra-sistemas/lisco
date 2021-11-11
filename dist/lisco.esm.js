@@ -1273,7 +1273,7 @@ class BaseController {
     async listEntidad(request, response, next) {
         try {
             let service = new this.service();
-            let filters = request.method === 'POST' ? request.body : request.query;
+            let filters = request.method === 'POST' ? request.body : (request.query && request.query.filters ? JSON.parse(request.query.filters) : {});
 
             let data = await service.list(filters, filters.start, filters.limit);
             let jsRes = new JsonResponse(true, data.data, null, data.total);
