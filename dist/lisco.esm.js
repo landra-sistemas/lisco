@@ -1194,11 +1194,9 @@ class BaseKnexDao {
     }
 
     async loadFilteredData(filters, start, limit) {
-        let sorts = [];
+        let sorts = 1;
         if (filters.sort) {
             sorts = KnexFilterParser.parseSort(filters.sort);
-        }else {
-            sorts = 1;
         }
 
         return KnexConnector$1.connection.from(this.tableName).where((builder) => (
