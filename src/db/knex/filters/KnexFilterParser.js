@@ -65,8 +65,8 @@ export default class KnexFilterParser {
                         }
                         break;
                     case 'jsonb':
-                        query = query.whereRaw("data::text like ?", ["%"+elm.value+"%"]);
-                        break;      
+                        query = query.whereRaw(prop + " like ?", ["%" + elm.value + "%"]);
+                        break;
                     case 'greater':
                         query = query.where(prop, '>', elm.value);
                         break;
@@ -140,9 +140,9 @@ export default class KnexFilterParser {
         if (sort.direction === 'descend') {
             direction = "DESC";
         }
-        
-     
-        return sort.field +" " + direction;
+
+
+        return sort.field + " " + direction;
     }
 
 }
