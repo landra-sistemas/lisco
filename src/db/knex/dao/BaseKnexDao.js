@@ -23,11 +23,13 @@ export default class BaseKnexDao {
         let sorts = [];
         if (filters.sort) {
             sorts = KnexFilterParser.parseSort(filters.sort);
+        }else{
+            sorts = 1;
         }
 
         return KnexConnector.connection.from(this.tableName).where((builder) => (
             KnexFilterParser.parseFilters(builder, lodash.omit(filters, ['sort', 'start', 'limit']))
-        )).orderBy(sorts).limit(limit).offset(start);
+        )).orderByRaw(sorts).limit(limit).offset(start);
 
     }
 

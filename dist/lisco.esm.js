@@ -1072,6 +1072,9 @@ class KnexFilterParser {
                             query = query.where(prop, '>=', elm.end);
                         }
                         break;
+                    case 'jsonb':
+                        query = query.whereRaw("data::text like ?", ["%"+elm.value+"%"]);
+                        break;      
                     case 'greater':
                         query = query.where(prop, '>', elm.value);
                         break;
@@ -1138,14 +1141,16 @@ class KnexFilterParser {
      */
     static parseSort(sort) {
         if (!sort.field || !sort.direction) {
-            return "";
+            return 1;
         }
 
         let direction = "ASC";
         if (sort.direction === 'descend') {
             direction = "DESC";
         }
-        return [{ column: sort.field, order: direction }];
+        
+     
+        return sort.field +" " + direction;
     }
 
 }
@@ -1192,11 +1197,13 @@ class BaseKnexDao {
         let sorts = [];
         if (filters.sort) {
             sorts = KnexFilterParser.parseSort(filters.sort);
+        }else {
+            sorts = 1;
         }
 
         return KnexConnector$1.connection.from(this.tableName).where((builder) => (
             KnexFilterParser.parseFilters(builder, lodash__default['default'].omit(filters, ['sort', 'start', 'limit']))
-        )).orderBy(sorts).limit(limit).offset(start);
+        )).orderByRaw(sorts).limit(limit).offset(start);
 
     }
 
