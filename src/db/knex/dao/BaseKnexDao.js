@@ -33,6 +33,44 @@ export default class BaseKnexDao {
 
     }
 
+    async loadFilteredDataWithRelations(filters,start,limit,relationParams,selectQuery){
+        let sorts = [];
+
+        if (filters.sort) {
+            sorts = KnexFilterParser.parseSort(filters.sort);
+        }else{
+            sorts = 1;
+        }
+        let connect = KnexConnector$1.connection
+                .select(KnexConnector$1.connection.raw(selectQuery))
+                .from(this.tableName)
+                .where((builder) =>
+                    KnexFilterParser.parseFilters(builder, lodash__default['default'].omit(filters, ["sort", "start", "limit"]))
+                )
+                
+        if(relationParams){
+            if(Array.isArray(relationParams)){
+                relationParams.forEach(element => {
+                    let typeInner = element.type
+                    let tabletoJoinInner = element.tabletoJoin
+                    let column1Inner = element.column1
+                    let column2Inner = element.column2
+                    connect = connect.joinRaw( typeInner + " " + tabletoJoinInner + " ON " + column1Inner + " = " + column2Inner)
+                });
+            }else{
+                    let type = relationParams.type
+                    let tabletoJoin = relationParams.tabletoJoin
+                    let column1 = relationParams.column1
+                    let column2 = relationParams.column2
+                    connect = connect.joinRaw( type + " " + tabletoJoin + " ON " + column1 + " = " + column2)
+            }
+        }
+      
+       return connect.orderByRaw(sorts).limit(limit).offset(start);
+           
+          
+    }
+
     async countFilteredData(filters) {
         let data = await KnexConnector.connection.from(this.tableName).where((builder) => (
             KnexFilterParser.parseFilters(builder, lodash.omit(filters, ['sort', 'start', 'limit']))
