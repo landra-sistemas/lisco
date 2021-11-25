@@ -57,7 +57,7 @@ var compression__default = /*#__PURE__*/_interopDefaultLegacy(compression);
 var cors__default = /*#__PURE__*/_interopDefaultLegacy(cors);
 var fileUpload__default = /*#__PURE__*/_interopDefaultLegacy(fileUpload);
 var url__default = /*#__PURE__*/_interopDefaultLegacy(url);
-var lodash__default = /*#__PURE__*/_interopDefaultLegacy(lodash);
+var lodash__default$1 = /*#__PURE__*/_interopDefaultLegacy(lodash);
 var fs__default = /*#__PURE__*/_interopDefaultLegacy(fs);
 var path__default = /*#__PURE__*/_interopDefaultLegacy(path);
 var util__default = /*#__PURE__*/_interopDefaultLegacy(util);
@@ -318,7 +318,7 @@ class Server {
      */
     constructor(config, statics, routes) {
         this.app = express__default['default']();
-        this.express_config = lodash__default['default'].defaultsDeep(config, {
+        this.express_config = lodash__default$1['default'].defaultsDeep(config, {
             helmet: true,
             json: true,
             urlencoded: true,
@@ -360,7 +360,7 @@ class Server {
 
         if (config && config.helmet) {
             //Security
-            this.app.use(helmet__default['default'](config && lodash__default['default'].isObject(config.helmet) && config.helmet));
+            this.app.use(helmet__default['default'](config && lodash__default$1['default'].isObject(config.helmet) && config.helmet));
         }
         if (config && config.json) {
             //mount json form parser
@@ -377,8 +377,8 @@ class Server {
         }
         if (config && config.cors) {
             //Enable cors to allow external references
-            this.app.options('*', cors__default['default'](config && lodash__default['default'].isObject(config.cors) && config.cors));
-            this.app.use(cors__default['default'](config && lodash__default['default'].isObject(config.cors) && config.cors));
+            this.app.options('*', cors__default['default'](config && lodash__default$1['default'].isObject(config.cors) && config.cors));
+            this.app.use(cors__default['default'](config && lodash__default$1['default'].isObject(config.cors) && config.cors));
         }
         if (config && config.fileupload) {
             // upload middleware
@@ -915,7 +915,7 @@ class JwtAuthHandler extends IAuthHandler {
         const user = await this.userDao.findByUsername(username);
 
         if (user && user.username === username && user.password === Utils.encrypt(password)) {
-            return this.tokenGenerator.sign(lodash__default['default'].omit(user, ['password']));
+            return this.tokenGenerator.sign(lodash__default$1['default'].omit(user, ['password']));
         }
 
         return false;
@@ -986,7 +986,7 @@ class CookieAuthHandler extends IAuthHandler {
         //TODO quizas poder configurar los nombres de username y password
 
         if (user && user.username === username && user.password === Utils.encrypt(password)) {
-            request.session = { ...request.session, ...lodash__default['default'].omit(user, ['password']) };
+            request.session = { ...request.session, ...lodash__default$1['default'].omit(user, ['password']) };
 
             return true;
         }
@@ -1175,7 +1175,7 @@ class KnexConnector {
 }
 
 
-var KnexConnector$1 = new KnexConnector();
+var KnexConnector$2 = new KnexConnector();
 
 /**
  * Crear un dao con los métodos básicos
@@ -1190,7 +1190,7 @@ class BaseKnexDao {
 
 
     loadAllData(start, limit) {
-        return KnexConnector$1.connection.select('*').from(this.tableName).limit(limit || 10000).offset(start)
+        return KnexConnector$2.connection.select('*').from(this.tableName).limit(limit || 10000).offset(start)
     }
 
     async loadFilteredData(filters, start, limit) {
@@ -1199,32 +1199,70 @@ class BaseKnexDao {
             sorts = KnexFilterParser.parseSort(filters.sort);
         }
 
-        return KnexConnector$1.connection.from(this.tableName).where((builder) => (
-            KnexFilterParser.parseFilters(builder, lodash__default['default'].omit(filters, ['sort', 'start', 'limit']))
+        return KnexConnector$2.connection.from(this.tableName).where((builder) => (
+            KnexFilterParser.parseFilters(builder, lodash__default$1['default'].omit(filters, ['sort', 'start', 'limit']))
         )).orderByRaw(sorts).limit(limit).offset(start);
 
     }
 
+    async loadFilteredDataWithRelations(filters,start,limit,relationParams,selectQuery){
+        let sorts = [];
+
+        if (filters.sort) {
+            sorts = KnexFilterParser.parseSort(filters.sort);
+        }else {
+            sorts = 1;
+        }
+        let connect = KnexConnector$1.connection
+                .select(KnexConnector$1.connection.raw(selectQuery))
+                .from(this.tableName)
+                .where((builder) =>
+                    KnexFilterParser.parseFilters(builder, lodash__default['default'].omit(filters, ["sort", "start", "limit"]))
+                );
+                
+        if(relationParams){
+            if(Array.isArray(relationParams)){
+                relationParams.forEach(element => {
+                    let typeInner = element.type;
+                    let tabletoJoinInner = element.tabletoJoin;
+                    let column1Inner = element.column1;
+                    let column2Inner = element.column2;
+                    connect = connect.joinRaw( typeInner + " " + tabletoJoinInner + " ON " + column1Inner + " = " + column2Inner);
+                });
+            }else {
+                    let type = relationParams.type;
+                    let tabletoJoin = relationParams.tabletoJoin;
+                    let column1 = relationParams.column1;
+                    let column2 = relationParams.column2;
+                    connect = connect.joinRaw( type + " " + tabletoJoin + " ON " + column1 + " = " + column2);
+            }
+        }
+      
+       return connect.orderByRaw(sorts).limit(limit).offset(start);
+           
+          
+    }
+
     async countFilteredData(filters) {
-        let data = await KnexConnector$1.connection.from(this.tableName).where((builder) => (
-            KnexFilterParser.parseFilters(builder, lodash__default['default'].omit(filters, ['sort', 'start', 'limit']))
+        let data = await KnexConnector$2.connection.from(this.tableName).where((builder) => (
+            KnexFilterParser.parseFilters(builder, lodash__default$1['default'].omit(filters, ['sort', 'start', 'limit']))
         )).count('id', { as: 'total' });
 
         return data && data[0].total;
     }
 
     async loadById(objectId) {
-        return KnexConnector$1.connection.from(this.tableName).where('id', objectId);
+        return KnexConnector$2.connection.from(this.tableName).where('id', objectId);
     }
 
     save(object) {
-        return KnexConnector$1.connection.from(this.tableName).insert(object).returning("*");
+        return KnexConnector$2.connection.from(this.tableName).insert(object).returning("*");
     }
     update(objectId, newObject) {
-        return KnexConnector$1.connection.from(this.tableName).where("id", objectId).update(newObject).returning("*");
+        return KnexConnector$2.connection.from(this.tableName).where("id", objectId).update(newObject).returning("*");
     }
     delete(objectId) {
-        return KnexConnector$1.connection.from(this.tableName).where("id", objectId).delete()
+        return KnexConnector$2.connection.from(this.tableName).where("id", objectId).delete()
     }
 }
 
@@ -1429,6 +1467,24 @@ class BaseService {
         return response;
     }
 
+    async listWithRelations(filters, start, limit, relations,selectQuery) {
+        //Pagination
+        var start = start || 0;
+        var limit = limit || 1000;//Default limit
+
+        let response = {};
+        response.total = await this.dao.countFilteredData(filters, start, limit);
+
+        if (filters && Object.keys(filters).length !== 0) {
+            let filteredData = await this.dao.loadFilteredDataWithRelations(filters, start, limit, relations,selectQuery);
+            response.data = filteredData;
+            return response;
+        }
+
+        response.data = await this.dao.loadFilteredDataWithRelations({},start, limit,relations,selectQuery);
+        return response;
+    }
+
     /**
      * Obtencion de un elemento mediante su identificador
      */
@@ -1582,7 +1638,7 @@ exports.IAuthHandler = IAuthHandler;
 exports.IUserDao = IUserDao;
 exports.JsonResponse = JsonResponse;
 exports.JwtAuthHandler = JwtAuthHandler;
-exports.KnexConnector = KnexConnector$1;
+exports.KnexConnector = KnexConnector$2;
 exports.KnexFilterParser = KnexFilterParser;
 exports.Logger = Logger;
 exports.Server = Server;
