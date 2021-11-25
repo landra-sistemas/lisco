@@ -1218,10 +1218,10 @@ class BaseKnexDao {
     }
 
     save(object) {
-        return KnexConnector$1.connection.from(this.tableName).insert(object);
+        return KnexConnector$1.connection.from(this.tableName).insert(object).returning("*");
     }
     update(objectId, newObject) {
-        return KnexConnector$1.connection.from(this.tableName).where("id", objectId).update(newObject);
+        return KnexConnector$1.connection.from(this.tableName).where("id", objectId).update(newObject).returning("*");
     }
     delete(objectId) {
         return KnexConnector$1.connection.from(this.tableName).where("id", objectId).delete()
@@ -1332,7 +1332,7 @@ class BaseController {
             let service = new this.service();
 
             let data = await service.save(request.body);
-            let jsRes = new JsonResponse(true, { id: request.body.id || data[0] });
+            let jsRes = new JsonResponse(true, (data && data[0]) || { id: request.body.id });
 
             response.status(201).json(jsRes.toJson());
 
@@ -1359,7 +1359,7 @@ class BaseController {
             let service = new this.service();
 
             let data = await service.update(request.params.id, request.body);
-            let jsRes = new JsonResponse(true, { id: request.body.id || data[0] });
+            let jsRes = new JsonResponse(true, (data && data[0]) || { id: request.body.id });
 
             response.json(jsRes.toJson());
 

@@ -44,10 +44,10 @@ export default class BaseKnexDao {
     }
 
     save(object) {
-        return KnexConnector.connection.from(this.tableName).insert(object);
+        return KnexConnector.connection.from(this.tableName).insert(object).returning("*");
     }
     update(objectId, newObject) {
-        return KnexConnector.connection.from(this.tableName).where("id", objectId).update(newObject);
+        return KnexConnector.connection.from(this.tableName).where("id", objectId).update(newObject).returning("*");
     }
     delete(objectId) {
         return KnexConnector.connection.from(this.tableName).where("id", objectId).delete()
