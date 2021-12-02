@@ -1073,7 +1073,7 @@ class KnexFilterParser {
                         }
                         break;
                     case 'jsonb':
-                        query = query.whereRaw(prop + " like ?", ["%" + elm.value + "%"]);
+                        query = query.whereRaw(prop + " ILIKE ?", ["%" + elm.value + "%"]);
                         break;
                     case 'greater':
                         query = query.where(prop, '>', elm.value);
