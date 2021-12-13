@@ -28,17 +28,21 @@ export default class JwtAuthHandler extends IAuthHandler {
                 console.error("Token needed");
                 return false;
             }
-            
-            var decoded = this.tokenGenerator.verify(token);
-            const { sub, username, exp } = decoded;
+            try {
+                var decoded = this.tokenGenerator.verify(token);
+                const { sub, username, exp } = decoded;
 
-            if (!sub || !username || moment(exp).isAfter(new Date())) {
+                if (!sub || !username || moment(exp).isAfter(new Date())) {
+                    return false;
+                }
+
+                //Si la sesion es valida, lo introducimos en el contexto de la solicitud
+                request.session = { ...request.session, ...decoded };
+                return true;
+            } catch (ex) {
+                console.error(ex);
                 return false;
             }
-
-            //Si la sesion es valida, lo introducimos en el contexto de la solicitud
-            request.session = { ...request.session, ...decoded };
-            return true;
         }
         return false;
     }

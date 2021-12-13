@@ -151,7 +151,7 @@ export default class Server {
         this.app.use((err, req, res, next) => {
             let jsRes = new JsonResponse();
             jsRes.success = false;
-            jsRes.message = err.message;
+            jsRes.message = err.message; //!FIXME protect error displaying in REST Responses
             console.error(err);
 
             res.status(500).json(jsRes.toJson());

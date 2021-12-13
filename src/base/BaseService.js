@@ -33,7 +33,7 @@ export class BaseService {
         return response;
     }
 
-    async listWithRelations(filters, start, limit, relations,selectQuery) {
+    async listWithRelations(filters, start, limit, relations, selectQuery) {
         //Pagination
         var start = start || 0;
         var limit = limit || 1000;//Default limit
@@ -42,12 +42,12 @@ export class BaseService {
         response.total = await this.dao.countFilteredData(filters, start, limit);
 
         if (filters && Object.keys(filters).length !== 0) {
-            let filteredData = await this.dao.loadFilteredDataWithRelations(filters, start, limit, relations,selectQuery);
+            let filteredData = await this.dao.loadFilteredDataWithRelations(filters, start, limit, relations, selectQuery);
             response.data = filteredData;
             return response;
         }
 
-        response.data = await this.dao.loadFilteredDataWithRelations({},start, limit,relations,selectQuery);
+        response.data = await this.dao.loadFilteredDataWithRelations({}, start, limit, relations, selectQuery);
         return response;
     }
 

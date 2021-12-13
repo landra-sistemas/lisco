@@ -107,10 +107,7 @@ describe('KnexFilterParser', () => {
         let sorts = KnexFilterParser.parseSort(sort);
 
         expect(sorts).not.to.be.null;
-        expect(sorts).to.have.property('column')
-        expect(sorts).to.have.property('order')
-        expect(sorts.column).to.eq('test')
-        expect(sorts.order).to.eq('ASC')
+        expect(sorts).to.eq('test ASC')
 
     })
 

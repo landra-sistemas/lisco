@@ -167,7 +167,7 @@ describe('AuthController', async () => {
             UserDao: {
                 findByUsername: () => { }
             },
-            authorize: () => { return true; }
+            validate: () => { return true; }
         });
         expect(auth).not.to.be.null;
 

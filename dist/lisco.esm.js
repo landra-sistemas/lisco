@@ -446,7 +446,7 @@ class Server {
         this.app.use((err, req, res, next) => {
             let jsRes = new JsonResponse();
             jsRes.success = false;
-            jsRes.message = err.message;
+            jsRes.message = err.message; //!FIXME protect error displaying in REST Responses
             console.error(err);
 
             res.status(500).json(jsRes.toJson());
@@ -889,17 +889,21 @@ class JwtAuthHandler extends IAuthHandler {
                 console.error("Token needed");
                 return false;
             }
-            
-            var decoded = this.tokenGenerator.verify(token);
-            const { sub, username, exp } = decoded;
+            try {
+                var decoded = this.tokenGenerator.verify(token);
+                const { sub, username, exp } = decoded;
 
-            if (!sub || !username || moment__default['default'](exp).isAfter(new Date())) {
+                if (!sub || !username || moment__default['default'](exp).isAfter(new Date())) {
+                    return false;
+                }
+
+                //Si la sesion es valida, lo introducimos en el contexto de la solicitud
+                request.session = { ...request.session, ...decoded };
+                return true;
+            } catch (ex) {
+                console.error(ex);
                 return false;
             }
-
-            //Si la sesion es valida, lo introducimos en el contexto de la solicitud
-            request.session = { ...request.session, ...decoded };
-            return true;
         }
         return false;
     }
@@ -1205,42 +1209,42 @@ class BaseKnexDao {
 
     }
 
-    async loadFilteredDataWithRelations(filters,start,limit,relationParams,selectQuery){
+    async loadFilteredDataWithRelations(filters, start, limit, relationParams, selectQuery) {
         let sorts = [];
 
         if (filters.sort) {
             sorts = KnexFilterParser.parseSort(filters.sort);
-        }else {
+        } else {
             sorts = 1;
         }
         let connect = KnexConnector$1.connection
-                .select(KnexConnector$1.connection.raw(selectQuery))
-                .from(this.tableName)
-                .where((builder) =>
-                    KnexFilterParser.parseFilters(builder, lodash__default['default'].omit(filters, ["sort", "start", "limit"]))
-                );
-                
-        if(relationParams){
-            if(Array.isArray(relationParams)){
+            .select(KnexConnector$1.connection.raw(selectQuery))
+            .from(this.tableName)
+            .where((builder) =>
+                KnexFilterParser.parseFilters(builder, lodash__default['default'].omit(filters, ["sort", "start", "limit"]))
+            );
+
+        if (relationParams) {
+            if (Array.isArray(relationParams)) {
                 relationParams.forEach(element => {
                     let typeInner = element.type;
                     let tabletoJoinInner = element.tabletoJoin;
                     let column1Inner = element.column1;
                     let column2Inner = element.column2;
-                    connect = connect.joinRaw( typeInner + " " + tabletoJoinInner + " ON " + column1Inner + " = " + column2Inner);
+                    connect = connect.joinRaw(typeInner + " " + tabletoJoinInner + " ON " + column1Inner + " = " + column2Inner);
                 });
-            }else {
-                    let type = relationParams.type;
-                    let tabletoJoin = relationParams.tabletoJoin;
-                    let column1 = relationParams.column1;
-                    let column2 = relationParams.column2;
-                    connect = connect.joinRaw( type + " " + tabletoJoin + " ON " + column1 + " = " + column2);
+            } else {
+                let type = relationParams.type;
+                let tabletoJoin = relationParams.tabletoJoin;
+                let column1 = relationParams.column1;
+                let column2 = relationParams.column2;
+                connect = connect.joinRaw(type + " " + tabletoJoin + " ON " + column1 + " = " + column2);
             }
         }
-      
-       return connect.orderByRaw(sorts).limit(limit).offset(start);
-           
-          
+
+        return connect.orderByRaw(sorts).limit(limit).offset(start);
+
+
     }
 
     async countFilteredData(filters) {
@@ -1252,7 +1256,12 @@ class BaseKnexDao {
     }
 
     async loadById(objectId) {
-        return KnexConnector$2.connection.from(this.tableName).where('id', objectId);
+        const data = await KnexConnector$2.connection.from(this.tableName).where('id', objectId);
+
+        if (data && data[0]) {
+            return data[0];
+        }
+        return null;
     }
 
     save(object) {
@@ -1261,7 +1270,11 @@ class BaseKnexDao {
     update(objectId, newObject) {
         return KnexConnector$2.connection.from(this.tableName).where("id", objectId).update(newObject).returning("*");
     }
-    delete(objectId) {
+    async delete(objectId) {
+        const existing = await this.loadById(objectId);
+        if (!existing) {
+            throw "NotFound";
+        }
         return KnexConnector$2.connection.from(this.tableName).where("id", objectId).delete()
     }
 }
@@ -1302,8 +1315,7 @@ class BaseController {
     /**
      * Lista entidades en la aplicacion, es posible enviarle parametros de filtrado.
      *
-     * !FIXME Todavia no se ha definido la lista de parametros a utilizar para el filtrado.
-     *
+     * 
      * @api {post} /:entidad/list Listar entidades
      * @apiName Listar entidades
      * @apiGroup Comun
@@ -1344,11 +1356,22 @@ class BaseController {
             let service = new this.service();
             let data = await service.loadById(request.params.id);
             let jsRes = new JsonResponse(true, data);
+            let code = 200;
+            if (data == null) {
+                code = 404;
+                let message = "Element not found";
+                jsRes = new JsonResponse(false, null, message, 0);
+            }
 
-            response.json(jsRes.toJson());
+            response.status(code).json(jsRes.toJson());
 
         } catch (e) {
-            next(e);
+            console.error(e);
+            let message = "";
+            if (e.code == "22P02") { //PostgreSQL error Code form string_to_UUID
+                message = "Expected uiid";
+            }            let jsRes = new JsonResponse(false, null, message, 0);
+            response.status(400).json(jsRes.toJson());
         }
     }
 
@@ -1372,6 +1395,7 @@ class BaseController {
             let data = await service.save(request.body);
             let jsRes = new JsonResponse(true, (data && data[0]) || { id: request.body.id });
 
+            response.setHeader('Location', `/entity/${jsRes.data.id}`);
             response.status(201).json(jsRes.toJson());
 
         } catch (e) {
@@ -1425,10 +1449,17 @@ class BaseController {
             let data = await service.delete(request.params.id);
             let jsRes = new JsonResponse(true, data);
 
-            response.json(jsRes.toJson());
+            response.status(204).json(jsRes.toJson());
 
         } catch (e) {
-            next(e);
+            console.error(e);
+            if (e == "NotFound") {
+                let message = "Element not found";
+                let jsRes = new JsonResponse(false, null, message, 0);
+                response.status(404).json(jsRes.toJson());
+            } else {
+                next(e);
+            }
         }
     }
 
@@ -1467,7 +1498,7 @@ class BaseService {
         return response;
     }
 
-    async listWithRelations(filters, start, limit, relations,selectQuery) {
+    async listWithRelations(filters, start, limit, relations, selectQuery) {
         //Pagination
         var start = start || 0;
         var limit = limit || 1000;//Default limit
@@ -1476,12 +1507,12 @@ class BaseService {
         response.total = await this.dao.countFilteredData(filters, start, limit);
 
         if (filters && Object.keys(filters).length !== 0) {
-            let filteredData = await this.dao.loadFilteredDataWithRelations(filters, start, limit, relations,selectQuery);
+            let filteredData = await this.dao.loadFilteredDataWithRelations(filters, start, limit, relations, selectQuery);
             response.data = filteredData;
             return response;
         }
 
-        response.data = await this.dao.loadFilteredDataWithRelations({},start, limit,relations,selectQuery);
+        response.data = await this.dao.loadFilteredDataWithRelations({}, start, limit, relations, selectQuery);
         return response;
     }
 

@@ -27,8 +27,7 @@ export class BaseController {
     /**
      * Lista entidades en la aplicacion, es posible enviarle parametros de filtrado.
      *
-     * !FIXME Todavia no se ha definido la lista de parametros a utilizar para el filtrado.
-     *
+     * 
      * @api {post} /:entidad/list Listar entidades
      * @apiName Listar entidades
      * @apiGroup Comun
@@ -69,11 +68,23 @@ export class BaseController {
             let service = new this.service();
             let data = await service.loadById(request.params.id);
             let jsRes = new JsonResponse(true, data);
+            let code = 200;
+            if (data == null) {
+                code = 404;
+                let message = "Element not found";
+                jsRes = new JsonResponse(false, null, message, 0);
+            }
 
-            response.json(jsRes.toJson());
+            response.status(code).json(jsRes.toJson());
 
         } catch (e) {
-            next(e)
+            console.error(e);
+            let message = "";
+            if (e.code == "22P02") { //PostgreSQL error Code form string_to_UUID
+                message = "Expected uiid";
+            };
+            let jsRes = new JsonResponse(false, null, message, 0);
+            response.status(400).json(jsRes.toJson());
         }
     }
 
@@ -97,6 +108,7 @@ export class BaseController {
             let data = await service.save(request.body);
             let jsRes = new JsonResponse(true, (data && data[0]) || { id: request.body.id });
 
+            response.setHeader('Location', `/entity/${jsRes.data.id}`);
             response.status(201).json(jsRes.toJson());
 
         } catch (e) {
@@ -150,10 +162,17 @@ export class BaseController {
             let data = await service.delete(request.params.id);
             let jsRes = new JsonResponse(true, data);
 
-            response.json(jsRes.toJson());
+            response.status(204).json(jsRes.toJson());
 
         } catch (e) {
-            next(e)
+            console.error(e);
+            if (e == "NotFound") {
+                let message = "Element not found";
+                let jsRes = new JsonResponse(false, null, message, 0);
+                response.status(404).json(jsRes.toJson());
+            } else {
+                next(e);
+            }
         }
     }
 
