@@ -7,7 +7,26 @@ import pkg from './package.json';
 
 const production = !process.env.ROLLUP_WATCH;
 
-
+const EXTERNALS = [
+    "compression",
+    "cookie-parser",
+    "cors",
+    "dotenv",
+    "esm",
+    "express",
+    "express-async-handler",
+    "express-fileupload",
+    "helmet",
+    "jsonwebtoken",
+    "knex",
+    "log4js",
+    "moment",
+    "path-to-regexp",
+    "socket.io",
+    "pg",
+    "uuid",
+    "lodash"
+];
 
 export default [
 
@@ -17,6 +36,7 @@ export default [
             { file: pkg.main, format: 'cjs' },
             // { file: pkg.main, format: 'es' }
         ],
+        external: EXTERNALS,
         plugins: [
             json(),
             // nodeResolve({
