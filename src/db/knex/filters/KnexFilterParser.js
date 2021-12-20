@@ -93,10 +93,14 @@ export default class KnexFilterParser {
                         query = query.where(prop, 'ILIKE', elm.value);
                         break;
                     case 'in':
+                        let propComplex = prop;
+                        if (propComplex.includes(",")) {
+                            propComplex = prop.split(',');
+                        }
                         if (!Array.isArray(elm.value)) {
-                            query = query.whereIn(prop, elm.value.split(','));
+                            query = query.whereIn(propComplex, elm.value.split(','));
                         } else {
-                            query = query.whereIn(prop, elm.value);
+                            query = query.whereIn(propComplex, elm.value);
                         }
                         break;
                     case 'not':
