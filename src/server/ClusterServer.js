@@ -3,9 +3,11 @@ import https from 'https';
 import fs from 'fs';
 import path from 'path';
 import cluster from 'cluster';
-import socketio from 'socket.io';
+import { Server } from "socket.io";
 import os from 'os'
 import { EventEmitter } from 'events';
+
+import ClusterMessages from 'cluster-messages';
 
 /**
  * Inicializa la escucha del server en modo cluster
@@ -38,9 +40,20 @@ export default class ClusterServer extends EventEmitter {
             this.initClustered();
         } else {
 
+            this.configureSocketIO();
             this.executeOnlyMain();
+
             await this.initUnclustered();
         }
+    }
+
+    /**
+     * 
+     * @param {*} server 
+     */
+    configureSocketIO() {
+        this.app.io = new Server({ transports: ["websocket"] });
+        this.app.io.listen(this.port + 1);
     }
 
     /**
@@ -50,7 +63,20 @@ export default class ClusterServer extends EventEmitter {
     async initClustered() {
         //Launch cluster
         if (cluster.isMaster) {
+            this.configureSocketIO();
+
             this.executeOnlyMain();
+
+
+            let messages = new ClusterMessages();
+            messages.on('event', (msg, callback) => {
+                if (msg && msg.event) {
+                    console.debug(`Received '${msg.event}' from ${msg.props.owner} at Master`)
+                    //Desencadenar en el proceso principal tambien
+                    this.app.events.emit(msg.event, msg.props, callback);
+                }
+            });
+
             //Count the machine's CPUs
             const cpuCount = os.cpus().length;
 
@@ -69,7 +95,6 @@ export default class ClusterServer extends EventEmitter {
             });
         } else {
             await this.initUnclustered();
-
             console.log(`Worker ${process.pid} started`);
         }
     }
@@ -79,21 +104,10 @@ export default class ClusterServer extends EventEmitter {
     initWorker() {
         let worker = cluster.fork();
         console.log(`Running worker ${worker.process.pid}`)
-        worker.on('message', (msg) => {
-            if (msg.event) {
-                console.debug(`Received ${msg.event} on ${worker.process.pid}`)
-                for (var i in this.workers) { //Si se recibe un mensaje de un worker implica que alguno de ellos ha desencadenado un evento.
-                    //Se notifica a todos los demas workers
-                    var current = this.workers[i];
-                    current.send(msg);
-                    console.log("Sending to workers");
-                }
-                //Desencadenar en el proceso principal tambien
-                this.app.events.emit(msg.event, msg.props);
-            }
-        });
+
         this.workers.push(worker);
     }
+
     /**
      * Inicializa la clase server encargada del control de las solicitudes en un unico proceso.
      *
@@ -105,8 +119,6 @@ export default class ClusterServer extends EventEmitter {
         this.server.port = this.port;
         //create http server
         let server = http.Server(this.server.app);
-
-        this.app.io = socketio(server);
 
         await this.server.initialize();
 

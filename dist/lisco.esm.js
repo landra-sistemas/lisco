@@ -18,9 +18,10 @@ var uuid = require('uuid');
 var http = require('http');
 var https = require('https');
 var cluster = require('cluster');
-var socketio = require('socket.io');
+var socket_io = require('socket.io');
 var os = require('os');
 var events = require('events');
+var ClusterMessages = require('cluster-messages');
 var log4js = require('log4js');
 var expressAsyncHandler = require('express-async-handler');
 var pathToRegexp = require('path-to-regexp');
@@ -57,7 +58,7 @@ var compression__default = /*#__PURE__*/_interopDefaultLegacy(compression);
 var cors__default = /*#__PURE__*/_interopDefaultLegacy(cors);
 var fileUpload__default = /*#__PURE__*/_interopDefaultLegacy(fileUpload);
 var url__default = /*#__PURE__*/_interopDefaultLegacy(url);
-var lodash__default$1 = /*#__PURE__*/_interopDefaultLegacy(lodash);
+var lodash__default = /*#__PURE__*/_interopDefaultLegacy(lodash);
 var fs__default = /*#__PURE__*/_interopDefaultLegacy(fs);
 var path__default = /*#__PURE__*/_interopDefaultLegacy(path);
 var util__default = /*#__PURE__*/_interopDefaultLegacy(util);
@@ -67,8 +68,8 @@ var uuid__namespace = /*#__PURE__*/_interopNamespace(uuid);
 var http__default = /*#__PURE__*/_interopDefaultLegacy(http);
 var https__default = /*#__PURE__*/_interopDefaultLegacy(https);
 var cluster__default = /*#__PURE__*/_interopDefaultLegacy(cluster);
-var socketio__default = /*#__PURE__*/_interopDefaultLegacy(socketio);
 var os__default = /*#__PURE__*/_interopDefaultLegacy(os);
+var ClusterMessages__default = /*#__PURE__*/_interopDefaultLegacy(ClusterMessages);
 var expressAsyncHandler__default = /*#__PURE__*/_interopDefaultLegacy(expressAsyncHandler);
 var moment__default = /*#__PURE__*/_interopDefaultLegacy(moment);
 var Knex__default = /*#__PURE__*/_interopDefaultLegacy(Knex);
@@ -318,7 +319,7 @@ class Server {
      */
     constructor(config, statics, routes) {
         this.app = express__default['default']();
-        this.express_config = lodash__default$1['default'].defaultsDeep(config, {
+        this.express_config = lodash__default['default'].defaultsDeep(config, {
             helmet: true,
             json: true,
             urlencoded: true,
@@ -360,7 +361,7 @@ class Server {
 
         if (config && config.helmet) {
             //Security
-            this.app.use(helmet__default['default'](config && lodash__default$1['default'].isObject(config.helmet) && config.helmet));
+            this.app.use(helmet__default['default'](config && lodash__default['default'].isObject(config.helmet) && config.helmet));
         }
         if (config && config.json) {
             //mount json form parser
@@ -377,8 +378,8 @@ class Server {
         }
         if (config && config.cors) {
             //Enable cors to allow external references
-            this.app.options('*', cors__default['default'](config && lodash__default$1['default'].isObject(config.cors) && config.cors));
-            this.app.use(cors__default['default'](config && lodash__default$1['default'].isObject(config.cors) && config.cors));
+            this.app.options('*', cors__default['default'](config && lodash__default['default'].isObject(config.cors) && config.cors));
+            this.app.use(cors__default['default'](config && lodash__default['default'].isObject(config.cors) && config.cors));
         }
         if (config && config.fileupload) {
             // upload middleware
@@ -485,9 +486,20 @@ class ClusterServer extends events.EventEmitter {
             this.initClustered();
         } else {
 
+            this.configureSocketIO();
             this.executeOnlyMain();
+
             await this.initUnclustered();
         }
+    }
+
+    /**
+     * 
+     * @param {*} server 
+     */
+    configureSocketIO() {
+        this.app.io = new socket_io.Server({ transports: ["websocket"] });
+        this.app.io.listen(this.port + 1);
     }
 
     /**
@@ -497,7 +509,20 @@ class ClusterServer extends events.EventEmitter {
     async initClustered() {
         //Launch cluster
         if (cluster__default['default'].isMaster) {
+            this.configureSocketIO();
+
             this.executeOnlyMain();
+
+
+            let messages = new ClusterMessages__default['default']();
+            messages.on('event', (msg, callback) => {
+                if (msg && msg.event) {
+                    console.debug(`Received '${msg.event}' from ${msg.props.owner} at Master`);
+                    //Desencadenar en el proceso principal tambien
+                    this.app.events.emit(msg.event, msg.props, callback);
+                }
+            });
+
             //Count the machine's CPUs
             const cpuCount = os__default['default'].cpus().length;
 
@@ -516,7 +541,6 @@ class ClusterServer extends events.EventEmitter {
             });
         } else {
             await this.initUnclustered();
-
             console.log(`Worker ${process.pid} started`);
         }
     }
@@ -526,21 +550,10 @@ class ClusterServer extends events.EventEmitter {
     initWorker() {
         let worker = cluster__default['default'].fork();
         console.log(`Running worker ${worker.process.pid}`);
-        worker.on('message', (msg) => {
-            if (msg.event) {
-                console.debug(`Received ${msg.event} on ${worker.process.pid}`);
-                for (var i in this.workers) { //Si se recibe un mensaje de un worker implica que alguno de ellos ha desencadenado un evento.
-                    //Se notifica a todos los demas workers
-                    var current = this.workers[i];
-                    current.send(msg);
-                    console.log("Sending to workers");
-                }
-                //Desencadenar en el proceso principal tambien
-                this.app.events.emit(msg.event, msg.props);
-            }
-        });
+
         this.workers.push(worker);
     }
+
     /**
      * Inicializa la clase server encargada del control de las solicitudes en un unico proceso.
      *
@@ -552,8 +565,6 @@ class ClusterServer extends events.EventEmitter {
         this.server.port = this.port;
         //create http server
         let server = http__default['default'].Server(this.server.app);
-
-        this.app.io = socketio__default['default'](server);
 
         await this.server.initialize();
 
@@ -661,14 +672,17 @@ class EventHandler extends events.EventEmitter {
 
     constructor(app) {
         super();
+        this.messages = new ClusterMessages__default['default']();
 
         this.app = app; //Se recibe el singleton App para evitar referencias cruzadas
 
         if (cluster__default['default'].isWorker) {
             // Levanto, en los worker, la escucha para recibir los eventos en broadcast de los demas hilos
-            process.on('message', (msg) => {
-                console.debug(`Receiving broadcast ${msg.event} - ${process.pid}`);
-                super.emit(msg.event, msg.props);
+            this.messages.on('event', (msg, callback) => {
+                if (msg && msg.event && process.pid !== msg.props.owner) {
+                    console.debug(`Receiving broadcast ${msg.event} - ${process.pid}`);
+                    super.emit(msg.event, { ...msg.props }, callback);
+                }
             });
         }
     }
@@ -679,29 +693,22 @@ class EventHandler extends events.EventEmitter {
      * @param {*} evt 
      * @param {*} props 
      */
-    emit(evt, props) {
+    emit(evt, props, callback) {
         //Desencadenar en local
-        super.emit(evt, props);
+        super.emit(evt, props, callback);
 
-        if (evt && props && cluster__default['default'].isWorker) {
+        if (evt && props && cluster__default['default'].isWorker && process.pid !== props.owner) {
             console.debug(`${evt} -> Firing from ${process.pid} to master`);
             if (!props) {
                 props = {};
             }
             props.owner = process.pid;
-            process.send({ event: evt, props });
+            this.messages.send("event", { event: evt, props: { ...props } }, callback);
         }
 
         if (evt && props && cluster__default['default'].isMaster && this.app && this.app.server && this.app.server.workers) {
             console.debug(`${evt} -> Firing from master to workers`);
-            for (var i in this.app.server.workers) { //Si se recibe un evento del master
-                //Se notifica a todos los demas workers excepto al que lo ha generado
-                var current = this.app.server.workers[i];
-                if (props && current.process.pid !== props.owner) {
-                    console.debug(`${evt} -> Sending to ${current.process.pid}`);
-                    current.send({ event: evt, props });
-                }
-            }
+            this.messages.send("event", { event: evt, props: { ...props } }, callback);
         }
     }
 }
@@ -919,7 +926,7 @@ class JwtAuthHandler extends IAuthHandler {
         const user = await this.userDao.findByUsername(username);
 
         if (user && user.username === username && user.password === Utils.encrypt(password)) {
-            return this.tokenGenerator.sign(lodash__default$1['default'].omit(user, ['password']));
+            return this.tokenGenerator.sign(lodash__default['default'].omit(user, ['password']));
         }
 
         return false;
@@ -990,7 +997,7 @@ class CookieAuthHandler extends IAuthHandler {
         //TODO quizas poder configurar los nombres de username y password
 
         if (user && user.username === username && user.password === Utils.encrypt(password)) {
-            request.session = { ...request.session, ...lodash__default$1['default'].omit(user, ['password']) };
+            request.session = { ...request.session, ...lodash__default['default'].omit(user, ['password']) };
 
             return true;
         }
@@ -1183,7 +1190,7 @@ class KnexConnector {
 }
 
 
-var KnexConnector$2 = new KnexConnector();
+var KnexConnector$1 = new KnexConnector();
 
 /**
  * Crear un dao con los métodos básicos
@@ -1198,7 +1205,7 @@ class BaseKnexDao {
 
 
     loadAllData(start, limit) {
-        return KnexConnector$2.connection.select('*').from(this.tableName).limit(limit || 10000).offset(start)
+        return KnexConnector$1.connection.select('*').from(this.tableName).limit(limit || 10000).offset(start)
     }
 
     async loadFilteredData(filters, start, limit) {
@@ -1207,13 +1214,13 @@ class BaseKnexDao {
             sorts = KnexFilterParser.parseSort(filters.sort);
         }
 
-        return KnexConnector$2.connection.from(this.tableName).where((builder) => (
-            KnexFilterParser.parseFilters(builder, lodash__default$1['default'].omit(filters, ['sort', 'start', 'limit']))
+        return KnexConnector$1.connection.from(this.tableName).where((builder) => (
+            KnexFilterParser.parseFilters(builder, lodash__default['default'].omit(filters, ['sort', 'start', 'limit']))
         )).orderByRaw(sorts).limit(limit).offset(start);
 
     }
 
-    async loadFilteredDataWithRelations(filters, start, limit, relationParams, selectQuery) {
+    async loadFilteredDataWithRelations(filters, start, limit, relation_config) {
         let sorts = [];
 
         if (filters.sort) {
@@ -1221,46 +1228,38 @@ class BaseKnexDao {
         } else {
             sorts = 1;
         }
-        let connect = KnexConnector$1.connection
-            .select(KnexConnector$1.connection.raw(selectQuery))
+        let qry = KnexConnector$1.connection
+            .select(KnexConnector$1.connection.raw(relation_config.selectQuery))
             .from(this.tableName)
+            .groupBy(relation_config.group_by)
             .where((builder) =>
                 KnexFilterParser.parseFilters(builder, lodash__default['default'].omit(filters, ["sort", "start", "limit"]))
             );
 
-        if (relationParams) {
-            if (Array.isArray(relationParams)) {
-                relationParams.forEach(element => {
-                    let typeInner = element.type;
-                    let tabletoJoinInner = element.tabletoJoin;
-                    let column1Inner = element.column1;
-                    let column2Inner = element.column2;
-                    connect = connect.joinRaw(typeInner + " " + tabletoJoinInner + " ON " + column1Inner + " = " + column2Inner);
-                });
-            } else {
-                let type = relationParams.type;
-                let tabletoJoin = relationParams.tabletoJoin;
-                let column1 = relationParams.column1;
-                let column2 = relationParams.column2;
-                connect = connect.joinRaw(type + " " + tabletoJoin + " ON " + column1 + " = " + column2);
+        if (relation_config.relation_schema) {
+            if (!Array.isArray(relation_config.relation_schema)) {
+                relationParams = [relation_config.relation_schema];
             }
+            relation_config.relation_schema.forEach(element => {
+                qry = qry.joinRaw(element.type + " " + element.with_table + " ON " + element.on_condition);
+            });
         }
 
-        return connect.orderByRaw(sorts).limit(limit).offset(start);
+        return qry.orderByRaw(sorts).limit(limit).offset(start);
 
 
     }
 
     async countFilteredData(filters) {
-        let data = await KnexConnector$2.connection.from(this.tableName).where((builder) => (
-            KnexFilterParser.parseFilters(builder, lodash__default$1['default'].omit(filters, ['sort', 'start', 'limit']))
+        let data = await KnexConnector$1.connection.from(this.tableName).where((builder) => (
+            KnexFilterParser.parseFilters(builder, lodash__default['default'].omit(filters, ['sort', 'start', 'limit']))
         )).count('id', { as: 'total' });
 
         return data && data[0].total;
     }
 
     async loadById(objectId) {
-        const data = await KnexConnector$2.connection.from(this.tableName).where('id', objectId);
+        const data = await KnexConnector$1.connection.from(this.tableName).where('id', objectId);
 
         if (data && data[0]) {
             return data[0];
@@ -1269,17 +1268,17 @@ class BaseKnexDao {
     }
 
     save(object) {
-        return KnexConnector$2.connection.from(this.tableName).insert(object).returning("*");
+        return KnexConnector$1.connection.from(this.tableName).insert(object).returning("*");
     }
     update(objectId, newObject) {
-        return KnexConnector$2.connection.from(this.tableName).where("id", objectId).update(newObject).returning("*");
+        return KnexConnector$1.connection.from(this.tableName).where("id", objectId).update(newObject).returning("*");
     }
     async delete(objectId) {
         const existing = await this.loadById(objectId);
         if (!existing) {
             throw "NotFound";
         }
-        return KnexConnector$2.connection.from(this.tableName).where("id", objectId).delete()
+        return KnexConnector$1.connection.from(this.tableName).where("id", objectId).delete()
     }
 }
 
@@ -1502,21 +1501,20 @@ class BaseService {
         return response;
     }
 
-    async listWithRelations(filters, start, limit, relations, selectQuery) {
+    async listWithRelations(filters, start, limit, relation_config) {
         //Pagination
         var start = start || 0;
         var limit = limit || 1000;//Default limit
 
+        if (!filters) {
+            filters = {};
+        }
+
         let response = {};
         response.total = await this.dao.countFilteredData(filters, start, limit);
 
-        if (filters && Object.keys(filters).length !== 0) {
-            let filteredData = await this.dao.loadFilteredDataWithRelations(filters, start, limit, relations, selectQuery);
-            response.data = filteredData;
-            return response;
-        }
-
-        response.data = await this.dao.loadFilteredDataWithRelations({}, start, limit, relations, selectQuery);
+        let filteredData = await this.dao.loadFilteredDataWithRelations(filters, start, limit, relation_config);
+        response.data = filteredData;
         return response;
     }
 
@@ -1673,7 +1671,7 @@ exports.IAuthHandler = IAuthHandler;
 exports.IUserDao = IUserDao;
 exports.JsonResponse = JsonResponse;
 exports.JwtAuthHandler = JwtAuthHandler;
-exports.KnexConnector = KnexConnector$2;
+exports.KnexConnector = KnexConnector$1;
 exports.KnexFilterParser = KnexFilterParser;
 exports.Logger = Logger;
 exports.Server = Server;

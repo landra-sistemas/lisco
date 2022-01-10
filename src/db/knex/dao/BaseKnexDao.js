@@ -31,7 +31,7 @@ export default class BaseKnexDao {
 
     }
 
-    async loadFilteredDataWithRelations(filters, start, limit, relationParams, selectQuery) {
+    async loadFilteredDataWithRelations(filters, start, limit, relation_config) {
         let sorts = [];
 
         if (filters.sort) {
@@ -39,32 +39,24 @@ export default class BaseKnexDao {
         } else {
             sorts = 1;
         }
-        let connect = KnexConnector$1.connection
-            .select(KnexConnector$1.connection.raw(selectQuery))
+        let qry = KnexConnector.connection
+            .select(KnexConnector.connection.raw(relation_config.selectQuery))
             .from(this.tableName)
+            .groupBy(relation_config.group_by)
             .where((builder) =>
-                KnexFilterParser.parseFilters(builder, lodash__default['default'].omit(filters, ["sort", "start", "limit"]))
+                KnexFilterParser.parseFilters(builder, lodash.omit(filters, ["sort", "start", "limit"]))
             )
 
-        if (relationParams) {
-            if (Array.isArray(relationParams)) {
-                relationParams.forEach(element => {
-                    let typeInner = element.type
-                    let tabletoJoinInner = element.tabletoJoin
-                    let column1Inner = element.column1
-                    let column2Inner = element.column2
-                    connect = connect.joinRaw(typeInner + " " + tabletoJoinInner + " ON " + column1Inner + " = " + column2Inner)
-                });
-            } else {
-                let type = relationParams.type
-                let tabletoJoin = relationParams.tabletoJoin
-                let column1 = relationParams.column1
-                let column2 = relationParams.column2
-                connect = connect.joinRaw(type + " " + tabletoJoin + " ON " + column1 + " = " + column2)
+        if (relation_config.relation_schema) {
+            if (!Array.isArray(relation_config.relation_schema)) {
+                relationParams = [relation_config.relation_schema];
             }
+            relation_config.relation_schema.forEach(element => {
+                qry = qry.joinRaw(element.type + " " + element.with_table + " ON " + element.on_condition)
+            });
         }
 
-        return connect.orderByRaw(sorts).limit(limit).offset(start);
+        return qry.orderByRaw(sorts).limit(limit).offset(start);
 
 
     }

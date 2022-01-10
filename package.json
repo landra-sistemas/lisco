@@ -1,11 +1,12 @@
 {
     "name": "lisco",
-    "version": "1.0.27",
+    "version": "1.0.31",
     "author": "iago.sardina",
     "description": "Framework nodejs ",
     "license": "Landra",
     "main": "dist/lisco.esm.js",
     "dependencies": {
+        "cluster-messages": "^1.2.1",
         "compression": "^1.7.4",
         "cookie-parser": "^1.4.5",
         "cors": "^2.8.5",
@@ -20,8 +21,8 @@
         "log4js": "^6.3.0",
         "moment": "^2.29.1",
         "path-to-regexp": "^6.2.0",
-        "socket.io": "^4.2.0",
         "pg": "^8.6.0",
+        "socket.io": "^4.2.0",
         "uuid": "^8.3.2"
     },
     "scripts": {
@@ -37,8 +38,8 @@
         "@rollup/plugin-node-resolve": "^13.0.0",
         "chai": "^4.3.4",
         "chai-http": "^4.3.0",
-        "eslint": "^7.32.0",
         "cookie": "^0.4.1",
+        "eslint": "^7.32.0",
         "mocha": "^9.1.1",
         "ms": "^2.1.3",
         "nyc": "^15.1.0",
