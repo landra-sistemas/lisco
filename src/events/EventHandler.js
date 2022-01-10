@@ -17,7 +17,9 @@ export default class EventHandler extends EventEmitter {
             // Levanto, en los worker, la escucha para recibir los eventos en broadcast de los demas hilos
             this.messages.on('event', (msg, callback) => {
                 if (msg && msg.event && process.pid !== msg.props.owner) {
-                    console.debug(`Receiving broadcast ${msg.event} - ${process.pid}`);
+                    if (process.env.DEBUG_EVENTS == true) {
+                        console.debug(`Receiving broadcast ${msg.event} - ${process.pid}`);
+                    }
                     super.emit(msg.event, { ...msg.props }, callback);
                 }
             });
@@ -35,7 +37,9 @@ export default class EventHandler extends EventEmitter {
         super.emit(evt, props, callback);
 
         if (evt && props && cluster.isWorker && process.pid !== props.owner) {
-            console.debug(`${evt} -> Firing from ${process.pid} to master`);
+            if (process.env.DEBUG_EVENTS == true) {
+                console.debug(`${evt} -> Firing from ${process.pid} to master`);
+            }
             if (!props) {
                 props = {};
             }
@@ -44,7 +48,9 @@ export default class EventHandler extends EventEmitter {
         }
 
         if (evt && props && cluster.isMaster && this.app && this.app.server && this.app.server.workers) {
-            console.debug(`${evt} -> Firing from master to workers`);
+            if (process.env.DEBUG_EVENTS == true) {
+                console.debug(`${evt} -> Firing from master to workers`);
+            }
             this.messages.send("event", { event: evt, props: { ...props } }, callback);
         }
     }

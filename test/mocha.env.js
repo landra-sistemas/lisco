@@ -10,3 +10,6 @@ process.env.JWT_EXPIRES = "2 days"
 process.env.JWT_AUDIENCE="MyAudience"
 process.env.JWT_ISSUER="Landra Sistemas"
 process.env.JWT_SUBJECT="MySub"
+
+
+process.env.DEBUG_EVENTS = false

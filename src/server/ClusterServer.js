@@ -71,7 +71,9 @@ export default class ClusterServer extends EventEmitter {
             let messages = new ClusterMessages();
             messages.on('event', (msg, callback) => {
                 if (msg && msg.event) {
-                    console.debug(`Received '${msg.event}' from ${msg.props.owner} at Master`)
+                    if (process.env.DEBUG_EVENTS == true) {
+                        console.debug(`Received '${msg.event}' from ${msg.props.owner} at Master`)
+                    }
                     //Desencadenar en el proceso principal tambien
                     this.app.events.emit(msg.event, msg.props, callback);
                 }

@@ -517,7 +517,9 @@ class ClusterServer extends events.EventEmitter {
             let messages = new ClusterMessages__default['default']();
             messages.on('event', (msg, callback) => {
                 if (msg && msg.event) {
-                    console.debug(`Received '${msg.event}' from ${msg.props.owner} at Master`);
+                    if (process.env.DEBUG_EVENTS == true) {
+                        console.debug(`Received '${msg.event}' from ${msg.props.owner} at Master`);
+                    }
                     //Desencadenar en el proceso principal tambien
                     this.app.events.emit(msg.event, msg.props, callback);
                 }
@@ -680,7 +682,9 @@ class EventHandler extends events.EventEmitter {
             // Levanto, en los worker, la escucha para recibir los eventos en broadcast de los demas hilos
             this.messages.on('event', (msg, callback) => {
                 if (msg && msg.event && process.pid !== msg.props.owner) {
-                    console.debug(`Receiving broadcast ${msg.event} - ${process.pid}`);
+                    if (process.env.DEBUG_EVENTS == true) {
+                        console.debug(`Receiving broadcast ${msg.event} - ${process.pid}`);
+                    }
                     super.emit(msg.event, { ...msg.props }, callback);
                 }
             });
@@ -698,7 +702,9 @@ class EventHandler extends events.EventEmitter {
         super.emit(evt, props, callback);
 
         if (evt && props && cluster__default['default'].isWorker && process.pid !== props.owner) {
-            console.debug(`${evt} -> Firing from ${process.pid} to master`);
+            if (process.env.DEBUG_EVENTS == true) {
+                console.debug(`${evt} -> Firing from ${process.pid} to master`);
+            }
             if (!props) {
                 props = {};
             }
@@ -707,7 +713,9 @@ class EventHandler extends events.EventEmitter {
         }
 
         if (evt && props && cluster__default['default'].isMaster && this.app && this.app.server && this.app.server.workers) {
-            console.debug(`${evt} -> Firing from master to workers`);
+            if (process.env.DEBUG_EVENTS == true) {
+                console.debug(`${evt} -> Firing from master to workers`);
+            }
             this.messages.send("event", { event: evt, props: { ...props } }, callback);
         }
     }
