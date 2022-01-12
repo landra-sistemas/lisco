@@ -29,7 +29,8 @@ export default class Server {
             urlencoded: true,
             compression: true,
             cors: { origin: true, credentials: true },
-            fileupload: true
+            fileupload: true,
+            socketio: { transports: ["websocket"] }
         });
         this.statics = statics;
         this.routes = routes;

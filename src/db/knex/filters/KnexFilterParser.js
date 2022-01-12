@@ -67,6 +67,9 @@ export default class KnexFilterParser {
                     case 'jsonb':
                         query = query.whereRaw(prop + " ILIKE ?", ["%" + elm.value + "%"]);
                         break;
+                    case 'full-text-psql':
+                        query = query.whereRaw(`to_tsvector(${prop}::text) @@ to_tsquery('${elm.value}')`);
+                        break;
                     case 'greater':
                         query = query.where(prop, '>', elm.value);
                         break;

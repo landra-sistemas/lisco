@@ -52,7 +52,7 @@ export default class ClusterServer extends EventEmitter {
      * @param {*} server 
      */
     configureSocketIO() {
-        this.app.io = new Server({ transports: ["websocket"] });
+        this.app.io = new Server(this.cls.express_config && this.cls.express_config.socketio);
         this.app.io.listen(this.port + 1);
     }
 

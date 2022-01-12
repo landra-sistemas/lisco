@@ -325,7 +325,8 @@ class Server {
             urlencoded: true,
             compression: true,
             cors: { origin: true, credentials: true },
-            fileupload: true
+            fileupload: true,
+            socketio: { transports: ["websocket"] }
         });
         this.statics = statics;
         this.routes = routes;
@@ -498,7 +499,7 @@ class ClusterServer extends events.EventEmitter {
      * @param {*} server 
      */
     configureSocketIO() {
-        this.app.io = new socket_io.Server({ transports: ["websocket"] });
+        this.app.io = new socket_io.Server(this.cls.express_config && this.cls.express_config.socketio);
         this.app.io.listen(this.port + 1);
     }
 
@@ -1093,6 +1094,9 @@ class KnexFilterParser {
                         break;
                     case 'jsonb':
                         query = query.whereRaw(prop + " ILIKE ?", ["%" + elm.value + "%"]);
+                        break;
+                    case 'full-text-psql':
+                        query = query.whereRaw(`to_tsvector(${prop}::text) @@ to_tsquery('${elm.value}')`);
                         break;
                     case 'greater':
                         query = query.where(prop, '>', elm.value);
