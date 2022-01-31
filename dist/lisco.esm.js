@@ -1128,10 +1128,12 @@ class KnexFilterParser {
                         if (propComplex.includes(",")) {
                             propComplex = prop.split(',');
                         }
-                        if (!Array.isArray(elm.value)) {
+                        if (!Array.isArray(elm.value) && elm.value != undefined) {
                             query = query.whereIn(propComplex, elm.value.split(','));
                         } else {
-                            query = query.whereIn(propComplex, elm.value);
+                            if(elm.value != undefined){
+                                query = query.whereIn(propComplex, elm.value);
+                            }
                         }
                         break;
                     case 'not':
