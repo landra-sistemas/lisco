@@ -1128,10 +1128,12 @@ class KnexFilterParser {
                         if (propComplex.includes(",")) {
                             propComplex = prop.split(',');
                         }
-                        if (!Array.isArray(elm.value)) {
+                        if (!Array.isArray(elm.value) && elm.value != undefined) {
                             query = query.whereIn(propComplex, elm.value.split(','));
                         } else {
-                            query = query.whereIn(propComplex, elm.value);
+                            if(elm.value != undefined){
+                                query = query.whereIn(propComplex, elm.value);
+                            }
                         }
                         break;
                     case 'not':
@@ -1232,36 +1234,7 @@ class BaseKnexDao {
 
     }
 
-    async loadFilteredDataWithRelations(filters, start, limit, relation_config) {
-        let sorts = [];
-
-        if (filters.sort) {
-            sorts = KnexFilterParser.parseSort(filters.sort);
-        } else {
-            sorts = 1;
-        }
-        let qry = KnexConnector$1.connection
-            .select(KnexConnector$1.connection.raw(relation_config.selectQuery))
-            .from(this.tableName)
-            .groupBy(relation_config.group_by)
-            .where((builder) =>
-                KnexFilterParser.parseFilters(builder, lodash__default['default'].omit(filters, ["sort", "start", "limit"]))
-            );
-
-        if (relation_config.relation_schema) {
-            if (!Array.isArray(relation_config.relation_schema)) {
-                relationParams = [relation_config.relation_schema];
-            }
-            relation_config.relation_schema.forEach(element => {
-                qry = qry.joinRaw(element.type + " " + element.with_table + " ON " + element.on_condition);
-            });
-        }
-
-        return qry.orderByRaw(sorts).limit(limit).offset(start);
-
-
-    }
-
+    
     async countFilteredData(filters) {
         let data = await KnexConnector$1.connection.from(this.tableName).where((builder) => (
             KnexFilterParser.parseFilters(builder, lodash__default['default'].omit(filters, ['sort', 'start', 'limit']))
@@ -1513,22 +1486,6 @@ class BaseService {
         return response;
     }
 
-    async listWithRelations(filters, start, limit, relation_config) {
-        //Pagination
-        var start = start || 0;
-        var limit = limit || 1000;//Default limit
-
-        if (!filters) {
-            filters = {};
-        }
-
-        let response = {};
-        response.total = await this.dao.countFilteredData(filters, start, limit);
-
-        let filteredData = await this.dao.loadFilteredDataWithRelations(filters, start, limit, relation_config);
-        response.data = filteredData;
-        return response;
-    }
 
     /**
      * Obtencion de un elemento mediante su identificador

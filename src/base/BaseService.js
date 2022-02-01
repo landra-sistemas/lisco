@@ -33,22 +33,6 @@ export class BaseService {
         return response;
     }
 
-    async listWithRelations(filters, start, limit, relation_config) {
-        //Pagination
-        var start = start || 0;
-        var limit = limit || 1000;//Default limit
-
-        if (!filters) {
-            filters = {};
-        }
-
-        let response = {};
-        response.total = await this.dao.countFilteredData(filters, start, limit);
-
-        let filteredData = await this.dao.loadFilteredDataWithRelations(filters, start, limit, relation_config);
-        response.data = filteredData;
-        return response;
-    }
 
     /**
      * Obtencion de un elemento mediante su identificador
