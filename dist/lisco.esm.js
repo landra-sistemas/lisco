@@ -41,14 +41,12 @@ function _interopNamespace(e) {
                 var d = Object.getOwnPropertyDescriptor(e, k);
                 Object.defineProperty(n, k, d.get ? d : {
                     enumerable: true,
-                    get: function () {
-                        return e[k];
-                    }
+                    get: function () { return e[k]; }
                 });
             }
         });
     }
-    n['default'] = e;
+    n["default"] = e;
     return Object.freeze(n);
 }
 
@@ -96,7 +94,7 @@ class Utils {
         const secret = Buffer.from(process.env.CRYPT_SECRET, 'hex');
         const iv = Buffer.from(process.env.CRYPT_IV, 'hex');
 
-        const cipher = crypto__default['default'].createCipheriv(algorithm, secret, iv);
+        const cipher = crypto__default["default"].createCipheriv(algorithm, secret, iv);
         let encrypted = cipher.update(text);
         encrypted = Buffer.concat([encrypted, cipher.final()]);
         return encrypted.toString('hex');
@@ -113,7 +111,7 @@ class Utils {
 
         const encryptedText = Buffer.from(text, 'hex');
 
-        const decipher = crypto__default['default'].createDecipheriv(algorithm, secret, iv);
+        const decipher = crypto__default["default"].createDecipheriv(algorithm, secret, iv);
         let decrypted = decipher.update(encryptedText);
         decrypted = Buffer.concat([decrypted, decipher.final()]);
         return decrypted.toString();
@@ -127,7 +125,7 @@ class Utils {
      * @param {*} ms 
      */
     static sleep(ms) {
-        let promise_sleep = util__default['default'].promisify(setTimeout);
+        let promise_sleep = util__default["default"].promisify(setTimeout);
 
         return promise_sleep(ms);
     }
@@ -137,8 +135,8 @@ class Utils {
      */
     static generateKeys() {
         return {
-            key: crypto__default['default'].randomBytes(32).toString('hex'),
-            iv: crypto__default['default'].randomBytes(16).toString('hex')
+            key: crypto__default["default"].randomBytes(32).toString('hex'),
+            iv: crypto__default["default"].randomBytes(16).toString('hex')
         }
     }
 
@@ -207,7 +205,7 @@ class I18nLoader {
      * @param callback
      */
     async load(custom) {
-        const readfile = util__default['default'].promisify(fs__default['default'].readFile);
+        const readfile = util__default["default"].promisify(fs__default["default"].readFile);
         const lang = custom || process.env.DEFAULT_LANG;
 
         if (!this.currentData) {
@@ -218,7 +216,7 @@ class I18nLoader {
         }
         //TODO mejorar el sistema cargando todas las traducciones del directorio i18n con chokidar esperando modificaciones
 
-        let file = path__default['default'].resolve(process.cwd(), "i18n/lang_" + lang + ".json");
+        let file = path__default["default"].resolve(process.cwd(), "i18n/lang_" + lang + ".json");
         try {
             const data = await readfile(file, 'utf8');
             var parsedData = JSON.parse(data);
@@ -282,15 +280,15 @@ class TokenGenerator {
 
     sign(payload) {
         const jwtSignOptions = { ...this.options, jwtid: uuid__namespace.v4() };
-        return jsonwebtoken__default['default'].sign(payload, this.privateKey, jwtSignOptions);
+        return jsonwebtoken__default["default"].sign(payload, this.privateKey, jwtSignOptions);
     }
 
     verify(token) {
-        return jsonwebtoken__default['default'].verify(token, this.privateKey, this.options);
+        return jsonwebtoken__default["default"].verify(token, this.privateKey, this.options);
     }
 
     refresh(token) {
-        const payload = jsonwebtoken__default['default'].verify(token, this.privateKey, this.options);
+        const payload = jsonwebtoken__default["default"].verify(token, this.privateKey, this.options);
         delete payload.sub;
         delete payload.iss;
         delete payload.aud;
@@ -300,7 +298,7 @@ class TokenGenerator {
         delete payload.jti; //We are generating a new token, if you are using jwtid during signing, pass it in refreshOptions
         const jwtSignOptions = { ...this.options, jwtid: uuid__namespace.v4() };
         // The first signing converted all needed options into claims, they are already in the payload
-        return jsonwebtoken__default['default'].sign(payload, this.privateKey, jwtSignOptions);
+        return jsonwebtoken__default["default"].sign(payload, this.privateKey, jwtSignOptions);
     }
 }
 
@@ -318,8 +316,8 @@ class Server {
      * @param {*} routes 
      */
     constructor(config, statics, routes) {
-        this.app = express__default['default']();
-        this.express_config = lodash__default['default'].defaultsDeep(config, {
+        this.app = express__default["default"]();
+        this.express_config = lodash__default["default"].defaultsDeep(config, {
             helmet: true,
             json: true,
             urlencoded: true,
@@ -362,35 +360,35 @@ class Server {
 
         if (config && config.helmet) {
             //Security
-            this.app.use(helmet__default['default'](config && lodash__default['default'].isObject(config.helmet) && config.helmet));
+            this.app.use(helmet__default["default"](config && lodash__default["default"].isObject(config.helmet) && config.helmet));
         }
         if (config && config.json) {
             //mount json form parser
-            this.app.use(express__default['default'].json());
+            this.app.use(express__default["default"].json());
         }
 
         if (config && config.urlencoded) {
             //mount query string parser
-            this.app.use(express__default['default'].urlencoded({ extended: true }));
+            this.app.use(express__default["default"].urlencoded({ extended: true }));
         }
         if (config && config.compression) {
             // compress responses
-            this.app.use(compression__default['default']());
+            this.app.use(compression__default["default"]());
         }
         if (config && config.cors) {
             //Enable cors to allow external references
-            this.app.options('*', cors__default['default'](config && lodash__default['default'].isObject(config.cors) && config.cors));
-            this.app.use(cors__default['default'](config && lodash__default['default'].isObject(config.cors) && config.cors));
+            this.app.options('*', cors__default["default"](config && lodash__default["default"].isObject(config.cors) && config.cors));
+            this.app.use(cors__default["default"](config && lodash__default["default"].isObject(config.cors) && config.cors));
         }
         if (config && config.fileupload) {
             // upload middleware
-            this.app.use(fileUpload__default['default']());
+            this.app.use(fileUpload__default["default"]());
         }
 
         if (this.statics) {
             //add static paths
             for (const idx in this.statics) {
-                this.app.use(idx, express__default['default'].static(this.statics[idx]));
+                this.app.use(idx, express__default["default"].static(this.statics[idx]));
             }
         }
 
@@ -399,7 +397,7 @@ class Server {
             this.app.use((request, response, next) => {
                 request.requestTime = Date.now();
                 response.on("finish", () => {
-                    let pathname = url__default['default'].parse(request.url).pathname;
+                    let pathname = url__default["default"].parse(request.url).pathname;
                     let end = Date.now() - request.requestTime;
                     let user = (request && request.session && request.session.user_id) || "";
 
@@ -415,7 +413,7 @@ class Server {
      * Crea el cargador automatico de rutas
      */
     configureRoutes(routes) {
-        const router = express__default['default'].Router();
+        const router = express__default["default"].Router();
         this.app.use(router);
 
         //create controllers
@@ -509,13 +507,13 @@ class ClusterServer extends events.EventEmitter {
      */
     async initClustered() {
         //Launch cluster
-        if (cluster__default['default'].isMaster) {
+        if (cluster__default["default"].isMaster) {
             this.configureSocketIO();
 
             this.executeOnlyMain();
 
 
-            let messages = new ClusterMessages__default['default']();
+            let messages = new ClusterMessages__default["default"]();
             messages.on('event', (msg, callback) => {
                 if (msg && msg.event) {
                     if (process.env.DEBUG_EVENTS == true) {
@@ -527,7 +525,7 @@ class ClusterServer extends events.EventEmitter {
             });
 
             //Count the machine's CPUs
-            const cpuCount = os__default['default'].cpus().length;
+            const cpuCount = os__default["default"].cpus().length;
 
             //Create a worker for each CPU
             for (let idx = 0; idx < cpuCount; idx += 1) {
@@ -535,7 +533,7 @@ class ClusterServer extends events.EventEmitter {
             }
 
             //Listen for dying workers
-            cluster__default['default'].on('exit', (worker) => {
+            cluster__default["default"].on('exit', (worker) => {
 
                 //Replace the dead worker, we're not sentimental
                 console.log('Worker ' + worker.id + ' died :(');
@@ -551,7 +549,7 @@ class ClusterServer extends events.EventEmitter {
      * Inicia un worker
      */
     initWorker() {
-        let worker = cluster__default['default'].fork();
+        let worker = cluster__default["default"].fork();
         console.log(`Running worker ${worker.process.pid}`);
 
         this.workers.push(worker);
@@ -567,7 +565,7 @@ class ClusterServer extends events.EventEmitter {
 
         this.server.port = this.port;
         //create http server
-        let server = http__default['default'].Server(this.server.app);
+        let server = http__default["default"].Server(this.server.app);
 
         await this.server.initialize();
 
@@ -593,8 +591,8 @@ class ClusterServer extends events.EventEmitter {
                 process.exit(0);
             }
 
-            var key = fs__default['default'].readFileSync(path__default['default'].resolve(process.cwd(), process.env.SSL_KEY || 'key.pem'));
-            var cert = fs__default['default'].readFileSync(path__default['default'].resolve(process.cwd(), process.env.SSL_CERT || 'cert.pem'));
+            var key = fs__default["default"].readFileSync(path__default["default"].resolve(process.cwd(), process.env.SSL_KEY || 'key.pem'));
+            var cert = fs__default["default"].readFileSync(path__default["default"].resolve(process.cwd(), process.env.SSL_CERT || 'cert.pem'));
 
             var options = {
                 key: key,
@@ -606,7 +604,7 @@ class ClusterServer extends events.EventEmitter {
                 console.log('Using 3443 as ssl default port. Customize via env SSL_PORT.');
             }
             var sslPort = this.normalizePort(process.env.SSL_PORT || 3443);
-            var serverSsl = https__default['default'].createServer(options, this.server.app);
+            var serverSsl = https__default["default"].createServer(options, this.server.app);
             serverSsl.listen(sslPort);
             //add error handler
             serverSsl.on("error", function (err) {
@@ -675,11 +673,11 @@ class EventHandler extends events.EventEmitter {
 
     constructor(app) {
         super();
-        this.messages = new ClusterMessages__default['default']();
+        this.messages = new ClusterMessages__default["default"]();
 
         this.app = app; //Se recibe el singleton App para evitar referencias cruzadas
 
-        if (cluster__default['default'].isWorker) {
+        if (cluster__default["default"].isWorker) {
             // Levanto, en los worker, la escucha para recibir los eventos en broadcast de los demas hilos
             this.messages.on('event', (msg, callback) => {
                 if (msg && msg.event && process.pid !== msg.props.owner) {
@@ -702,7 +700,7 @@ class EventHandler extends events.EventEmitter {
         //Desencadenar en local
         super.emit(evt, props, callback);
 
-        if (evt && props && cluster__default['default'].isWorker && process.pid !== props.owner) {
+        if (evt && props && cluster__default["default"].isWorker && process.pid !== props.owner) {
             if (process.env.DEBUG_EVENTS == true) {
                 console.debug(`${evt} -> Firing from ${process.pid} to master`);
             }
@@ -713,7 +711,7 @@ class EventHandler extends events.EventEmitter {
             this.messages.send("event", { event: evt, props: { ...props } }, callback);
         }
 
-        if (evt && props && cluster__default['default'].isMaster && this.app && this.app.server && this.app.server.workers) {
+        if (evt && props && cluster__default["default"].isMaster && this.app && this.app.server && this.app.server.workers) {
             if (process.env.DEBUG_EVENTS == true) {
                 console.debug(`${evt} -> Firing from master to workers`);
             }
@@ -728,9 +726,9 @@ class EventHandler extends events.EventEmitter {
 class Logger {
 
     static async configure() {
-        const readfile = util__default['default'].promisify(fs__default['default'].readFile);
+        const readfile = util__default["default"].promisify(fs__default["default"].readFile);
 
-        const json = await readfile(path__default['default'].resolve(process.cwd(), './log4js.json'), 'utf8');
+        const json = await readfile(path__default["default"].resolve(process.cwd(), './log4js.json'), 'utf8');
 
         log4js.configure(JSON.parse(json));
 
@@ -778,7 +776,7 @@ class Logger {
 class AuthController {
 
     constructor(publicPathsList, AuthHandler) {
-        this.router = express__default['default'].Router();
+        this.router = express__default["default"].Router();
         this.publicPathsList = [...publicPathsList, '/login'];
 
         this.AuthHandler = AuthHandler;
@@ -786,9 +784,9 @@ class AuthController {
 
 
     configure() {
-        this.router.use(expressAsyncHandler__default['default']((res, req, next) => { this.check(res, req, next); }));
-        this.router.post('/login', expressAsyncHandler__default['default']((res, req, next) => { this.loginPost(res, req, next); }));
-        this.router.post('/logout', expressAsyncHandler__default['default']((res, req, next) => { this.logout(res, req, next); }));
+        this.router.use(expressAsyncHandler__default["default"]((res, req, next) => { this.check(res, req, next); }));
+        this.router.post('/login', expressAsyncHandler__default["default"]((res, req, next) => { this.loginPost(res, req, next); }));
+        this.router.post('/logout', expressAsyncHandler__default["default"]((res, req, next) => { this.logout(res, req, next); }));
 
         return this.router;
     }
@@ -805,7 +803,7 @@ class AuthController {
             //Rutas ublicas 
             for (let path of this.publicPathsList) {
                 const expr = pathToRegexp.pathToRegexp(path);
-                if (expr.exec(url__default['default'].parse(request.url).pathname) !== null) {
+                if (expr.exec(url__default["default"].parse(request.url).pathname) !== null) {
                     return next();
                 }
             }
@@ -909,7 +907,7 @@ class JwtAuthHandler extends IAuthHandler {
                 var decoded = this.tokenGenerator.verify(token);
                 const { sub, username, exp } = decoded;
 
-                if (!sub || !username || moment__default['default'](exp).isAfter(new Date())) {
+                if (!sub || !username || moment__default["default"](exp).isAfter(new Date())) {
                     return false;
                 }
 
@@ -935,7 +933,7 @@ class JwtAuthHandler extends IAuthHandler {
         const user = await this.userDao.findByUsername(username);
 
         if (user && user.username === username && user.password === Utils.encrypt(password)) {
-            return this.tokenGenerator.sign(lodash__default['default'].omit(user, ['password']));
+            return this.tokenGenerator.sign(lodash__default["default"].omit(user, ['password']));
         }
 
         return false;
@@ -1006,7 +1004,7 @@ class CookieAuthHandler extends IAuthHandler {
         //TODO quizas poder configurar los nombres de username y password
 
         if (user && user.username === username && user.password === Utils.encrypt(password)) {
-            request.session = { ...request.session, ...lodash__default['default'].omit(user, ['password']) };
+            request.session = { ...request.session, ...lodash__default["default"].omit(user, ['password']) };
 
             return true;
         }
@@ -1194,7 +1192,7 @@ class KnexConnector {
          * @type {Knex}
          * @public
          */
-        this.connection = Knex__default['default'](config);
+        this.connection = Knex__default["default"](config);
     }
 
 
@@ -1229,7 +1227,7 @@ class BaseKnexDao {
         }
 
         return KnexConnector$1.connection.from(this.tableName).where((builder) => (
-            KnexFilterParser.parseFilters(builder, lodash__default['default'].omit(filters, ['sort', 'start', 'limit']))
+            KnexFilterParser.parseFilters(builder, lodash__default["default"].omit(filters, ['sort', 'start', 'limit']))
         )).orderByRaw(sorts).limit(limit).offset(start);
 
     }
@@ -1237,7 +1235,7 @@ class BaseKnexDao {
     
     async countFilteredData(filters) {
         let data = await KnexConnector$1.connection.from(this.tableName).where((builder) => (
-            KnexFilterParser.parseFilters(builder, lodash__default['default'].omit(filters, ['sort', 'start', 'limit']))
+            KnexFilterParser.parseFilters(builder, lodash__default["default"].omit(filters, ['sort', 'start', 'limit']))
         )).count('id', { as: 'total' });
 
         return data && data[0].total;
@@ -1284,7 +1282,7 @@ class BaseController {
 
 
     constructor() {
-        this.router = express__default['default'].Router();
+        this.router = express__default["default"].Router();
     }
 
     configure(entity, config) {
@@ -1603,8 +1601,8 @@ class App {
      */
     startRepl() {
         try {
-            net__default['default'].createServer((socket) => {
-                const remote = repl__default['default'].start({
+            net__default["default"].createServer((socket) => {
+                const remote = repl__default["default"].start({
                     prompt: "lisco::remote> ",
                     input: socket,
                     output: socket,
