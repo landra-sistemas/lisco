@@ -55,13 +55,13 @@ export default class KnexFilterParser {
                     case 'date':
                     case 'between':
                         if (elm.start && elm.end) {
-                            query = query.whereBetween(prop, [elm.start, elm.end]);
+                            query = query.whereRaw(`${prop} BETWEEN '${elm.start}' AND '${elm.end}'`);
                         }
                         if (elm.start && !elm.end) {
-                            query = query.where(prop, '>=', elm.start);
+                            query = query.whereRaw(`${prop} >= '${elm.start}'`);
                         }
                         if (!elm.start && elm.end) {
-                            query = query.where(prop, '>=', elm.end);
+                            query = query.whereRaw(`${prop} >= '${elm.end}'`);
                         }
                         break;
                     case 'jsonb':
@@ -71,16 +71,16 @@ export default class KnexFilterParser {
                         query = query.whereRaw(`to_tsvector(${prop}::text) @@ to_tsquery('${elm.value}')`);
                         break;
                     case 'greater':
-                        query = query.where(prop, '>', elm.value);
+                        query = query.whereRaw(`${prop} > '${elm.value}'`);
                         break;
                     case 'greaterEq':
-                        query = query.where(prop, '>=', elm.value);
+                        query = query.whereRaw(`${prop} >= '${elm.value}'`);
                         break;
                     case 'less':
-                        query = query.where(prop, '<', elm.value);
+                        query = query.whereRaw(`${prop} < '${elm.value}'`);
                         break;
                     case 'lessEq':
-                        query = query.where(prop, '<=', elm.value);
+                        query = query.whereRaw(`${prop} <= '${elm.value}'`);
                         break;
                     case 'exists':
                         query = query.whereExists(prop);
@@ -89,7 +89,7 @@ export default class KnexFilterParser {
                         query = query.whereNotExists(prop);
                         break;
                     case 'exact':
-                        query = query.where(prop, elm.value);
+                        query = query.whereRaw(`${prop} = '${elm.value}'`);
                         break;
                     case 'exactI':
                         //!FIXME https://github.com/knex/knex/issues/233
@@ -101,19 +101,20 @@ export default class KnexFilterParser {
                             propComplex = prop.split(',');
                         }
                         if (!Array.isArray(elm.value) && elm.value != undefined) {
-                            query = query.whereIn(propComplex, elm.value.split(','));
+                            // query = query.whereIn(propComplex, elm.value.split(','));
+                            query = query.whereRaw(`${prop} IN (${elm.value.split(',').map(e => `'${e}'`).join(',')})`);
                         } else {
-                            if(elm.value != undefined){
-                                query = query.whereIn(propComplex, elm.value);
+                            if (elm.value != undefined) {
+                                query = query.whereRaw(`${prop} IN (${elm.value.map(e => `'${e}'`).join(',')})`);
                             }
                         }
                         break;
                     case 'not':
-                        query = query.whereNot(prop, elm.value);
+                        query = query.whereNot(`${prop} != '${elm.value}'`);
                         break;
                     case 'like':
                         let value_like = Utils.replaceAll(elm.value, '*', '%');
-                        query = query.where(prop, 'LIKE', value_like);
+                        query = query.whereRaw(prop, 'LIKE', value_like);
                         break;
                     case 'likeI':
                         //!FIXME https://github.com/knex/knex/issues/233
@@ -121,10 +122,10 @@ export default class KnexFilterParser {
                         query = query.where(prop, 'ILIKE', value_ilike);
                         break;
                     case 'null':
-                        query = query.whereNull(prop);
+                        query = query.whereRaw(`${prop} is NULL`);
                         break;
                     case 'notnull':
-                        query = query.whereNotNull(prop);
+                        query = query.whereRaw(`${prop} is not NULL`);
                         break;
                 }
             } else {
