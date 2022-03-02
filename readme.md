@@ -1,7 +1,7 @@
 # Lisco Framework
 
 
-![alt](./logo.png)
+![alt](https://raw.githubusercontent.com/landra-sistemas/lisco/master/logo.png)
 
 Framework nodejs con express y knex para el desarrollo de backends.
 

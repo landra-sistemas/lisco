@@ -1,9 +1,13 @@
 {
     "name": "lisco",
-    "version": "1.0.40",
-    "author": "iago.sardina",
-    "description": "Framework nodejs ",
-    "license": "Landra",
+    "version": "1.0.47",
+    "author": "LandraSistemas",
+    "description": "Framework nodejs con Knex y Express",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/landra-sistemas/lisco.git"
+    },
+    "license": "MIT License",
     "main": "dist/lisco.esm.js",
     "dependencies": {
         "cluster-messages": "^1.2.1",
@@ -22,6 +26,7 @@
         "moment": "^2.29.1",
         "path-to-regexp": "^6.2.0",
         "pg": "^8.7.1",
+        "search-string": "^3.1.0",
         "socket.io": "^4.4.1",
         "uuid": "^8.3.2"
     },
@@ -36,6 +41,7 @@
         "@rollup/plugin-commonjs": "^21.0.1",
         "@rollup/plugin-json": "^4.1.0",
         "@rollup/plugin-node-resolve": "^13.1.3",
+        "@vscode/sqlite3": "^5.0.7",
         "chai": "^4.3.6",
         "chai-http": "^4.3.0",
         "cookie": "^0.4.1",

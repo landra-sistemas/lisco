@@ -30,7 +30,8 @@ export default class Server {
             compression: true,
             cors: { origin: true, credentials: true },
             fileupload: true,
-            socketio: { transports: ["websocket"] }
+            socketio: { transports: ["websocket"] },
+            traceRequests: false
         });
         this.statics = statics;
         this.routes = routes;
@@ -99,7 +100,7 @@ export default class Server {
         }
 
         //Logging
-        if (!process.env.DISABLE_LOGGER) {
+        if ((config && config.traceRequests === true) && process.env.DISABLE_LOGGER != "true") {
             this.app.use((request, response, next) => {
                 request.requestTime = Date.now();
                 response.on("finish", () => {

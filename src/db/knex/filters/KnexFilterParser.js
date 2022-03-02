@@ -1,7 +1,13 @@
 import { Utils } from "../../../common";
 
+import * as SearchString from 'search-string';
 export default class KnexFilterParser {
 
+
+    static parseQueryString(builder, string) {
+        const parsedQry = SearchString.parse(string);
+        return builder;
+    }
 
     /**
      * Convierte un objeto clave valor en un conjunto de filtros.
@@ -55,13 +61,13 @@ export default class KnexFilterParser {
                     case 'dateraw':
                     case 'betweenraw':
                         if (elm.start && elm.end) {
-                            query = query.whereRaw(`${prop} BETWEEN '${elm.start}' AND '${elm.end}'`);
+                            query = query.whereRaw(`? BETWEEN '?' AND '?'`, [prop, elm.start, elm.end]);
                         }
                         if (elm.start && !elm.end) {
-                            query = query.whereRaw(`${prop} >= '${elm.start}'`);
+                            query = query.whereRaw(`? >= '?'`, [prop, elm.start]);
                         }
                         if (!elm.start && elm.end) {
-                            query = query.whereRaw(`${prop} >= '${elm.end}'`);
+                            query = query.whereRaw(`? >= '?'`, [prop, elm.start]);
                         }
                         break;
                     case 'date':
@@ -77,10 +83,10 @@ export default class KnexFilterParser {
                         }
                         break;
                     case 'jsonb':
-                        query = query.whereRaw(prop + " ILIKE ?", ["%" + elm.value + "%"]);
+                        query = query.whereRaw("? ILIKE ?", [prop, "%" + elm.value + "%"]);
                         break;
                     case 'full-text-psql':
-                        query = query.whereRaw(`to_tsvector(${prop}::text) @@ to_tsquery('${elm.value}')`);
+                        query = query.whereRaw(`to_tsvector(?::text) @@ to_tsquery(?)`, [prop, elm.value]);
                         break;
                     case 'greater':
                         query = query.where(prop, '>', elm.value);
@@ -94,16 +100,16 @@ export default class KnexFilterParser {
                     case 'lessEq':
                         query = query.where(prop, '<=', elm.value);
                     case 'greaterraw':
-                        query = query.whereRaw(`${prop} > '${elm.value}'`);
+                        query = query.whereRaw(`? > ?`, [prop, elm.value]);
                         break;
                     case 'greaterEqraw':
-                        query = query.whereRaw(`${prop} >= '${elm.value}'`);
+                        query = query.whereRaw(`? >= ?`, [prop, elm.value]);
                         break;
                     case 'lessraw':
-                        query = query.whereRaw(`${prop} < '${elm.value}'`);
+                        query = query.whereRaw(`? < ?`, [prop, elm.value]);
                         break;
                     case 'lessEqraw':
-                        query = query.whereRaw(`${prop} <= '${elm.value}'`);
+                        query = query.whereRaw(`? <= ?`, [prop, elm.value]);
                         break;
                     case 'exists':
                         query = query.whereExists(prop);
@@ -112,14 +118,10 @@ export default class KnexFilterParser {
                         query = query.whereNotExists(prop);
                         break;
                     case 'exactraw':
-                        query = query.whereRaw(`${prop} = '${elm.value}'`);
+                        query = query.whereRaw(`? = ?`, [prop, elm.value]);
                         break;
                     case 'exact':
                         query = query.where(prop, elm.value);
-                    case 'exactI':
-                        //!FIXME https://github.com/knex/knex/issues/233
-                        query = query.where(prop, 'ILIKE', elm.value);
-                        break;
                     case 'in':
                         let propComplex = prop;
                         if (propComplex.includes(",")) {
@@ -135,19 +137,15 @@ export default class KnexFilterParser {
                         break;
                     case 'inraw':
                         if (!Array.isArray(elm.value) && elm.value != undefined) {
-                            query = query.whereRaw(`${prop} IN (${elm.value.split(',').map(e => `'${e}'`).join(',')})`);
+                            query = query.whereRaw(`? IN (?)`, [prop, elm.value.split(',').map(e => `'${e}'`).join(',')]);
                         } else {
                             if (elm.value != undefined) {
-                                query = query.whereRaw(`${prop} IN (${elm.value.map(e => `'${e}'`).join(',')})`);
+                                query = query.whereRaw(`? IN (?)`, [prop, elm.value.map(e => `'${e}'`).join(',')]);
                             }
                         }
                         break;
                     case 'notraw':
-                        query = query.whereNot(`${prop} != '${elm.value}'`);
-                        break;
-                    case 'likeraw':
-                        let value_likeraw = Utils.replaceAll(elm.value, '*', '%');
-                        query = query.whereRaw(prop, 'LIKE', value_likeraw);
+                        query = query.whereNot(`? != ?`, [prop, elm.value]);
                         break;
                     case 'not':
                         query = query.whereNot(prop, elm.value);
@@ -156,16 +154,32 @@ export default class KnexFilterParser {
                         let value_like = Utils.replaceAll(elm.value, '*', '%');
                         query = query.where(prop, 'LIKE', value_like);
                         break;
+                    case 'likeraw':
+                        let value_likeraw = Utils.replaceAll(elm.value, '*', '%');
+                        query = query.whereRaw(" ? LIKE ?", [prop, value_likeraw]);
+                        break;
+                    case 'notlike':
+                        let value_nolike = Utils.replaceAll(elm.value, '*', '%');
+                        query = query.where(prop, ' NOT LIKE', value_nolike);
+                        break;
+                    case 'notlikeraw':
+                        let value_nolikeraw = Utils.replaceAll(elm.value, '*', '%');
+                        query = query.whereRaw(" ? NOT LIKE ?", [prop, value_nolikeraw]);
+                        break;
+
                     case 'likeI':
-                        //!FIXME https://github.com/knex/knex/issues/233
-                        let value_ilike = Utils.replaceAll(elm.value, '*', '%');
-                        query = query.where(prop, 'ILIKE', value_ilike);
+                        let value_rawilike = Utils.replaceAll(elm.value, '*', '%');
+                        query = query.whereRaw(" ? ILIKE ?", [prop, value_rawilike]);
+                        break;
+                    case 'notlikeI':
+                        let value_notrawilike = Utils.replaceAll(elm.value, '*', '%');
+                        query = query.whereRaw(" ? NOT ILIKE ?", [prop, value_notrawilike]);
                         break;
                     case 'nullraw':
-                        query = query.whereRaw(`${prop} is NULL`);
+                        query = query.whereRaw(`? is NULL`, [prop]);
                         break;
                     case 'notnullraw':
-                        query = query.whereRaw(`${prop} is not NULL`);
+                        query = query.whereRaw(`? is not NULL`, [prop]);
                         break;
                     case 'null':
                         query = query.whereNull(prop);

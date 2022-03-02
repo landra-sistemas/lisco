@@ -50,7 +50,7 @@ describe('KnexFilterParser', () => {
         console.log(query)
         expect(query).not.to.be.null;
         expect(query).to.have.property('sql')
-        expect(query.sql).to.contains('BETWEEN')
+        expect(query.sql).to.contains('between')
         expect(query).to.have.property('bindings')
         // expect(query.bindings).to.deep.eq(['1', '10'])
 
@@ -68,7 +68,7 @@ describe('KnexFilterParser', () => {
         console.log(query)
         expect(query).not.to.be.null;
         expect(query).to.have.property('sql')
-        expect(query.sql).to.contains('IN')
+        expect(query.sql).to.contains('in')
         expect(query).to.have.property('bindings')
         // expect(query.bindings).to.deep.eq([1, 2, 3])
 
@@ -91,7 +91,7 @@ describe('KnexFilterParser', () => {
         console.log(query)
         expect(query).not.to.be.null;
         expect(query).to.have.property('sql')
-        expect(query.sql).to.contains('IN')
+        expect(query.sql).to.contains('in')
         expect(query.sql).to.contains('<')
         // expect(query).to.have.property('bindings')
         // expect(query.bindings).to.deep.eq([1, 2, 3, 3])
@@ -110,6 +110,20 @@ describe('KnexFilterParser', () => {
         expect(sorts).to.eq('test ASC')
 
     })
+
+
+    it('#parseQueryString()', async () => {
+
+        let string = "from:hi@retrace.io,foo@gmail.com to:me subject:vacations date:1/10/2013, 15/04/2014 photos";
+        let query = knex('test').from('test').where((builder) => KnexFilterParser.parseQueryString(builder, string)).toSQL();
+        console.log(query)
+
+        expect(query).not.to.be.null;
+        expect(query).to.have.property('sql')
+
+    })
+
+
 
 
 
