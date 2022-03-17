@@ -114,7 +114,7 @@ describe('KnexFilterParser', () => {
 
     it('#parseQueryString()', async () => {
 
-        let string = "from:hi@retrace.io,foo@gmail.com to:me subject:vacations date:1/10/2013, 15/04/2014 photos";
+        let string = "from:hi@retrace.io,foo@gmail.com to:me subject:vacations date:[1/10/2013 TO 15/04/2014] photos";
         let query = knex('test').from('test').where((builder) => KnexFilterParser.parseQueryString(builder, string)).toSQL();
         console.log(query)
 

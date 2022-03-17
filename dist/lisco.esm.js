@@ -26,7 +26,7 @@ var log4js = require('log4js');
 var expressAsyncHandler = require('express-async-handler');
 var pathToRegexp = require('path-to-regexp');
 var moment = require('moment');
-var SearchString = require('search-string');
+var fql_parser = require('fql_parser');
 var Knex = require('knex');
 var net = require('net');
 var repl = require('repl');
@@ -71,7 +71,6 @@ var os__default = /*#__PURE__*/_interopDefaultLegacy(os);
 var ClusterMessages__default = /*#__PURE__*/_interopDefaultLegacy(ClusterMessages);
 var expressAsyncHandler__default = /*#__PURE__*/_interopDefaultLegacy(expressAsyncHandler);
 var moment__default = /*#__PURE__*/_interopDefaultLegacy(moment);
-var SearchString__namespace = /*#__PURE__*/_interopNamespace(SearchString);
 var Knex__default = /*#__PURE__*/_interopDefaultLegacy(Knex);
 var net__default = /*#__PURE__*/_interopDefaultLegacy(net);
 var repl__default = /*#__PURE__*/_interopDefaultLegacy(repl);
@@ -1032,10 +1031,25 @@ class CookieAuthHandler extends IAuthHandler {
 class KnexFilterParser {
 
 
-    static parseQueryString(builder, string) {
-        SearchString__namespace.parse(string);
-        return builder;
-    }
+    /**
+     * 
+     * @param {*} builder 
+     * @param {*} string 
+     * @returns 
+     */
+    static parseQueryString(builder, string, tableName) {
+        const options = {
+            allowGlobalSearch: true,
+            caseInsensitive: true
+        };
+        //Agregar los aliases en caso de que se hayan configurado de forma global
+        if (KnexConnector$1.columnAliases && KnexConnector$1.columnAliases[tableName]) {
+            options.aliases = KnexConnector$1.columnAliases[tableName];
+        }
+        const parser = new fql_parser.FQLParser(options);
+        const data = parser.parse(string);
+
+        return new fql_parser.KnexParser(tableName).toKnex(builder, data);    }
 
     /**
      * Convierte un objeto clave valor en un conjunto de filtros.
@@ -1076,7 +1090,7 @@ class KnexFilterParser {
      *    like: filtro like
      *    likeI: filtro like ignorando mayusculas y minusculas
      */
-    static parseFilters(builder, filter) {
+    static parseFilters(builder, filter, tableName) {
         let query = builder;
 
         for (let prop in filter) {
@@ -1086,6 +1100,11 @@ class KnexFilterParser {
             if (typeof elm === 'object') {
 
                 switch (elm.type) {
+                    case 'fql':
+                        query = KnexFilterParser.parseQueryString(query, elm.value, tableName);
+                        break;
+                    case 'date':
+                    case 'between':
                     case 'dateraw':
                     case 'betweenraw':
                         if (elm.start && elm.end) {
@@ -1098,44 +1117,26 @@ class KnexFilterParser {
                             query = query.whereRaw(`? >= '?'`, [prop, elm.start]);
                         }
                         break;
-                    case 'date':
-                    case 'between':
-                        if (elm.start && elm.end) {
-                            query = query.whereBetween(prop, [elm.start, elm.end]);
-                        }
-                        if (elm.start && !elm.end) {
-                            query = query.where(prop, '>=', elm.start);
-                        }
-                        if (!elm.start && elm.end) {
-                            query = query.where(prop, '>=', elm.end);
-                        }
-                        break;
                     case 'jsonb':
                         query = query.whereRaw("? ILIKE ?", [prop, "%" + elm.value + "%"]);
                         break;
                     case 'full-text-psql':
-                        query = query.whereRaw(`to_tsvector(?::text) @@ to_tsquery(?)`, [prop, elm.value]);
+                        query = query.whereRaw(`to_tsvector(${prop}::text) @@ to_tsquery(?)`, [elm.value]);
                         break;
+
                     case 'greater':
-                        query = query.where(prop, '>', elm.value);
-                        break;
-                    case 'greaterEq':
-                        query = query.where(prop, '>=', elm.value);
-                        break;
-                    case 'less':
-                        query = query.where(prop, '<', elm.value);
-                        break;
-                    case 'lessEq':
-                        query = query.where(prop, '<=', elm.value);
                     case 'greaterraw':
                         query = query.whereRaw(`? > ?`, [prop, elm.value]);
                         break;
+                    case 'greaterEq':
                     case 'greaterEqraw':
                         query = query.whereRaw(`? >= ?`, [prop, elm.value]);
                         break;
+                    case 'less':
                     case 'lessraw':
                         query = query.whereRaw(`? < ?`, [prop, elm.value]);
                         break;
+                    case 'lessEq':
                     case 'lessEqraw':
                         query = query.whereRaw(`? <= ?`, [prop, elm.value]);
                         break;
@@ -1145,11 +1146,10 @@ class KnexFilterParser {
                     case 'notexists':
                         query = query.whereNotExists(prop);
                         break;
+                    case 'exact':
                     case 'exactraw':
                         query = query.whereRaw(`? = ?`, [prop, elm.value]);
                         break;
-                    case 'exact':
-                        query = query.where(prop, elm.value);
                     case 'in':
                         let propComplex = prop;
                         if (propComplex.includes(",")) {
@@ -1172,29 +1172,20 @@ class KnexFilterParser {
                             }
                         }
                         break;
-                    case 'notraw':
-                        query = query.whereNot(`? != ?`, [prop, elm.value]);
-                        break;
                     case 'not':
-                        query = query.whereNot(prop, elm.value);
+                    case 'notraw':
+                        query = query.whereRaw(`? != ?`, [prop, elm.value]);
                         break;
                     case 'like':
-                        let value_like = Utils.replaceAll(elm.value, '*', '%');
-                        query = query.where(prop, 'LIKE', value_like);
-                        break;
                     case 'likeraw':
                         let value_likeraw = Utils.replaceAll(elm.value, '*', '%');
                         query = query.whereRaw(" ? LIKE ?", [prop, value_likeraw]);
                         break;
                     case 'notlike':
-                        let value_nolike = Utils.replaceAll(elm.value, '*', '%');
-                        query = query.where(prop, ' NOT LIKE', value_nolike);
-                        break;
                     case 'notlikeraw':
                         let value_nolikeraw = Utils.replaceAll(elm.value, '*', '%');
                         query = query.whereRaw(" ? NOT LIKE ?", [prop, value_nolikeraw]);
                         break;
-
                     case 'likeI':
                         let value_rawilike = Utils.replaceAll(elm.value, '*', '%');
                         query = query.whereRaw(" ? ILIKE ?", [prop, value_rawilike]);
@@ -1203,17 +1194,13 @@ class KnexFilterParser {
                         let value_notrawilike = Utils.replaceAll(elm.value, '*', '%');
                         query = query.whereRaw(" ? NOT ILIKE ?", [prop, value_notrawilike]);
                         break;
+                    case 'null':
                     case 'nullraw':
                         query = query.whereRaw(`? is NULL`, [prop]);
                         break;
+                    case 'notnull':
                     case 'notnullraw':
                         query = query.whereRaw(`? is not NULL`, [prop]);
-                        break;
-                    case 'null':
-                        query = query.whereNull(prop);
-                        break;
-                    case 'notnull':
-                        query = query.whereNotNull(prop);
                         break;
                 }
             } else {
@@ -1221,6 +1208,8 @@ class KnexFilterParser {
                 query = query.where(prop, elm);
             }
         }
+
+        // console.log(query.toSQL());
         return query;
     }
 
@@ -1247,7 +1236,7 @@ class KnexFilterParser {
 
 class KnexConnector {
 
-    
+
     init(config) {
 
         /**
@@ -1257,6 +1246,27 @@ class KnexConnector {
          */
         this.connection = Knex__default["default"](config);
     }
+
+    /**
+     * Configura de forma global los aliases de las columnas para utilizar en FQL.
+     * 
+     * La estructura es 
+     * {
+            "table1": {
+                "alias1": "column1",
+                "alias2": "column2"
+            },
+            "table2": {
+                "alias1": "column1"
+            }
+        }
+     *
+     * @param {*} aliases 
+     */
+    setColumnAliases(aliases) {
+        this.columnAliases = aliases;
+    }
+    
 
 
     test() {
@@ -1290,7 +1300,7 @@ class BaseKnexDao {
         }
 
         return KnexConnector$1.connection.from(this.tableName).where((builder) => (
-            KnexFilterParser.parseFilters(builder, lodash__default["default"].omit(filters, ['sort', 'start', 'limit']))
+            KnexFilterParser.parseFilters(builder, lodash__default["default"].omit(filters, ['sort', 'start', 'limit']), this.tableName)
         )).orderByRaw(sorts).limit(limit).offset(start);
 
     }
@@ -1298,7 +1308,7 @@ class BaseKnexDao {
     
     async countFilteredData(filters) {
         let data = await KnexConnector$1.connection.from(this.tableName).where((builder) => (
-            KnexFilterParser.parseFilters(builder, lodash__default["default"].omit(filters, ['sort', 'start', 'limit']))
+            KnexFilterParser.parseFilters(builder, lodash__default["default"].omit(filters, ['sort', 'start', 'limit']), this.tableName)
         )).count('id', { as: 'total' });
 
         return data && data[0].total;

@@ -2,7 +2,7 @@ import Knex from 'knex'
 
 class KnexConnector {
 
-    
+
     init(config) {
 
         /**
@@ -12,6 +12,27 @@ class KnexConnector {
          */
         this.connection = Knex(config)
     }
+
+    /**
+     * Configura de forma global los aliases de las columnas para utilizar en FQL.
+     * 
+     * La estructura es 
+     * {
+            "table1": {
+                "alias1": "column1",
+                "alias2": "column2"
+            },
+            "table2": {
+                "alias1": "column1"
+            }
+        }
+     *
+     * @param {*} aliases 
+     */
+    setColumnAliases(aliases) {
+        this.columnAliases = aliases;
+    }
+    
 
 
     test() {
