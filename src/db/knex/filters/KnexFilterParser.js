@@ -81,20 +81,30 @@ export default class KnexFilterParser {
                         break;
                     case 'date':
                     case 'between':
+                        if (elm.start && elm.end) {
+                            query = query.whereBetween(prop, [elm.start, elm.end]);
+                        }
+                        if (elm.start && !elm.end) {
+                            query = query.where(prop, '>=', elm.start);
+                        }
+                        if (!elm.start && elm.end) {
+                            query = query.where(prop, '>=', elm.end);
+                        }
+                        break;
                     case 'dateraw':
                     case 'betweenraw':
                         if (elm.start && elm.end) {
-                            query = query.whereRaw(`? BETWEEN '?' AND '?'`, [prop, elm.start, elm.end]);
+                            query = query.whereRaw(`${prop} BETWEEN '?' AND '?'`, [elm.start, elm.end]);
                         }
                         if (elm.start && !elm.end) {
-                            query = query.whereRaw(`? >= '?'`, [prop, elm.start]);
+                            query = query.whereRaw(`${prop} >= '?'`, [elm.start]);
                         }
                         if (!elm.start && elm.end) {
-                            query = query.whereRaw(`? >= '?'`, [prop, elm.start]);
+                            query = query.whereRaw(`${prop} >= '?'`, [elm.start]);
                         }
                         break;
                     case 'jsonb':
-                        query = query.whereRaw("? ILIKE ?", [prop, "%" + elm.value + "%"]);
+                        query = query.whereRaw(`${prop} ILIKE ?`, ["%" + elm.value + "%"]);
                         break;
                     case 'full-text-psql':
                         query = query.whereRaw(`to_tsvector(${prop}::text) @@ to_tsquery(?)`, [elm.value]);
@@ -102,19 +112,19 @@ export default class KnexFilterParser {
 
                     case 'greater':
                     case 'greaterraw':
-                        query = query.whereRaw(`? > ?`, [prop, elm.value]);
+                        query = query.whereRaw(`${prop} > ?`, [elm.value]);
                         break;
                     case 'greaterEq':
                     case 'greaterEqraw':
-                        query = query.whereRaw(`? >= ?`, [prop, elm.value]);
+                        query = query.whereRaw(`${prop} >= ?`, [elm.value]);
                         break;
                     case 'less':
                     case 'lessraw':
-                        query = query.whereRaw(`? < ?`, [prop, elm.value]);
+                        query = query.whereRaw(`${prop} < ?`, [elm.value]);
                         break;
                     case 'lessEq':
                     case 'lessEqraw':
-                        query = query.whereRaw(`? <= ?`, [prop, elm.value]);
+                        query = query.whereRaw(`${prop} <= ?`, [elm.value]);
                         break;
                     case 'exists':
                         query = query.whereExists(prop);
@@ -124,7 +134,7 @@ export default class KnexFilterParser {
                         break;
                     case 'exact':
                     case 'exactraw':
-                        query = query.whereRaw(`? = ?`, [prop, elm.value]);
+                        query = query.whereRaw(`${prop} = ?`, [elm.value]);
                         break;
                     case 'in':
                         let propComplex = prop;
@@ -141,42 +151,42 @@ export default class KnexFilterParser {
                         break;
                     case 'inraw':
                         if (!Array.isArray(elm.value) && elm.value != undefined) {
-                            query = query.whereRaw(`? IN (?)`, [prop, elm.value.split(',').map(e => `'${e}'`).join(',')]);
+                            query = query.whereRaw(`${prop} IN (?)`, [elm.value.split(',').map(e => `'${e}'`).join(',')]);
                         } else {
                             if (elm.value != undefined) {
-                                query = query.whereRaw(`? IN (?)`, [prop, elm.value.map(e => `'${e}'`).join(',')]);
+                                query = query.whereRaw(`${prop} IN (?)`, [elm.value.map(e => `'${e}'`).join(',')]);
                             }
                         }
                         break;
                     case 'not':
                     case 'notraw':
-                        query = query.whereRaw(`? != ?`, [prop, elm.value]);
+                        query = query.whereRaw(`${prop} != ?`, [elm.value]);
                         break;
                     case 'like':
                     case 'likeraw':
                         let value_likeraw = Utils.replaceAll(elm.value, '*', '%');
-                        query = query.whereRaw(" ? LIKE ?", [prop, value_likeraw]);
+                        query = query.whereRaw(` ${prop} LIKE ?`, [value_likeraw]);
                         break;
                     case 'notlike':
                     case 'notlikeraw':
                         let value_nolikeraw = Utils.replaceAll(elm.value, '*', '%');
-                        query = query.whereRaw(" ? NOT LIKE ?", [prop, value_nolikeraw]);
+                        query = query.whereRaw(` ${prop} NOT LIKE ?`, [value_nolikeraw]);
                         break;
                     case 'likeI':
                         let value_rawilike = Utils.replaceAll(elm.value, '*', '%');
-                        query = query.whereRaw(" ? ILIKE ?", [prop, value_rawilike]);
+                        query = query.whereRaw(` ${prop} ILIKE ?`, [value_rawilike]);
                         break;
                     case 'notlikeI':
                         let value_notrawilike = Utils.replaceAll(elm.value, '*', '%');
-                        query = query.whereRaw(" ? NOT ILIKE ?", [prop, value_notrawilike]);
+                        query = query.whereRaw(` ${prop} NOT ILIKE ?`, [value_notrawilike]);
                         break;
                     case 'null':
                     case 'nullraw':
-                        query = query.whereRaw(`? is NULL`, [prop]);
+                        query = query.whereRaw(`${prop} is NULL`);
                         break;
                     case 'notnull':
                     case 'notnullraw':
-                        query = query.whereRaw(`? is not NULL`, [prop]);
+                        query = query.whereRaw(`${prop} is not NULL`);
                         break;
                 }
             } else {
