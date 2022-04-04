@@ -1,6 +1,6 @@
 {
     "name": "lisco",
-    "version": "1.0.52",
+    "version": "1.0.53",
     "author": "LandraSistemas",
     "description": "Framework nodejs con Knex y Express",
     "repository": {
@@ -14,7 +14,7 @@
         "compression": "^1.7.4",
         "cookie-parser": "^1.4.6",
         "cors": "^2.8.5",
-        "dotenv": "^15.0.0",
+        "dotenv": "^15.0.1",
         "esm": "^3.2.25",
         "express": "^4.17.2",
         "express-async-handler": "^1.2.0",
