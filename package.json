@@ -1,6 +1,6 @@
 {
     "name": "@landra_sistemas/lisco",
-    "version": "0.0.4",
+    "version": "0.0.6",
     "author": "LandraSistemas",
     "description": "Framework nodejs con Knex y Express",
     "repository": {
@@ -42,7 +42,8 @@
         "dev": "rollup -c -w",
         "start": "node execute.js",
         "test": "mocha test --exit",
-        "clean": "rimraf node_modules"
+        "clean": "rimraf node_modules",
+        "send": "npm publish --access public"
     },
     "devDependencies": {
         "@haensl/rollup-plugin-local-resolve": "^1.1.5",

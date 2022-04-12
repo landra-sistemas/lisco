@@ -90,13 +90,13 @@ export default class KnexFilterParser {
                     case "dateraw":
                     case "betweenraw":
                         if (elm.start && elm.end) {
-                            query = query.whereRaw(`${prop} BETWEEN '?' AND '?'`, [elm.start, elm.end]);
+                            query = query.whereRaw(`${prop} BETWEEN ? AND ?`, [elm.start, elm.end]);
                         }
                         if (elm.start && !elm.end) {
-                            query = query.whereRaw(`${prop} >= '?'`, [elm.start]);
+                            query = query.whereRaw(`${prop} >= ?`, [elm.start]);
                         }
                         if (!elm.start && elm.end) {
-                            query = query.whereRaw(`${prop} >= '?'`, [elm.start]);
+                            query = query.whereRaw(`${prop} >= ?`, [elm.end]);
                         }
                         break;
                     case "jsonb":
