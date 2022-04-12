@@ -1,7 +1,9 @@
 {
+    "node-option": [
+        "experimental-specifier-resolution=node"
+    ],
     "require": [
-        "esm",
-        "test/mocha.env"
+        "test/mocha.env.js"
     ],
     "file": [
         "./test/run-enviroment.js"
