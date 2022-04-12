@@ -1,6 +1,6 @@
 {
-    "name": "lisco",
-    "version": "1.0.53",
+    "name": "@landra_sistemas/lisco",
+    "version": "0.0.4",
     "author": "LandraSistemas",
     "description": "Framework nodejs con Knex y Express",
     "repository": {
@@ -8,18 +8,24 @@
         "url": "https://github.com/landra-sistemas/lisco.git"
     },
     "license": "MIT License",
-    "main": "dist/lisco.esm.js",
+    "source": "src/index",
+    "exports": {
+        "require": "./dist/lisco.cjs",
+        "import": "./dist/lisco.esm.js"
+    },
+    "type": "module",
+    "main": "dist/lisco.cjs",
+    "module": "./dist/lisco.esm.js",
     "dependencies": {
+        "@landra_sistemas/fql-parser": "^0.0.2",
         "cluster-messages": "^1.2.1",
         "compression": "^1.7.4",
         "cookie-parser": "^1.4.6",
         "cors": "^2.8.5",
-        "dotenv": "^15.0.1",
-        "esm": "^3.2.25",
+        "dotenv": "^15.0.0",
         "express": "^4.17.2",
         "express-async-handler": "^1.2.0",
         "express-fileupload": "^1.2.1",
-        "fql_parser": "^0.0.1",
         "helmet": "^5.0.2",
         "jsonwebtoken": "^8.5.1",
         "knex": "^1.0.1",
@@ -35,13 +41,15 @@
         "build": "rollup -c",
         "dev": "rollup -c -w",
         "start": "node execute.js",
-        "test": "nyc --reporter=lcov --reporter=html mocha --exit || exit 0"
+        "test": "nyc --reporter=lcov --reporter=html mocha --exit || exit 0",
+        "clean": "rimraf node_modules"
     },
     "devDependencies": {
         "@haensl/rollup-plugin-local-resolve": "^1.1.5",
-        "@rollup/plugin-commonjs": "^21.0.1",
+        "@rollup/plugin-commonjs": "^21.0.3",
         "@rollup/plugin-json": "^4.1.0",
         "@rollup/plugin-node-resolve": "^13.1.3",
+        "@rollup/plugin-replace": "^4.0.0",
         "@vscode/sqlite3": "^5.0.7",
         "chai": "^4.3.6",
         "chai-http": "^4.3.0",
@@ -50,7 +58,9 @@
         "mocha": "^9.2.0",
         "ms": "^2.1.3",
         "nyc": "^15.1.0",
+        "rimraf": "^3.0.2",
         "rollup": "^2.66.1",
+        "rollup-plugin-peer-deps-external": "^2.2.4",
         "rollup-plugin-terser": "^7.0.2"
     }
 }

@@ -1,11 +1,16 @@
-import { nodeResolve } from '@rollup/plugin-node-resolve';
-import commonjs from '@rollup/plugin-commonjs';
-import json from '@rollup/plugin-json';
-import { terser } from 'rollup-plugin-terser';
-import localResolve from '@haensl/rollup-plugin-local-resolve';
-import pkg from './package.json';
+import commonjs from "@rollup/plugin-commonjs";
+import json from "@rollup/plugin-json";
+import nodeResolve from "@rollup/plugin-node-resolve";
+import replace from "@rollup/plugin-replace";
+import peerDepsExternal from "rollup-plugin-peer-deps-external";
+import { terser } from "rollup-plugin-terser";
 
-const production = !process.env.ROLLUP_WATCH;
+import packageJson from "./package.json";
+
+const env = process.env.NODE_ENV;
+const extensions = [".js", ".cjs", ".mjs"];
+const minify_cjs_Extension = (pathToFile) => pathToFile.replace(/\.cjs$/, ".min.cjs");
+const minify_js_Extension = (pathToFile) => pathToFile.replace(/\.js$/, ".min.js");
 
 const EXTERNALS = [
     "compression",
@@ -25,27 +30,50 @@ const EXTERNALS = [
     "socket.io",
     "pg",
     "uuid",
-    "lodash"
+    "lodash",
 ];
 
 export default [
-
     {
-        input: 'src/index.js',
+        input: packageJson.source,
         output: [
-            { file: pkg.main, format: 'cjs' },
-            // { file: pkg.main, format: 'es' }
+            {
+                file: packageJson.main,
+                format: "cjs",
+                exports: "named" /** Disable warning for default imports */,
+                sourcemap: true,
+            },
+            {
+                file: minify_cjs_Extension(packageJson.main),
+                format: "cjs",
+                exports: "named" /** Disable warning for default imports */,
+                plugins: [terser()],
+            },
+            {
+                file: packageJson.module,
+                format: "es",
+                sourcemap: true,
+            },
+            {
+                file: minify_js_Extension(packageJson.module),
+                format: "es",
+                plugins: [terser()],
+            },
         ],
         external: EXTERNALS,
         plugins: [
             json(),
-            // nodeResolve({
-            //     preferBuiltins: true,
-            //     skip: Object.keys(EXTERNALS)
-            // }), // tells Rollup how to find date-fns in node_modules
-            localResolve(),
-            // commonjs(), // converts date-fns to ES modules
-            production && terser() // minify, but only in production
-        ]
-    }
+            peerDepsExternal(),
+            nodeResolve({ extensions }),
+            replace({
+                preventAssignment: true,
+                "process.env.NODE_ENV": JSON.stringify(env),
+            }),
+            commonjs({
+                dynamicRequireTargets: [
+                    // include using a glob pattern (either a string or an array of strings)
+                ],
+            }),
+        ],
+    },
 ];

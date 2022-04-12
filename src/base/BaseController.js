@@ -1,23 +1,50 @@
-import express from 'express';
-import { JsonResponse } from '../common';
+import express from "express";
+import { JsonResponse } from "../common";
 
-const asyncHandler = require('express-async-handler')
-
+import asyncHandler from "express-async-handler";
 
 export class BaseController {
-
-
     constructor() {
         this.router = express.Router();
     }
 
     configure(entity, config) {
-        this.router.get(`/${entity}`, asyncHandler((request, response, next) => { this.listEntidad(request, response, next); }));
-        this.router.post(`/${entity}/list`, asyncHandler((request, response, next) => { this.listEntidad(request, response, next); }));
-        this.router.get(`/${entity}/:id`, asyncHandler((request, response, next) => { this.getEntidad(request, response, next); }));
-        this.router.post(`/${entity}`, asyncHandler((request, response, next) => { this.saveEntidad(request, response, next); }));
-        this.router.put(`/${entity}/:id`, asyncHandler((request, response, next) => { this.updateEntidad(request, response, next); }));
-        this.router.delete(`/${entity}/:id`, asyncHandler((request, response, next) => { this.deleteEntidad(request, response, next); }));
+        this.router.get(
+            `/${entity}`,
+            asyncHandler((request, response, next) => {
+                this.listEntidad(request, response, next);
+            })
+        );
+        this.router.post(
+            `/${entity}/list`,
+            asyncHandler((request, response, next) => {
+                this.listEntidad(request, response, next);
+            })
+        );
+        this.router.get(
+            `/${entity}/:id`,
+            asyncHandler((request, response, next) => {
+                this.getEntidad(request, response, next);
+            })
+        );
+        this.router.post(
+            `/${entity}`,
+            asyncHandler((request, response, next) => {
+                this.saveEntidad(request, response, next);
+            })
+        );
+        this.router.put(
+            `/${entity}/:id`,
+            asyncHandler((request, response, next) => {
+                this.updateEntidad(request, response, next);
+            })
+        );
+        this.router.delete(
+            `/${entity}/:id`,
+            asyncHandler((request, response, next) => {
+                this.deleteEntidad(request, response, next);
+            })
+        );
 
         this.service = config.service;
 
@@ -27,7 +54,7 @@ export class BaseController {
     /**
      * Lista entidades en la aplicacion, es posible enviarle parametros de filtrado.
      *
-     * 
+     *
      * @api {post} /:entidad/list Listar entidades
      * @apiName Listar entidades
      * @apiGroup Comun
@@ -40,14 +67,19 @@ export class BaseController {
     async listEntidad(request, response, next) {
         try {
             let service = new this.service();
-            let filters = request.method === 'POST' ? request.body : (request.query && request.query.filters ? JSON.parse(request.query.filters) : {});
+            let filters =
+                request.method === "POST"
+                    ? request.body
+                    : request.query && request.query.filters
+                    ? JSON.parse(request.query.filters)
+                    : {};
 
             let data = await service.list(filters, filters.start, filters.limit);
             let jsRes = new JsonResponse(true, data.data, null, data.total);
 
             response.json(jsRes.toJson());
         } catch (e) {
-            next(e)
+            next(e);
         }
     }
     /**
@@ -76,13 +108,13 @@ export class BaseController {
             }
 
             response.status(code).json(jsRes.toJson());
-
         } catch (e) {
             console.error(e);
             let message = "";
-            if (e.code == "22P02") { //PostgreSQL error Code form string_to_UUID
+            if (e.code == "22P02") {
+                //PostgreSQL error Code form string_to_UUID
                 message = "Expected uiid";
-            };
+            }
             let jsRes = new JsonResponse(false, null, message, 0);
             response.status(400).json(jsRes.toJson());
         }
@@ -108,11 +140,10 @@ export class BaseController {
             let data = await service.save(request.body);
             let jsRes = new JsonResponse(true, (data && data[0]) || { id: request.body.id });
 
-            response.setHeader('Location', `/entity/${jsRes.data.id}`);
+            response.setHeader("Location", `/entity/${jsRes.data.id}`);
             response.status(201).json(jsRes.toJson());
-
         } catch (e) {
-            next(e)
+            next(e);
         }
     }
 
@@ -137,9 +168,8 @@ export class BaseController {
             let jsRes = new JsonResponse(true, (data && data[0]) || { id: request.body.id });
 
             response.json(jsRes.toJson());
-
         } catch (e) {
-            next(e)
+            next(e);
         }
     }
 
@@ -150,7 +180,7 @@ export class BaseController {
      * @api {delete} /:entidad/:id/delete Delete entidad
      * @apiName Eliminar entidad
      * @apiGroup Comun
-    * @apiPermission Auth Basic username:pwd
+     * @apiPermission Auth Basic username:pwd
      * @apiParam {Number} id entidades unique ID.
      *
      * @apiSuccess {Boolean} success
@@ -163,7 +193,6 @@ export class BaseController {
             let jsRes = new JsonResponse(true, data);
 
             response.status(204).json(jsRes.toJson());
-
         } catch (e) {
             console.error(e);
             if (e == "NotFound") {
@@ -175,6 +204,4 @@ export class BaseController {
             }
         }
     }
-
 }
-

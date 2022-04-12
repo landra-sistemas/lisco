@@ -1,30 +1,28 @@
 import { Utils } from "../../../common";
 
-import { FQLParser, KnexParser } from 'fql_parser';
+import { FQLParser, KnexParser } from "@landra_sistemas/fql-parser";
 import { KnexConnector } from "..";
 
 export default class KnexFilterParser {
-
-
     /**
-     * 
-     * @param {*} builder 
-     * @param {*} string 
-     * @returns 
+     *
+     * @param {*} builder
+     * @param {*} string
+     * @returns
      */
     static parseQueryString(builder, string, tableName) {
         const options = {
             allowGlobalSearch: true,
-            caseInsensitive: true
+            caseInsensitive: true,
         };
         //Agregar los aliases en caso de que se hayan configurado de forma global
         if (KnexConnector.columnAliases && KnexConnector.columnAliases[tableName]) {
-            options.aliases = KnexConnector.columnAliases[tableName]
+            options.aliases = KnexConnector.columnAliases[tableName];
         }
         const parser = new FQLParser(options);
-        const data = parser.parse(string)
+        const data = parser.parse(string);
 
-        return new KnexParser(tableName).toKnex(builder, data);;
+        return new KnexParser(tableName).toKnex(builder, data);
     }
 
     /**
@@ -48,7 +46,7 @@ export default class KnexFilterParser {
      *       "column": [1, 2, 3]
      *     }
      *    Filtro de tipo IN, todos los elementos que coincidan
-     * 
+     *
      * - Definicion de tipos:
      *    date: filtro de fechas desde y hasta
      *    between: filtro entre dos valores concretos
@@ -70,122 +68,125 @@ export default class KnexFilterParser {
         let query = builder;
 
         for (let prop in filter) {
-
             let elm = filter[prop];
 
-            if (typeof elm === 'object') {
-
+            if (typeof elm === "object") {
                 switch (elm.type) {
-                    case 'fql':
+                    case "fql":
                         query = KnexFilterParser.parseQueryString(query, elm.value, tableName);
                         break;
-                    case 'date':
-                    case 'between':
+                    case "date":
+                    case "between":
                         if (elm.start && elm.end) {
                             query = query.whereBetween(prop, [elm.start, elm.end]);
                         }
                         if (elm.start && !elm.end) {
-                            query = query.where(prop, '>=', elm.start);
+                            query = query.where(prop, ">=", elm.start);
                         }
                         if (!elm.start && elm.end) {
-                            query = query.where(prop, '>=', elm.end);
+                            query = query.where(prop, ">=", elm.end);
                         }
                         break;
-                    case 'dateraw':
-                    case 'betweenraw':
+                    case "dateraw":
+                    case "betweenraw":
                         if (elm.start && elm.end) {
-                            query = query.whereRaw(`${prop} BETWEEN ? AND ?`, [elm.start, elm.end]);
+                            query = query.whereRaw(`${prop} BETWEEN '?' AND '?'`, [elm.start, elm.end]);
                         }
                         if (elm.start && !elm.end) {
-                            query = query.whereRaw(`${prop} >= ?`, [elm.start]);
+                            query = query.whereRaw(`${prop} >= '?'`, [elm.start]);
                         }
                         if (!elm.start && elm.end) {
-                            query = query.whereRaw(`${prop} >= ?`, [elm.start]);
+                            query = query.whereRaw(`${prop} >= '?'`, [elm.start]);
                         }
                         break;
-                    case 'jsonb':
+                    case "jsonb":
                         query = query.whereRaw(`${prop} ILIKE ?`, ["%" + elm.value + "%"]);
                         break;
-                    case 'full-text-psql':
+                    case "full-text-psql":
                         query = query.whereRaw(`to_tsvector(${prop}::text) @@ to_tsquery(?)`, [elm.value]);
                         break;
 
-                    case 'greater':
-                    case 'greaterraw':
+                    case "greater":
+                    case "greaterraw":
                         query = query.whereRaw(`${prop} > ?`, [elm.value]);
                         break;
-                    case 'greaterEq':
-                    case 'greaterEqraw':
+                    case "greaterEq":
+                    case "greaterEqraw":
                         query = query.whereRaw(`${prop} >= ?`, [elm.value]);
                         break;
-                    case 'less':
-                    case 'lessraw':
+                    case "less":
+                    case "lessraw":
                         query = query.whereRaw(`${prop} < ?`, [elm.value]);
                         break;
-                    case 'lessEq':
-                    case 'lessEqraw':
+                    case "lessEq":
+                    case "lessEqraw":
                         query = query.whereRaw(`${prop} <= ?`, [elm.value]);
                         break;
-                    case 'exists':
+                    case "exists":
                         query = query.whereExists(prop);
                         break;
-                    case 'notexists':
+                    case "notexists":
                         query = query.whereNotExists(prop);
                         break;
-                    case 'exact':
-                    case 'exactraw':
+                    case "exact":
+                    case "exactraw":
                         query = query.whereRaw(`${prop} = ?`, [elm.value]);
                         break;
-                    case 'in':
+                    case "in":
                         let propComplex = prop;
                         if (propComplex.includes(",")) {
-                            propComplex = prop.split(',');
+                            propComplex = prop.split(",");
                         }
                         if (!Array.isArray(elm.value) && elm.value != undefined) {
-                            query = query.whereIn(propComplex, elm.value.split(','));
+                            query = query.whereIn(propComplex, elm.value.split(","));
                         } else {
                             if (elm.value != undefined) {
                                 query = query.whereIn(propComplex, elm.value);
                             }
                         }
                         break;
-                    case 'inraw':
+                    case "inraw":
                         if (!Array.isArray(elm.value) && elm.value != undefined) {
-                            query = query.whereRaw(`${prop} IN (?)`, [elm.value.split(',').map(e => `'${e}'`).join(',')]);
+                            query = query.whereRaw(`${prop} IN (?)`, [
+                                elm.value
+                                    .split(",")
+                                    .map((e) => `'${e}'`)
+                                    .join(","),
+                            ]);
                         } else {
                             if (elm.value != undefined) {
-                                query = query.whereRaw(`${prop} IN (?)`, [elm.value.map(e => `'${e}'`).join(',')]);
+                                query = query.whereRaw(`${prop} IN (?)`, [elm.value.map((e) => `'${e}'`).join(",")]);
                             }
                         }
                         break;
-                    case 'not':
-                    case 'notraw':
+                    case "not":
+                    case "notraw":
                         query = query.whereRaw(`${prop} != ?`, [elm.value]);
                         break;
-                    case 'like':
-                    case 'likeraw':
-                        let value_likeraw = Utils.replaceAll(elm.value, '*', '%');
+                    case "like":
+                    case "likeraw":
+                        let value_likeraw = Utils.replaceAll(elm.value, "*", "%");
                         query = query.whereRaw(` ${prop} LIKE ?`, [value_likeraw]);
                         break;
-                    case 'notlike':
-                    case 'notlikeraw':
-                        let value_nolikeraw = Utils.replaceAll(elm.value, '*', '%');
+                    case "notlike":
+                    case "notlikeraw":
+                        let value_nolikeraw = Utils.replaceAll(elm.value, "*", "%");
                         query = query.whereRaw(` ${prop} NOT LIKE ?`, [value_nolikeraw]);
                         break;
-                    case 'likeI':
-                        let value_rawilike = Utils.replaceAll(elm.value, '*', '%');
+                    case "likeI":
+                        let value_rawilike = Utils.replaceAll(elm.value, "*", "%");
                         query = query.whereRaw(` ${prop} ILIKE ?`, [value_rawilike]);
                         break;
-                    case 'notlikeI':
-                        let value_notrawilike = Utils.replaceAll(elm.value, '*', '%');
+                    case "notlikeI":
+                        let value_notrawilike = Utils.replaceAll(elm.value, "*", "%");
                         query = query.whereRaw(` ${prop} NOT ILIKE ?`, [value_notrawilike]);
                         break;
-                    case 'null':
-                    case 'nullraw':
+                    case "null":
+                    case "nullraw":
                         query = query.whereRaw(`${prop} is NULL`);
                         break;
-                    case 'notnull':
-                    case 'notnullraw':
+                    case "notnull":
+                    case "notnullraw":
                         query = query.whereRaw(`${prop} is not NULL`);
                         break;
                 }
@@ -201,8 +202,8 @@ export default class KnexFilterParser {
 
     /**
      * Conversion de un objeto {property: XX, direction: ASC|DESC - ascend|descend} a un ORDER BY
-     * 
-     * @param {*} sorts 
+     *
+     * @param {*} sorts
      */
     static parseSort(sort) {
         if (!sort.field || !sort.direction) {
@@ -210,12 +211,10 @@ export default class KnexFilterParser {
         }
 
         let direction = "ASC";
-        if (sort.direction === 'descend') {
+        if (sort.direction === "descend") {
             direction = "DESC";
         }
 
-
         return sort.field + " " + direction;
     }
-
 }
