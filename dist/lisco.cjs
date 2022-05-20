@@ -5025,10 +5025,10 @@ class KnexFilterParser {
       options.aliases = KnexConnector$1.columnAliases[tableName];
     }
     //Options
-    if (KnexConnector$1.caseInsensitive) {
+    if (KnexConnector$1.caseInsensitive !== undefined) {
       options.caseInsensitive = KnexConnector$1.caseInsensitive;
     }
-    if (KnexConnector$1.allowGlobalSearch) {
+    if (KnexConnector$1.allowGlobalSearch !== undefined) {
       options.allowGlobalSearch = KnexConnector$1.allowGlobalSearch;
     }
     const parser = new l(options);
