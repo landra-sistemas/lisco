@@ -38,7 +38,7 @@
         "uuid": "^8.3.2"
     },
     "scripts": {
-        "build": "rollup -c",
+        "build": "rollup -c --compress false",
         "dev": "rollup -c -w",
         "start": "node execute.js",
         "test": "mocha test --exit",

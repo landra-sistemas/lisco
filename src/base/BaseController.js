@@ -7,39 +7,40 @@ export class BaseController {
     }
 
     configure(entity, config) {
+        const exAsync = Utils.expressHandler();
         this.router.get(
             `/${entity}`,
-            Utils.expressHandler((request, response, next) => {
+            exAsync((request, response, next) => {
                 this.listEntidad(request, response, next);
             })
         );
         this.router.post(
             `/${entity}/list`,
-            Utils.expressHandler((request, response, next) => {
+            exAsync((request, response, next) => {
                 this.listEntidad(request, response, next);
             })
         );
         this.router.get(
             `/${entity}/:id`,
-            Utils.expressHandler((request, response, next) => {
+            exAsync((request, response, next) => {
                 this.getEntidad(request, response, next);
             })
         );
         this.router.post(
             `/${entity}`,
-            Utils.expressHandler((request, response, next) => {
+            exAsync((request, response, next) => {
                 this.saveEntidad(request, response, next);
             })
         );
         this.router.put(
             `/${entity}/:id`,
-            Utils.expressHandler((request, response, next) => {
+            exAsync((request, response, next) => {
                 this.updateEntidad(request, response, next);
             })
         );
         this.router.delete(
             `/${entity}/:id`,
-            Utils.expressHandler((request, response, next) => {
+            exAsync((request, response, next) => {
                 this.deleteEntidad(request, response, next);
             })
         );
