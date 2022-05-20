@@ -24,7 +24,7 @@ Runtime principal. Archivo desde el que se arranca el proyecto.
 
 require = require("esm")(module/*, options*/)
 
-require('dotenv').config();
+require('dotenv-defaults').config();
 //module dependencies.
 require('./index.js')().then(() => {
     console.log("Started");

@@ -51,35 +51,35 @@ describe('EventHandler', () => {
         expect(testString).to.eq('asdf');
     });
 
-    it('#clusterWorker()', async () => {
+    // it('#clusterWorker()', async () => {
 
 
-        cluster.isMaster = false;
-        cluster.isWorker = true;
+    //     cluster.isMaster = false;
+    //     cluster.isWorker = true;
 
         
-        await App.init();
-        App.server.start();
-        let events = new EventHandler();
+    //     await App.init();
+    //     App.server.start();
+    //     let events = new EventHandler();
 
-        var testString;
+    //     var testString;
 
-        events.on('test', function test({ str, owner }) {
-            testString = str;
-            console.log(str)
-            console.log("owner: " + owner)
-        });
+    //     events.on('test', function test({ str, owner }) {
+    //         testString = str;
+    //         console.log(str)
+    //         console.log("owner: " + owner)
+    //     });
 
-        try {
-            events.emit('test', { str: 'asdf' })
-        } catch (ex) {
+    //     try {
+    //         events.emit('test', { str: 'asdf' })
+    //     } catch (ex) {
 
-        }
-        // await Utils.sleep(3000);
+    //     }
+    //     // await Utils.sleep(3000);
 
-        expect(testString).not.to.be.undefined;
-        expect(testString).to.eq('asdf');
-    });
+    //     expect(testString).not.to.be.undefined;
+    //     expect(testString).to.eq('asdf');
+    // });
 
 
 

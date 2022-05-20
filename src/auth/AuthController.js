@@ -1,8 +1,7 @@
 
 import express from 'express';
 import url from 'url';
-import { JsonResponse } from '../common';
-import expressAsyncHandler from 'express-async-handler'
+import { JsonResponse, Utils } from '../common';
 
 
 import { pathToRegexp } from 'path-to-regexp';
@@ -18,9 +17,9 @@ export default class AuthController {
 
 
     configure() {
-        this.router.use(expressAsyncHandler((res, req, next) => { this.check(res, req, next); }));
-        this.router.post('/login', expressAsyncHandler((res, req, next) => { this.loginPost(res, req, next); }));
-        this.router.post('/logout', expressAsyncHandler((res, req, next) => { this.logout(res, req, next); }));
+        this.router.use(Utils.expressHandler((res, req, next) => { this.check(res, req, next); }));
+        this.router.post('/login', Utils.expressHandler((res, req, next) => { this.loginPost(res, req, next); }));
+        this.router.post('/logout', Utils.expressHandler((res, req, next) => { this.logout(res, req, next); }));
 
         return this.router;
     }
