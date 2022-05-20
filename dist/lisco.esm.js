@@ -18,7 +18,6 @@ import { Server as Server$1 } from 'socket.io';
 import os from 'os';
 import { EventEmitter } from 'events';
 import log4js from 'log4js';
-import asyncHandler from 'express-async-handler';
 import { pathToRegexp } from 'path-to-regexp';
 import moment from 'moment';
 import Knex from 'knex';
@@ -146,6 +145,22 @@ class Utils {
         return result
     }
 
+    /**
+     * 
+     * @returns 
+     */
+    static expressHandler() {
+
+        return (fn) => {
+            return function asyncUtilWrap(...args) {
+                const fnReturn = fn(...args);
+                const next = args[args.length - 1];
+                return Promise.resolve(fnReturn).catch((e) => {
+                    return next(e);
+                });
+            };
+        };
+    }
 }
 
 class I18nLoader {
@@ -410,39 +425,39 @@ var uuid4 = {exports: {}};
 
 (function (module, exports) {
 
-var crypto$1 = crypto,
-  uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+	var crypto$1 = crypto,
+	  uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 
-exports = module.exports = genUUID;
-exports.valid = isUUID;
+	exports = module.exports = genUUID;
+	exports.valid = isUUID;
 
-function genUUID(callback) {
-  if (typeof callback !== "function") {
-    var rnd = crypto$1.randomBytes(16);
-    rnd[6] = (rnd[6] & 0x0f) | 0x40;
-    rnd[8] = (rnd[8] & 0x3f) | 0x80;
-    rnd = rnd.toString("hex").match(/(.{8})(.{4})(.{4})(.{4})(.{12})/);
-    rnd.shift();
-    return rnd.join("-");
-  }
-  crypto$1.randomBytes(16, function(err, rnd) {
-    if (err) return callback(err);
-    try {
-      rnd[6] = (rnd[6] & 0x0f) | 0x40;
-      rnd[8] = (rnd[8] & 0x3f) | 0x80;
-      rnd = rnd.toString("hex").match(/(.{8})(.{4})(.{4})(.{4})(.{12})/);
-      rnd.shift();
-      return callback(null, rnd.join("-"));
-    } catch (err2) {
-      return callback(err2);
-    }
-  });
-}
+	function genUUID(callback) {
+	  if (typeof callback !== "function") {
+	    var rnd = crypto$1.randomBytes(16);
+	    rnd[6] = (rnd[6] & 0x0f) | 0x40;
+	    rnd[8] = (rnd[8] & 0x3f) | 0x80;
+	    rnd = rnd.toString("hex").match(/(.{8})(.{4})(.{4})(.{4})(.{12})/);
+	    rnd.shift();
+	    return rnd.join("-");
+	  }
+	  crypto$1.randomBytes(16, function(err, rnd) {
+	    if (err) return callback(err);
+	    try {
+	      rnd[6] = (rnd[6] & 0x0f) | 0x40;
+	      rnd[8] = (rnd[8] & 0x3f) | 0x80;
+	      rnd = rnd.toString("hex").match(/(.{8})(.{4})(.{4})(.{4})(.{12})/);
+	      rnd.shift();
+	      return callback(null, rnd.join("-"));
+	    } catch (err2) {
+	      return callback(err2);
+	    }
+	  });
+	}
 
-function isUUID(uuid) {
-  return uuidPattern.test(uuid);
-}
-}(uuid4, uuid4.exports));
+	function isUUID(uuid) {
+	  return uuidPattern.test(uuid);
+	}
+} (uuid4, uuid4.exports));
 
 const cluster = cluster$1;
 const uuid = uuid4.exports;
@@ -704,7 +719,7 @@ class ClusterServer extends EventEmitter {
      */
     async initClustered() {
         //Launch cluster
-        if (cluster$1.isMaster) {
+        if (cluster$1.isPrimary) {
             this.configureSocketIO();
 
             this.executeOnlyMain();
@@ -908,7 +923,7 @@ class EventHandler extends EventEmitter {
             this.messages.send("event", { event: evt, props: { ...props } }, callback);
         }
 
-        if (evt && props && cluster$1.isMaster && this.app && this.app.server && this.app.server.workers) {
+        if (evt && props && cluster$1.isPrimary && this.app && this.app.server && this.app.server.workers) {
             if (process.env.DEBUG_EVENTS == true) {
                 console.debug(`${evt} -> Firing from master to workers`);
             }
@@ -978,9 +993,9 @@ class AuthController {
 
 
     configure() {
-        this.router.use(asyncHandler((res, req, next) => { this.check(res, req, next); }));
-        this.router.post('/login', asyncHandler((res, req, next) => { this.loginPost(res, req, next); }));
-        this.router.post('/logout', asyncHandler((res, req, next) => { this.logout(res, req, next); }));
+        this.router.use(Utils.expressHandler((res, req, next) => { this.check(res, req, next); }));
+        this.router.post('/login', Utils.expressHandler((res, req, next) => { this.loginPost(res, req, next); }));
+        this.router.post('/logout', Utils.expressHandler((res, req, next) => { this.logout(res, req, next); }));
 
         return this.router;
     }
@@ -1194,8 +1209,6 @@ class CookieAuthHandler extends IAuthHandler {
     async validate(request, username, password) {
 
         const user = await this.userDao.findByUsername(username);
-
-        //TODO quizas poder configurar los nombres de username y password
 
         if (user && user.username === username && user.password === Utils.encrypt(password)) {
             request.session = { ...request.session, ...lodash.omit(user, ['password']) };
@@ -4948,219 +4961,238 @@ unicodeScripts(XRegExp);
 function r(){r=function(e,t){return new l(e,void 0,t)};var e=RegExp.prototype,t=new WeakMap;function l(e,r,s){var n=new RegExp(e,r);return t.set(n,s||t.get(e)),i(n,l.prototype)}function n(e,r){var s=t.get(r);return Object.keys(s).reduce(function(t,r){return t[r]=e[s[r]],t},Object.create(null))}return s(l,RegExp),l.prototype.exec=function(t){var r=e.exec.call(this,t);return r&&(r.groups=n(r,this)),r},l.prototype[Symbol.replace]=function(r,s){if("string"==typeof s){var i=t.get(this);return e[Symbol.replace].call(this,r,s.replace(/\$<([^>]+)>/g,function(e,t){return "$"+i[t]}))}if("function"==typeof s){var l=this;return e[Symbol.replace].call(this,r,function(){var e=arguments;return "object"!=typeof e[e.length-1]&&(e=[].slice.call(e)).push(n(e,l)),s.apply(this,e)})}return e[Symbol.replace].call(this,r,s)},r.apply(this,arguments)}function s(e,t){if("function"!=typeof t&&null!==t)throw new TypeError("Super expression must either be null or a function");e.prototype=Object.create(t&&t.prototype,{constructor:{value:e,writable:!0,configurable:!0}}),Object.defineProperty(e,"prototype",{writable:!1}),t&&i(e,t);}function i(e,t){return i=Object.setPrototypeOf||function(e,t){return e.__proto__=t,e},i(e,t)}class l{constructor(s){this.LIKE="LIKE",this.parse=e=>{let r=[],s=e;const i=this.splitPatentheses(e);if(!lodash.isEmpty(i))for(const e in i)s=s.replace(`${i[e]}`,`#${e}`),r.push(this.parse(i[e]));return this.parseQS(s,r)},this.splitPatentheses=t=>XRegExp.matchRecursive(t,"\\(","\\)","g"),this.parseQS=(e,t)=>{const s=/*#__PURE__*/r(/(([^\s|^:|^!:|^>:|^<:]+)(:|!:|>:|<:)([^\s|"|\[]+|".*?"|\[.*?\]))? ?(OR|AND)? ?([\+|\-|\(#][^\s]+|)? ?/gm,{key:2,operator:3,value:4,logic:5,plain:6});let i,l=[];for(;null!==(i=s.exec(e));){if(i.index===s.lastIndex&&s.lastIndex++,null===i)continue;let{key:e,value:r,operator:n,plain:a,logic:o}=i.groups;n||(n=":");let c=this.LIKE;switch(n){case":":default:c=this.LIKE;break;case"!:":c=`NOT ${this.LIKE}`;break;case">:":c=">";break;case"<:":c="<";}if(r&&r.match(/\[.*?\]/)&&(c=c===`NOT ${this.LIKE}`?"NOT BETWEEN":"BETWEEN"),r&&-1!==r.indexOf(",")&&(c=c===`NOT ${this.LIKE}`?"NOT IN":"IN"),e&&l.push({key:this.checkAliases(e),operator:c,value:this.parseValue(r),logic:o||"AND"}),a&&-1!==a.indexOf("#")){const e=a.replace(/#|\(|\)/g,"");l.push(t[parseInt(e)]);}else if(this.allowGlobalSearch&&a&&-1===a.indexOf("#")){let e="plain_+";a.startsWith("-")&&(e="plain_-"),l.push({operator:e,value:this.parseValue(a.replace(/\+|\-/gm,"")),logic:o||"AND"});}}return l},this.aliases=s&&s.aliases||{},this.allowGlobalSearch=s&&s.allowGlobalSearch||!1,s&&s.caseInsensitive&&(this.LIKE="ILIKE");}checkAliases(e){return this.aliases?this.aliases[e]?this.aliases[e].replaceAll("{{key}}",e):this.aliases["*"]?this.aliases["*"].replaceAll("{{key}}",e):e:e}parseValue(e){return e.replaceAll(/"|\?/g,"").replaceAll("*","%")}}class n{constructor(e,t="pg"){this.table=e,this.dialect=t;}parse(e){let t="",r=[];for(let s of e)if(Array.isArray(s)){const{query:e,bindings:i}=this.parse(s);t+=`(${e})`,r=[...r,...i];}else if("object"==typeof s){const{query:e,bindings:i}=this.convertCondition(s);t+=e,r=[...r,...i];}else console.warn("Unknown type detected in qry");return t=t.replace(/( AND | OR )$/gm,""),{query:t,bindings:r}}convertCondition(e){let{key:t,operator:r,value:s,logic:i}=e;if(!t){if("pg"!==this.dialect)return console.warn("Only PostgreSQL supports global searching"),"";let e="";return "plain_-"===r&&(e="NOT"),{query:`${e} to_tsvector(${this.table}::text) @@ to_tsquery(?) ${i} `,bindings:[s]}}let l="?",n=[s];return "BETWEEN"!==r&&"NOT BETWEEN"!==r||(n=s.replace(/\[|\]/gm,""),n=n.split(" TO "),l="? AND ?"),"IN"!==r&&"NOT IN"!==r||(n=[s.split(",")]),{query:`${t} ${r} ${l} ${i} `,bindings:n}}}class a extends n{toKnex(e,t){const r=this.parse(t);return e.whereRaw(r.query,r.bindings)}}
 
 class KnexFilterParser {
-    /**
-     *
-     * @param {*} builder
-     * @param {*} string
-     * @returns
-     */
-    static parseQueryString(builder, string, tableName) {
-        const options = {
-            allowGlobalSearch: true,
-            caseInsensitive: true,
-        };
-        //Agregar los aliases en caso de que se hayan configurado de forma global
-        if (KnexConnector$1.columnAliases && KnexConnector$1.columnAliases[tableName]) {
-            options.aliases = KnexConnector$1.columnAliases[tableName];
-        }
-        const parser = new l(options);
-        const data = parser.parse(string);
-
-        return new a(tableName).toKnex(builder, data);
+  /**
+   *
+   * @param {*} builder
+   * @param {*} string
+   * @returns
+   */
+  static parseQueryString(builder, string, tableName) {
+    const options = {
+      allowGlobalSearch: true,
+      caseInsensitive: true,
+    };
+    //Agregar los aliases en caso de que se hayan configurado de forma global
+    if (KnexConnector$1.columnAliases && KnexConnector$1.columnAliases[tableName]) {
+      options.aliases = KnexConnector$1.columnAliases[tableName];
     }
+    //Options
+    if (KnexConnector$1.caseInsensitive) {
+      options.caseInsensitive = KnexConnector$1.caseInsensitive;
+    }
+    if (KnexConnector$1.allowGlobalSearch) {
+      options.allowGlobalSearch = KnexConnector$1.allowGlobalSearch;
+    }
+    const parser = new l(options);
+    const data = parser.parse(string);
 
-    /**
-     * Convierte un objeto clave valor en un conjunto de filtros.
-     *
-     * - Filtro estandar:
-     *    filters: {
-     *       "column": "value" -> filtro generico exact
-     *    }
-     * - Filtro Objeto:
-     *    filters:{
-     *       "column": {
-     *       "type": "date|between|exists|notexists|greater|greaterEq|less|lessEq|exact|exactI|not|null|notnull|like|likeI"
-     *       "start": "xxx", //inicio de rango para el filtro de date y between
-     *       "end": "xxx", //fin de rango para el filtro date y between
-     *       "value": "xxx" //valor a utilizar para el resto de filtros
-     *     }
-     * }
-     *  - Filtro Lista:
-     *     filters: {
-     *       "column": [1, 2, 3]
-     *     }
-     *    Filtro de tipo IN, todos los elementos que coincidan
-     *
-     * - Definicion de tipos:
-     *    date: filtro de fechas desde y hasta
-     *    between: filtro entre dos valores concretos
-     *    exists: busca si existe la propiedad
-     *    notexists: busca si existe la propiedad
-     *    greater: mayor que
-     *    greaterEq: mayor o igual que
-     *    less: menor que
-     *    lessEq: menor o igual que
-     *    exact: valor exacto
-     *    exactI: valor exacto ignorando mayusculas y minusculas
-     *    not: distinto de
-     *    null: igual a null
-     *    notnull: distinto de null
-     *    like: filtro like
-     *    likeI: filtro like ignorando mayusculas y minusculas
-     */
-    static parseFilters(builder, filter, tableName) {
-        let query = builder;
+    return new a(tableName).toKnex(builder, data);
+  }
 
-        for (let prop in filter) {
-            let elm = filter[prop];
+  /**
+   * Convierte un objeto clave valor en un conjunto de filtros.
+   *
+   * - Filtro estandar:
+   *    filters: {
+   *       "column": "value" -> filtro generico exact
+   *    }
+   * - Filtro Objeto:
+   *    filters:{
+   *       "column": {
+   *       "type": "date|between|exists|notexists|greater|greaterEq|less|lessEq|exact|exactI|not|null|notnull|like|likeI"
+   *       "start": "xxx", //inicio de rango para el filtro de date y between
+   *       "end": "xxx", //fin de rango para el filtro date y between
+   *       "value": "xxx" //valor a utilizar para el resto de filtros
+   *     }
+   * }
+   *  - Filtro Lista:
+   *     filters: {
+   *       "column": [1, 2, 3]
+   *     }
+   *    Filtro de tipo IN, todos los elementos que coincidan
+   *
+   * - Definicion de tipos:
+   *    date: filtro de fechas desde y hasta
+   *    between: filtro entre dos valores concretos
+   *    exists: busca si existe la propiedad
+   *    notexists: busca si existe la propiedad
+   *    greater: mayor que
+   *    greaterEq: mayor o igual que
+   *    less: menor que
+   *    lessEq: menor o igual que
+   *    exact: valor exacto
+   *    exactI: valor exacto ignorando mayusculas y minusculas
+   *    not: distinto de
+   *    null: igual a null
+   *    notnull: distinto de null
+   *    like: filtro like
+   *    likeI: filtro like ignorando mayusculas y minusculas
+   */
+  static parseFilters(builder, filter, tableName) {
+    let query = builder;
 
-            if (typeof elm === "object") {
-                switch (elm.type) {
-                    case "fql":
-                        query = KnexFilterParser.parseQueryString(query, elm.value, tableName);
-                        break;
-                    case "date":
-                    case "between":
-                        if (elm.start && elm.end) {
-                            query = query.whereBetween(prop, [elm.start, elm.end]);
-                        }
-                        if (elm.start && !elm.end) {
-                            query = query.where(prop, ">=", elm.start);
-                        }
-                        if (!elm.start && elm.end) {
-                            query = query.where(prop, ">=", elm.end);
-                        }
-                        break;
-                    case "dateraw":
-                    case "betweenraw":
-                        if (elm.start && elm.end) {
-                            query = query.whereRaw(`${prop} BETWEEN ? AND ?`, [elm.start, elm.end]);
-                        }
-                        if (elm.start && !elm.end) {
-                            query = query.whereRaw(`${prop} >= ?`, [elm.start]);
-                        }
-                        if (!elm.start && elm.end) {
-                            query = query.whereRaw(`${prop} >= ?`, [elm.end]);
-                        }
-                        break;
-                    case "jsonb":
-                        query = query.whereRaw(`${prop} ILIKE ?`, ["%" + elm.value + "%"]);
-                        break;
-                    case "full-text-psql":
-                        query = query.whereRaw(`to_tsvector(${prop}::text) @@ to_tsquery(?)`, [elm.value]);
-                        break;
+    for (let prop in filter) {
+      let elm = filter[prop];
 
-                    case "greater":
-                    case "greaterraw":
-                        query = query.whereRaw(`${prop} > ?`, [elm.value]);
-                        break;
-                    case "greaterEq":
-                    case "greaterEqraw":
-                        query = query.whereRaw(`${prop} >= ?`, [elm.value]);
-                        break;
-                    case "less":
-                    case "lessraw":
-                        query = query.whereRaw(`${prop} < ?`, [elm.value]);
-                        break;
-                    case "lessEq":
-                    case "lessEqraw":
-                        query = query.whereRaw(`${prop} <= ?`, [elm.value]);
-                        break;
-                    case "exists":
-                        query = query.whereExists(prop);
-                        break;
-                    case "notexists":
-                        query = query.whereNotExists(prop);
-                        break;
-                    case "exact":
-                    case "exactraw":
-                        query = query.whereRaw(`${prop} = ?`, [elm.value]);
-                        break;
-                    case "in":
-                        let propComplex = prop;
-                        if (propComplex.includes(",")) {
-                            propComplex = prop.split(",");
-                        }
-                        if (!Array.isArray(elm.value) && elm.value != undefined) {
-                            query = query.whereIn(propComplex, elm.value.split(","));
-                        } else {
-                            if (elm.value != undefined) {
-                                query = query.whereIn(propComplex, elm.value);
-                            }
-                        }
-                        break;
-                    case "inraw":
-                        if (!Array.isArray(elm.value) && elm.value != undefined) {
-                            query = query.whereRaw(`${prop} IN (?)`, [
-                                elm.value
-                                    .split(",")
-                                    .map((e) => `'${e}'`)
-                                    .join(","),
-                            ]);
-                        } else {
-                            if (elm.value != undefined) {
-                                query = query.whereRaw(`${prop} IN (?)`, [elm.value.map((e) => `'${e}'`).join(",")]);
-                            }
-                        }
-                        break;
-                    case "not":
-                    case "notraw":
-                        query = query.whereRaw(`${prop} != ?`, [elm.value]);
-                        break;
-                    case "like":
-                    case "likeraw":
-                        let value_likeraw = Utils.replaceAll(elm.value, "*", "%");
-                        query = query.whereRaw(` ${prop} LIKE ?`, [value_likeraw]);
-                        break;
-                    case "notlike":
-                    case "notlikeraw":
-                        let value_nolikeraw = Utils.replaceAll(elm.value, "*", "%");
-                        query = query.whereRaw(` ${prop} NOT LIKE ?`, [value_nolikeraw]);
-                        break;
-                    case "likeI":
-                        let value_rawilike = Utils.replaceAll(elm.value, "*", "%");
-                        query = query.whereRaw(` ${prop} ILIKE ?`, [value_rawilike]);
-                        break;
-                    case "notlikeI":
-                        let value_notrawilike = Utils.replaceAll(elm.value, "*", "%");
-                        query = query.whereRaw(` ${prop} NOT ILIKE ?`, [value_notrawilike]);
-                        break;
-                    case "null":
-                    case "nullraw":
-                        query = query.whereRaw(`${prop} is NULL`);
-                        break;
-                    case "notnull":
-                    case "notnullraw":
-                        query = query.whereRaw(`${prop} is not NULL`);
-                        break;
-                }
-            } else {
-                //Si el valor no es un objeto se devuelve
-                query = query.where(prop, elm);
+      if (typeof elm === "object") {
+        switch (elm.type) {
+          case "fql":
+            query = KnexFilterParser.parseQueryString(
+              query,
+              elm.value,
+              tableName
+            );
+            break;
+          case "date":
+          case "between":
+            if (elm.start && elm.end) {
+              query = query.whereBetween(prop, [elm.start, elm.end]);
             }
-        }
+            if (elm.start && !elm.end) {
+              query = query.where(prop, ">=", elm.start);
+            }
+            if (!elm.start && elm.end) {
+              query = query.where(prop, ">=", elm.end);
+            }
+            break;
+          case "dateraw":
+          case "betweenraw":
+            if (elm.start && elm.end) {
+              query = query.whereRaw(`${prop} BETWEEN ? AND ?`, [
+                elm.start,
+                elm.end,
+              ]);
+            }
+            if (elm.start && !elm.end) {
+              query = query.whereRaw(`${prop} >= ?`, [elm.start]);
+            }
+            if (!elm.start && elm.end) {
+              query = query.whereRaw(`${prop} >= ?`, [elm.end]);
+            }
+            break;
+          case "jsonb":
+            query = query.whereRaw(`${prop} ILIKE ?`, ["%" + elm.value + "%"]);
+            break;
+          case "full-text-psql":
+            query = query.whereRaw(
+              `to_tsvector(${prop}::text) @@ to_tsquery(?)`,
+              [elm.value]
+            );
+            break;
 
-        // console.log(query.toSQL());
-        return query;
+          case "greater":
+          case "greaterraw":
+            query = query.whereRaw(`${prop} > ?`, [elm.value]);
+            break;
+          case "greaterEq":
+          case "greaterEqraw":
+            query = query.whereRaw(`${prop} >= ?`, [elm.value]);
+            break;
+          case "less":
+          case "lessraw":
+            query = query.whereRaw(`${prop} < ?`, [elm.value]);
+            break;
+          case "lessEq":
+          case "lessEqraw":
+            query = query.whereRaw(`${prop} <= ?`, [elm.value]);
+            break;
+          case "exists":
+            query = query.whereExists(prop);
+            break;
+          case "notexists":
+            query = query.whereNotExists(prop);
+            break;
+          case "exact":
+          case "exactraw":
+            query = query.whereRaw(`${prop} = ?`, [elm.value]);
+            break;
+          case "in":
+            let propComplex = prop;
+            if (propComplex.includes(",")) {
+              propComplex = prop.split(",");
+            }
+            if (!Array.isArray(elm.value) && elm.value != undefined) {
+              query = query.whereIn(propComplex, elm.value.split(","));
+            } else {
+              if (elm.value != undefined) {
+                query = query.whereIn(propComplex, elm.value);
+              }
+            }
+            break;
+          case "inraw":
+            if (!Array.isArray(elm.value) && elm.value != undefined) {
+              query = query.whereRaw(`${prop} IN (?)`, [
+                elm.value
+                  .split(",")
+                  .map((e) => `'${e}'`)
+                  .join(","),
+              ]);
+            } else {
+              if (elm.value != undefined) {
+                query = query.whereRaw(`${prop} IN (?)`, [
+                  elm.value.map((e) => `'${e}'`).join(","),
+                ]);
+              }
+            }
+            break;
+          case "not":
+          case "notraw":
+            query = query.whereRaw(`${prop} != ?`, [elm.value]);
+            break;
+          case "like":
+          case "likeraw":
+            let value_likeraw = Utils.replaceAll(elm.value, "*", "%");
+            query = query.whereRaw(` ${prop} LIKE ?`, [value_likeraw]);
+            break;
+          case "notlike":
+          case "notlikeraw":
+            let value_nolikeraw = Utils.replaceAll(elm.value, "*", "%");
+            query = query.whereRaw(` ${prop} NOT LIKE ?`, [value_nolikeraw]);
+            break;
+          case "likeI":
+            let value_rawilike = Utils.replaceAll(elm.value, "*", "%");
+            query = query.whereRaw(` ${prop} ILIKE ?`, [value_rawilike]);
+            break;
+          case "notlikeI":
+            let value_notrawilike = Utils.replaceAll(elm.value, "*", "%");
+            query = query.whereRaw(` ${prop} NOT ILIKE ?`, [value_notrawilike]);
+            break;
+          case "null":
+          case "nullraw":
+            query = query.whereRaw(`${prop} is NULL`);
+            break;
+          case "notnull":
+          case "notnullraw":
+            query = query.whereRaw(`${prop} is not NULL`);
+            break;
+        }
+      } else {
+        //Si el valor no es un objeto se devuelve
+        query = query.where(prop, elm);
+      }
     }
 
-    /**
-     * Conversion de un objeto {property: XX, direction: ASC|DESC - ascend|descend} a un ORDER BY
-     *
-     * @param {*} sorts
-     */
-    static parseSort(sort) {
-        if (!sort.field || !sort.direction) {
-            return 1;
-        }
+    // console.log(query.toSQL());
+    return query;
+  }
 
-        let direction = "ASC";
-        if (sort.direction === "descend") {
-            direction = "DESC";
-        }
-
-        return sort.field + " " + direction;
+  /**
+   * Conversion de un objeto {property: XX, direction: ASC|DESC - ascend|descend} a un ORDER BY
+   *
+   * @param {*} sorts
+   */
+  static parseSort(sort) {
+    if (!sort.field || !sort.direction) {
+      return 1;
     }
+
+    let direction = "ASC";
+    if (sort.direction === "descend") {
+      direction = "DESC";
+    }
+
+    return sort.field + " " + direction;
+  }
 }
 
 class KnexConnector {
@@ -5285,42 +5317,43 @@ class BaseController {
     configure(entity, config) {
         this.router.get(
             `/${entity}`,
-            asyncHandler((request, response, next) => {
+            Utils.expressHandler((request, response, next) => {
                 this.listEntidad(request, response, next);
             })
         );
         this.router.post(
             `/${entity}/list`,
-            asyncHandler((request, response, next) => {
+            Utils.expressHandler((request, response, next) => {
                 this.listEntidad(request, response, next);
             })
         );
         this.router.get(
             `/${entity}/:id`,
-            asyncHandler((request, response, next) => {
+            Utils.expressHandler((request, response, next) => {
                 this.getEntidad(request, response, next);
             })
         );
         this.router.post(
             `/${entity}`,
-            asyncHandler((request, response, next) => {
+            Utils.expressHandler((request, response, next) => {
                 this.saveEntidad(request, response, next);
             })
         );
         this.router.put(
             `/${entity}/:id`,
-            asyncHandler((request, response, next) => {
+            Utils.expressHandler((request, response, next) => {
                 this.updateEntidad(request, response, next);
             })
         );
         this.router.delete(
             `/${entity}/:id`,
-            asyncHandler((request, response, next) => {
+            Utils.expressHandler((request, response, next) => {
                 this.deleteEntidad(request, response, next);
             })
         );
 
         this.service = config.service;
+        this.table = config.table;
 
         return this.router;
     }
@@ -5340,7 +5373,7 @@ class BaseController {
      */
     async listEntidad(request, response, next) {
         try {
-            let service = new this.service();
+            let service = new this.service(null, this.table);
             let filters =
                 request.method === "POST"
                     ? request.body
@@ -5371,7 +5404,7 @@ class BaseController {
      */
     async getEntidad(request, response, next) {
         try {
-            let service = new this.service();
+            let service = new this.service(null, this.table);
             let data = await service.loadById(request.params.id);
             let jsRes = new JsonResponse(true, data);
             let code = 200;
@@ -5409,7 +5442,7 @@ class BaseController {
      */
     async saveEntidad(request, response, next) {
         try {
-            let service = new this.service();
+            let service = new this.service(null, this.table);
 
             let data = await service.save(request.body);
             let jsRes = new JsonResponse(true, (data && data[0]) || { id: request.body.id });
@@ -5436,7 +5469,7 @@ class BaseController {
      */
     async updateEntidad(request, response, next) {
         try {
-            let service = new this.service();
+            let service = new this.service(null, this.table);
 
             let data = await service.update(request.params.id, request.body);
             let jsRes = new JsonResponse(true, (data && data[0]) || { id: request.body.id });
@@ -5462,7 +5495,7 @@ class BaseController {
      */
     async deleteEntidad(request, response, next) {
         try {
-            let service = new this.service();
+            let service = new this.service(null, this.table);
             let data = await service.delete(request.params.id);
             let jsRes = new JsonResponse(true, data);
 
@@ -5483,11 +5516,14 @@ class BaseController {
 class BaseService {
 
 
-    constructor(cls) {
+    constructor(cls, table) {
         if (cls) {
             this.dao = new cls();
         } else {
             this.dao = new BaseKnexDao(); //El sistema por defecto utiliza knex, si se pasa un dao personalizado se puede sobreescribir este comportamiento
+        }
+        if (table) {
+            this.dao.tableName = table;
         }
     }
     /**
