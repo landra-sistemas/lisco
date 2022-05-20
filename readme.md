@@ -315,7 +315,7 @@ export default class UserController extends BaseController {
     configure() { //Necesario
         super.configure('user', { service: BaseService, table: 'user' });
 
-        this.router.get('/session', asyncHandler((res, req, next) => { this.getSession(res, req, next); }));
+        this.router.get('/session', Utils.expressHandler((res, req, next) => { this.getSession(res, req, next); }));
 
         return this.router;
     }

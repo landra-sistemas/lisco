@@ -47,7 +47,7 @@ export default class EventHandler extends EventEmitter {
             this.messages.send("event", { event: evt, props: { ...props } }, callback);
         }
 
-        if (evt && props && cluster.isMaster && this.app && this.app.server && this.app.server.workers) {
+        if (evt && props && cluster.isPrimary && this.app && this.app.server && this.app.server.workers) {
             if (process.env.DEBUG_EVENTS == true) {
                 console.debug(`${evt} -> Firing from master to workers`);
             }

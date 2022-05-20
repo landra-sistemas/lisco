@@ -1,7 +1,5 @@
 import express from "express";
-import { JsonResponse } from "../common";
-
-import asyncHandler from "express-async-handler";
+import { JsonResponse, Utils } from "../common";
 
 export class BaseController {
     constructor() {
@@ -11,42 +9,43 @@ export class BaseController {
     configure(entity, config) {
         this.router.get(
             `/${entity}`,
-            asyncHandler((request, response, next) => {
+            Utils.expressHandler((request, response, next) => {
                 this.listEntidad(request, response, next);
             })
         );
         this.router.post(
             `/${entity}/list`,
-            asyncHandler((request, response, next) => {
+            Utils.expressHandler((request, response, next) => {
                 this.listEntidad(request, response, next);
             })
         );
         this.router.get(
             `/${entity}/:id`,
-            asyncHandler((request, response, next) => {
+            Utils.expressHandler((request, response, next) => {
                 this.getEntidad(request, response, next);
             })
         );
         this.router.post(
             `/${entity}`,
-            asyncHandler((request, response, next) => {
+            Utils.expressHandler((request, response, next) => {
                 this.saveEntidad(request, response, next);
             })
         );
         this.router.put(
             `/${entity}/:id`,
-            asyncHandler((request, response, next) => {
+            Utils.expressHandler((request, response, next) => {
                 this.updateEntidad(request, response, next);
             })
         );
         this.router.delete(
             `/${entity}/:id`,
-            asyncHandler((request, response, next) => {
+            Utils.expressHandler((request, response, next) => {
                 this.deleteEntidad(request, response, next);
             })
         );
 
         this.service = config.service;
+        this.table = config.table;
 
         return this.router;
     }
@@ -66,7 +65,7 @@ export class BaseController {
      */
     async listEntidad(request, response, next) {
         try {
-            let service = new this.service();
+            let service = new this.service(null, this.table);
             let filters =
                 request.method === "POST"
                     ? request.body
@@ -97,7 +96,7 @@ export class BaseController {
      */
     async getEntidad(request, response, next) {
         try {
-            let service = new this.service();
+            let service = new this.service(null, this.table);
             let data = await service.loadById(request.params.id);
             let jsRes = new JsonResponse(true, data);
             let code = 200;
@@ -135,7 +134,7 @@ export class BaseController {
      */
     async saveEntidad(request, response, next) {
         try {
-            let service = new this.service();
+            let service = new this.service(null, this.table);
 
             let data = await service.save(request.body);
             let jsRes = new JsonResponse(true, (data && data[0]) || { id: request.body.id });
@@ -162,7 +161,7 @@ export class BaseController {
      */
     async updateEntidad(request, response, next) {
         try {
-            let service = new this.service();
+            let service = new this.service(null, this.table);
 
             let data = await service.update(request.params.id, request.body);
             let jsRes = new JsonResponse(true, (data && data[0]) || { id: request.body.id });
@@ -188,7 +187,7 @@ export class BaseController {
      */
     async deleteEntidad(request, response, next) {
         try {
-            let service = new this.service();
+            let service = new this.service(null, this.table);
             let data = await service.delete(request.params.id);
             let jsRes = new JsonResponse(true, data);
 

@@ -62,7 +62,7 @@ export default class ClusterServer extends EventEmitter {
      */
     async initClustered() {
         //Launch cluster
-        if (cluster.isMaster) {
+        if (cluster.isPrimary) {
             this.configureSocketIO();
 
             this.executeOnlyMain();

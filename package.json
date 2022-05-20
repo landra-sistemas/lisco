@@ -18,13 +18,13 @@
     "module": "./dist/lisco.esm.js",
     "dependencies": {
         "@landra_sistemas/fql-parser": "^0.0.2",
+        "chokidar": "^3.5.3",
         "cluster-messages": "^1.2.1",
         "compression": "^1.7.4",
         "cookie-parser": "^1.4.6",
         "cors": "^2.8.5",
         "dotenv": "^15.0.0",
         "express": "^4.17.2",
-        "express-async-handler": "^1.2.0",
         "express-fileupload": "^1.2.1",
         "helmet": "^5.0.2",
         "jsonwebtoken": "^8.5.1",
@@ -43,7 +43,15 @@
         "start": "node execute.js",
         "test": "mocha test --exit",
         "clean": "rimraf node_modules",
-        "send": "npm publish --access public"
+        "preversion": "npm install && npm test -- --watchAll=false",
+        "version": "npm run build && git add -A",
+        "postversion": "git push --follow-tags && npm publish --access public",
+        "release:patch": "npm version patch -m \"Bump version %s\"",
+        "release:minor": "npm version minor -m \"Bump version %s\"",
+        "release:major": "npm version major -m \"Bump version %s\"",
+        "release:alpha": "npm version prerelease --preid=alpha -m \"Bump version %s\"",
+        "release:beta": "npm version prerelease --preid=beta -m \"Bump version %s\"",
+        "release:rc": "npm version prerelease --preid=rc -m \"Bump version %s\""
     },
     "devDependencies": {
         "@haensl/rollup-plugin-local-resolve": "^1.1.5",
