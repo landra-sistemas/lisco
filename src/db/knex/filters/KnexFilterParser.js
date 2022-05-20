@@ -20,10 +20,10 @@ export default class KnexFilterParser {
       options.aliases = KnexConnector.columnAliases[tableName];
     }
     //Options
-    if (KnexConnector.caseInsensitive) {
+    if (KnexConnector.caseInsensitive !== undefined) {
       options.caseInsensitive = KnexConnector.caseInsensitive;
     }
-    if (KnexConnector.allowGlobalSearch) {
+    if (KnexConnector.allowGlobalSearch !== undefined) {
       options.allowGlobalSearch = KnexConnector.allowGlobalSearch;
     }
     const parser = new FQLParser(options);
