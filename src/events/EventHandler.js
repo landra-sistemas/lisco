@@ -1,12 +1,11 @@
-import cluster from 'cluster';
-import { EventEmitter } from 'events';
-import ClusterMessages from 'cluster-messages';
+import cluster from "cluster";
+import { EventEmitter } from "events";
+import ClusterMessages from "cluster-messages";
 
 /**
  * Clase encargada de la generacion de eventos.
  */
 export default class EventHandler extends EventEmitter {
-
     constructor(app) {
         super();
         this.messages = new ClusterMessages();
@@ -15,7 +14,7 @@ export default class EventHandler extends EventEmitter {
 
         if (cluster.isWorker) {
             // Levanto, en los worker, la escucha para recibir los eventos en broadcast de los demas hilos
-            this.messages.on('event', (msg, callback) => {
+            this.messages.on("event", (msg, callback) => {
                 if (msg && msg.event && process.pid !== msg.props.owner) {
                     if (process.env.DEBUG_EVENTS == true) {
                         console.debug(`Receiving broadcast ${msg.event} - ${process.pid}`);
@@ -28,9 +27,9 @@ export default class EventHandler extends EventEmitter {
 
     /**
      * Sobreescribir el emitter para notificar a los hijos
-     * 
-     * @param {*} evt 
-     * @param {*} props 
+     *
+     * @param {*} evt
+     * @param {*} props
      */
     emit(evt, props, callback) {
         //Desencadenar en local
@@ -43,7 +42,7 @@ export default class EventHandler extends EventEmitter {
             if (!props) {
                 props = {};
             }
-            props.owner = process.pid
+            props.owner = process.pid;
             this.messages.send("event", { event: evt, props: { ...props } }, callback);
         }
 
