@@ -289,17 +289,6 @@ import {KnexConnector} from '@landra_sistemas/lisco';
 
 
 
-
-## Monitoring
-
-TODO intentar adaptar, aunque sea con un fork esto:
-
-https://github.com/RafalWilinski/express-status-monitor
-
-Al utilizar CDN's limita bastante el deploy del proyecto, pero con un fork podríamos hacer que utilizase dependencias locales.
-
-
-
 # Descripción de Componentes
 
 ## Rutas y Controladores
@@ -726,3 +715,32 @@ Una vez que esta runtime se encuentra activada la aplicación aceptará, al arra
 - --encrypt string: Encripta una cadena pasada como parámetro utilizando las claves proporcionadas. Util para la generación de contraseñas.
 
 
+
+## Monitoring
+
+Se ha adaptado la librería: https://github.com/RafalWilinski/express-status-monitor. Al utilizar CDN's limita bastante el deploy del proyecto, pero esta adaptación la hace perfecta para incluir a modo de monitorización https://github.com/thorin8k/express-status-monitor.
+
+Para instalar el fork basta con:
+
+``` bash
+> npm install https://github.com/thorin8k/express-status-monitor
+``` 
+
+Una vez instalada, para incluirla en el proyecto es necesario incluirla en el método `customizeExpress`:
+
+``` javascript
+App.customizeExpress = (app) => { 
+    //Monitoring
+    app.use(
+        require("express-status-monitor")({
+            title: "Server Backend",
+            path: '/status',
+            websocket: App.io //Lisco inicia un socketio por defecto, si se desactiva (socketio: false), quitar esta linea
+        })
+    );
+};
+``` 
+
+En el repositorio existen parámetros adicionales que pueden ser útiles en ciertos casos: https://github.com/thorin8k/express-status-monitor
+
+> Lisco arranca un socketio por defecto en el puerto siguiente al configurado. Si este socketio se desactiva es necesario quitar la linea websocket de la configuración para que el monitor arranque su propio servidor.
