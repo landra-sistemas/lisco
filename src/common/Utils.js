@@ -8,7 +8,7 @@ export default class Utils {
     }
 
     static replaceAll(str, find, replace) {
-        return str.replace(new RegExp(find.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'g'), replace);
+        return str.replace(new RegExp(find.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&'), 'g'), replace);
     }
 
     /**

@@ -7,41 +7,30 @@ export class BaseController {
     }
 
     configure(entity, config) {
+        const exAsync = Utils.expressHandler();
         this.router.get(
             `/${entity}`,
-            Utils.expressHandler((request, response, next) => {
-                this.listEntidad(request, response, next);
-            })
+            exAsync((...args) => this.listEntidad(...args))
         );
         this.router.post(
             `/${entity}/list`,
-            Utils.expressHandler((request, response, next) => {
-                this.listEntidad(request, response, next);
-            })
+            exAsync((...args) => this.listEntidad(...args))
         );
         this.router.get(
             `/${entity}/:id`,
-            Utils.expressHandler((request, response, next) => {
-                this.getEntidad(request, response, next);
-            })
+            exAsync((...args) => this.getEntidad(...args))
         );
         this.router.post(
             `/${entity}`,
-            Utils.expressHandler((request, response, next) => {
-                this.saveEntidad(request, response, next);
-            })
+            exAsync((...args) => this.saveEntidad(...args))
         );
         this.router.put(
             `/${entity}/:id`,
-            Utils.expressHandler((request, response, next) => {
-                this.updateEntidad(request, response, next);
-            })
+            exAsync((...args) => this.updateEntidad(...args))
         );
         this.router.delete(
             `/${entity}/:id`,
-            Utils.expressHandler((request, response, next) => {
-                this.deleteEntidad(request, response, next);
-            })
+            exAsync((...args) => this.deleteEntidad(...args))
         );
 
         this.service = config.service;
@@ -66,12 +55,7 @@ export class BaseController {
     async listEntidad(request, response, next) {
         try {
             let service = new this.service(null, this.table);
-            let filters =
-                request.method === "POST"
-                    ? request.body
-                    : request.query && request.query.filters
-                    ? JSON.parse(request.query.filters)
-                    : {};
+            let filters = request.method === "POST" ? request.body : request.query && request.query.filters ? JSON.parse(request.query.filters) : {};
 
             let data = await service.list(filters, filters.start, filters.limit);
             let jsRes = new JsonResponse(true, data.data, null, data.total);

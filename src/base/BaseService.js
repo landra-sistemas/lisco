@@ -1,9 +1,6 @@
-import { BaseKnexDao } from '../db';
-
+import { BaseKnexDao } from "../db";
 
 export class BaseService {
-
-
     constructor(cls, table) {
         if (cls) {
             this.dao = new cls();
@@ -21,22 +18,21 @@ export class BaseService {
      */
     async list(filters, start, limit) {
         //Pagination
-        var start = start || 0;
-        var limit = limit || 1000;//Default limit
+        const st = start || 0;
+        const lm = limit || 1000; //Default limit
 
         let response = {};
-        response.total = await this.dao.countFilteredData(filters, start, limit);
+        response.total = await this.dao.countFilteredData(filters, st, lm);
 
         if (filters && Object.keys(filters).length !== 0) {
-            let filteredData = await this.dao.loadFilteredData(filters, start, limit)
-            response.data = filteredData
+            let filteredData = await this.dao.loadFilteredData(filters, st, lm);
+            response.data = filteredData;
             return response;
         }
 
         response.data = await this.dao.loadAllData(start, limit);
         return response;
     }
-
 
     /**
      * Obtencion de un elemento mediante su identificador
@@ -77,4 +73,3 @@ export class BaseService {
         }
     }
 }
-

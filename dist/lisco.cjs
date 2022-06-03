@@ -22,7 +22,6 @@ var socket_io = require('socket.io');
 var os = require('os');
 var events = require('events');
 var log4js = require('log4js');
-var asyncHandler = require('express-async-handler');
 var pathToRegexp = require('path-to-regexp');
 var moment = require('moment');
 var Knex = require('knex');
@@ -67,7 +66,6 @@ var https__default = /*#__PURE__*/_interopDefaultLegacy(https);
 var cluster__default = /*#__PURE__*/_interopDefaultLegacy(cluster$1);
 var os__default = /*#__PURE__*/_interopDefaultLegacy(os);
 var log4js__default = /*#__PURE__*/_interopDefaultLegacy(log4js);
-var asyncHandler__default = /*#__PURE__*/_interopDefaultLegacy(asyncHandler);
 var moment__default = /*#__PURE__*/_interopDefaultLegacy(moment);
 var Knex__default = /*#__PURE__*/_interopDefaultLegacy(Knex);
 var net__default = /*#__PURE__*/_interopDefaultLegacy(net);
@@ -80,7 +78,7 @@ class Utils {
     }
 
     static replaceAll(str, find, replace) {
-        return str.replace(new RegExp(find.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'g'), replace);
+        return str.replace(new RegExp(find.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&'), 'g'), replace);
     }
 
     /**
@@ -194,6 +192,22 @@ class Utils {
         return result
     }
 
+    /**
+     * 
+     * @returns 
+     */
+    static expressHandler() {
+
+        return (fn) => {
+            return function asyncUtilWrap(...args) {
+                const fnReturn = fn(...args);
+                const next = args[args.length - 1];
+                return Promise.resolve(fnReturn).catch((e) => {
+                    return next(e);
+                });
+            };
+        };
+    }
 }
 
 class I18nLoader {
@@ -307,12 +321,11 @@ class TokenGenerator {
  * que el codigo se disperse entre diferentes proyectos.
  */
 class Server {
-
     /**
-     * 
-     * @param {*} config 
-     * @param {*} statics 
-     * @param {*} routes 
+     *
+     * @param {*} config
+     * @param {*} statics
+     * @param {*} routes
      */
     constructor(config, statics, routes) {
         this.app = express__default["default"]();
@@ -324,12 +337,11 @@ class Server {
             cors: { origin: true, credentials: true },
             fileupload: true,
             socketio: { transports: ["websocket"] },
-            traceRequests: false
+            traceRequests: false,
         });
         this.statics = statics;
         this.routes = routes;
     }
-
 
     /**
      * Inicializa el servidor
@@ -345,19 +357,18 @@ class Server {
 
     /**
      * Funcion sobreescribible para personalizar los componentes cargados en Express
-     * 
+     *
      * Aqui se pueden poner cosas como:
-     * 
+     *
      * this.app.use(cookieParser())... etc
      */
-    customizeExpress() { }
+    customizeExpress() {}
 
     /**
      * Se encarga de realizar la configuración inicial del servidor
-     * 
+     *
      */
     config(config) {
-
         if (config && config.helmet) {
             //Security
             this.app.use(helmet__default["default"](config && lodash__default["default"].isObject(config.helmet) && config.helmet));
@@ -377,7 +388,7 @@ class Server {
         }
         if (config && config.cors) {
             //Enable cors to allow external references
-            this.app.options('*', cors__default["default"](config && lodash__default["default"].isObject(config.cors) && config.cors));
+            this.app.options("*", cors__default["default"](config && lodash__default["default"].isObject(config.cors) && config.cors));
             this.app.use(cors__default["default"](config && lodash__default["default"].isObject(config.cors) && config.cors));
         }
         if (config && config.fileupload) {
@@ -393,7 +404,7 @@ class Server {
         }
 
         //Logging
-        if ((config && config.traceRequests === true) && process.env.DISABLE_LOGGER != "true") {
+        if (config && config.traceRequests === true && process.env.DISABLE_LOGGER != "true") {
             this.app.use((request, response, next) => {
                 request.requestTime = Date.now();
                 response.on("finish", () => {
@@ -401,7 +412,7 @@ class Server {
                     let end = Date.now() - request.requestTime;
                     let user = (request && request.session && request.session.user_id) || "";
 
-                    console.debug('APIRequest[' + process.pid + ']::. [' + request.method + '] (user:' + user + ')  ' + pathname + ' |-> took: ' + end + ' ms');
+                    console.debug("APIRequest[" + process.pid + "]::. [" + request.method + "] (user:" + user + ")  " + pathname + " |-> took: " + end + " ms");
                     console.debug(JSON.stringify(request.body));
                 });
                 next();
@@ -458,39 +469,39 @@ var uuid4 = {exports: {}};
 
 (function (module, exports) {
 
-var crypto = crypto__default["default"],
-  uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+	var crypto = crypto__default["default"],
+	  uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 
-exports = module.exports = genUUID;
-exports.valid = isUUID;
+	exports = module.exports = genUUID;
+	exports.valid = isUUID;
 
-function genUUID(callback) {
-  if (typeof callback !== "function") {
-    var rnd = crypto.randomBytes(16);
-    rnd[6] = (rnd[6] & 0x0f) | 0x40;
-    rnd[8] = (rnd[8] & 0x3f) | 0x80;
-    rnd = rnd.toString("hex").match(/(.{8})(.{4})(.{4})(.{4})(.{12})/);
-    rnd.shift();
-    return rnd.join("-");
-  }
-  crypto.randomBytes(16, function(err, rnd) {
-    if (err) return callback(err);
-    try {
-      rnd[6] = (rnd[6] & 0x0f) | 0x40;
-      rnd[8] = (rnd[8] & 0x3f) | 0x80;
-      rnd = rnd.toString("hex").match(/(.{8})(.{4})(.{4})(.{4})(.{12})/);
-      rnd.shift();
-      return callback(null, rnd.join("-"));
-    } catch (err2) {
-      return callback(err2);
-    }
-  });
-}
+	function genUUID(callback) {
+	  if (typeof callback !== "function") {
+	    var rnd = crypto.randomBytes(16);
+	    rnd[6] = (rnd[6] & 0x0f) | 0x40;
+	    rnd[8] = (rnd[8] & 0x3f) | 0x80;
+	    rnd = rnd.toString("hex").match(/(.{8})(.{4})(.{4})(.{4})(.{12})/);
+	    rnd.shift();
+	    return rnd.join("-");
+	  }
+	  crypto.randomBytes(16, function(err, rnd) {
+	    if (err) return callback(err);
+	    try {
+	      rnd[6] = (rnd[6] & 0x0f) | 0x40;
+	      rnd[8] = (rnd[8] & 0x3f) | 0x80;
+	      rnd = rnd.toString("hex").match(/(.{8})(.{4})(.{4})(.{4})(.{12})/);
+	      rnd.shift();
+	      return callback(null, rnd.join("-"));
+	    } catch (err2) {
+	      return callback(err2);
+	    }
+	  });
+	}
 
-function isUUID(uuid) {
-  return uuidPattern.test(uuid);
-}
-}(uuid4, uuid4.exports));
+	function isUUID(uuid) {
+	  return uuidPattern.test(uuid);
+	}
+} (uuid4, uuid4.exports));
 
 const cluster = cluster__default["default"];
 const uuid = uuid4.exports;
@@ -707,20 +718,19 @@ class ClusterServer extends events.EventEmitter {
         super();
 
         if (!process.env.PORT) {
-            console.log('Using 3000 as default port. Customize via env PORT.');
+            console.log("Using 3000 as default port. Customize via env PORT.");
         }
         this.port = this.normalizePort(process.env.PORT || 3000);
         this.clustered = process.env.CLUSTERED;
         this.workers = [];
         this.app = app;
 
-        this.executeOnlyMain = () => { };
+        this.executeOnlyMain = () => {};
     }
 
     setServerCls(cls) {
         this.cls = cls;
     }
-
 
     /**
      * Iniciar el servidor en el puerto y con la configuración seleccionadas.
@@ -729,7 +739,6 @@ class ClusterServer extends events.EventEmitter {
         if (this.clustered == "true") {
             this.initClustered();
         } else {
-
             this.configureSocketIO();
             this.executeOnlyMain();
 
@@ -738,12 +747,15 @@ class ClusterServer extends events.EventEmitter {
     }
 
     /**
-     * 
-     * @param {*} server 
+     * Inicializa el servidor de socketio en el puerto siguiente al configurado.
+     *
+     * Se puede desactivar mediante la config socketio: false al realizar el App.init()
      */
     configureSocketIO() {
-        this.app.io = new socket_io.Server(this.cls.express_config && this.cls.express_config.socketio);
-        this.app.io.listen(this.port + 1);
+        if (this.cls.express_config && this.cls.express_config.socketio) {
+            this.app.io = new socket_io.Server(this.cls.express_config && this.cls.express_config.socketio);
+            this.app.io.listen(this.port + 1);
+        }
     }
 
     /**
@@ -752,14 +764,13 @@ class ClusterServer extends events.EventEmitter {
      */
     async initClustered() {
         //Launch cluster
-        if (cluster__default["default"].isMaster) {
+        if (cluster__default["default"].isPrimary) {
             this.configureSocketIO();
 
             this.executeOnlyMain();
 
-
             let messages = new clusterMessages();
-            messages.on('event', (msg, callback) => {
+            messages.on("event", (msg, callback) => {
                 if (msg && msg.event) {
                     if (process.env.DEBUG_EVENTS == true) {
                         console.debug(`Received '${msg.event}' from ${msg.props.owner} at Master`);
@@ -778,12 +789,10 @@ class ClusterServer extends events.EventEmitter {
             }
 
             //Listen for dying workers
-            cluster__default["default"].on('exit', (worker) => {
-
+            cluster__default["default"].on("exit", (worker) => {
                 //Replace the dead worker, we're not sentimental
-                console.log('Worker ' + worker.id + ' died :(');
+                console.log("Worker " + worker.id + " died :(");
                 this.initWorker();
-
             });
         } else {
             await this.initUnclustered();
@@ -826,18 +835,18 @@ class ClusterServer extends events.EventEmitter {
         });
         //start listening on port
         server.on("listening", () => {
-            console.log('Server Worker running on port: ' + this.port + '!');
-            this.emit('listening', this.port);
+            console.log("Server Worker running on port: " + this.port + "!");
+            this.emit("listening", this.port);
         });
 
         if (process.env.SSL && process.env.SSL == "true") {
             if (!process.env.SSL_KEY || !process.env.SSL_CERT || !process.env.SSL_PASS) {
-                console.error('Invalid SSL configuration. SLL_KEY, SSL_CERT and SSL_PASS needed');
+                console.error("Invalid SSL configuration. SLL_KEY, SSL_CERT and SSL_PASS needed");
                 process.exit(0);
             }
 
-            var key = fs__default["default"].readFileSync(path__default["default"].resolve(process.cwd(), process.env.SSL_KEY || 'key.pem'));
-            var cert = fs__default["default"].readFileSync(path__default["default"].resolve(process.cwd(), process.env.SSL_CERT || 'cert.pem'));
+            var key = fs__default["default"].readFileSync(path__default["default"].resolve(process.cwd(), process.env.SSL_KEY || "key.pem"));
+            var cert = fs__default["default"].readFileSync(path__default["default"].resolve(process.cwd(), process.env.SSL_CERT || "cert.pem"));
 
             var options = {
                 key: key,
@@ -846,19 +855,19 @@ class ClusterServer extends events.EventEmitter {
             };
 
             if (!process.env.SSL_PORT) {
-                console.log('Using 3443 as ssl default port. Customize via env SSL_PORT.');
+                console.log("Using 3443 as ssl default port. Customize via env SSL_PORT.");
             }
             var sslPort = this.normalizePort(process.env.SSL_PORT || 3443);
             var serverSsl = https__default["default"].createServer(options, this.server.app);
             serverSsl.listen(sslPort);
             //add error handler
-            serverSsl.on("error", function (err) {
-                self.handleErrors(err, sslPort);
+            serverSsl.on("error", (err) => {
+                this.handleErrors(err, sslPort);
             });
             //start listening on port
-            serverSsl.on("listening", function () {
-                console.log('Server Worker running on port: ' + sslPort + '!');
-                this.emit('listening_ssl', sslPort);
+            serverSsl.on("listening", () => {
+                console.log("Server Worker running on port: " + sslPort + "!");
+                this.emit("listening_ssl", sslPort);
             });
         }
     }
@@ -891,9 +900,7 @@ class ClusterServer extends events.EventEmitter {
             throw error;
         }
 
-        let bind = typeof port === "string"
-            ? "Pipe " + port
-            : "Port " + port;
+        let bind = typeof port === "string" ? "Pipe " + port : "Port " + port;
 
         //handle specific listen errors with friendly messages
         switch (error.code) {
@@ -915,7 +922,6 @@ class ClusterServer extends events.EventEmitter {
  * Clase encargada de la generacion de eventos.
  */
 class EventHandler extends events.EventEmitter {
-
     constructor(app) {
         super();
         this.messages = new clusterMessages();
@@ -924,7 +930,7 @@ class EventHandler extends events.EventEmitter {
 
         if (cluster__default["default"].isWorker) {
             // Levanto, en los worker, la escucha para recibir los eventos en broadcast de los demas hilos
-            this.messages.on('event', (msg, callback) => {
+            this.messages.on("event", (msg, callback) => {
                 if (msg && msg.event && process.pid !== msg.props.owner) {
                     if (process.env.DEBUG_EVENTS == true) {
                         console.debug(`Receiving broadcast ${msg.event} - ${process.pid}`);
@@ -937,9 +943,9 @@ class EventHandler extends events.EventEmitter {
 
     /**
      * Sobreescribir el emitter para notificar a los hijos
-     * 
-     * @param {*} evt 
-     * @param {*} props 
+     *
+     * @param {*} evt
+     * @param {*} props
      */
     emit(evt, props, callback) {
         //Desencadenar en local
@@ -956,7 +962,7 @@ class EventHandler extends events.EventEmitter {
             this.messages.send("event", { event: evt, props: { ...props } }, callback);
         }
 
-        if (evt && props && cluster__default["default"].isMaster && this.app && this.app.server && this.app.server.workers) {
+        if (evt && props && cluster__default["default"].isPrimary && this.app && this.app.server && this.app.server.workers) {
             if (process.env.DEBUG_EVENTS == true) {
                 console.debug(`${evt} -> Firing from master to workers`);
             }
@@ -966,9 +972,7 @@ class EventHandler extends events.EventEmitter {
 }
 
 const { configure, getLogger } = log4js__default["default"];
-/**
- *
- */
+
 class Logger {
     static async configure() {
         const readfile = util__default["default"].promisify(fs__default["default"].readFile);
@@ -981,7 +985,6 @@ class Logger {
         // Esto sobreescribe los metodos de console.log
         // Es necesario que la sitaxis se mantenga tal cual....
         (() => {
-
             const log_logger = getLogger("log");
             const error_logger = getLogger("error");
             const debug_logger = getLogger("debug");
@@ -1007,42 +1010,47 @@ class Logger {
                 debug_logger.log("debug", args[0]);
             };
 
-            console.custom = function (logger, message) {
+            console.custom = function (logger, level, message) {
                 const custom_logger = getLogger(logger);
-                custom_logger.log(logger, message);
+                custom_logger.log(level, message);
             };
         })();
     }
 }
 
 class AuthController {
-
     constructor(publicPathsList, AuthHandler) {
         this.router = express__default["default"].Router();
-        this.publicPathsList = [...publicPathsList, '/login'];
+        this.publicPathsList = [...publicPathsList, "/login"];
 
         this.AuthHandler = AuthHandler;
     }
 
-
     configure() {
-        this.router.use(asyncHandler__default["default"]((res, req, next) => { this.check(res, req, next); }));
-        this.router.post('/login', asyncHandler__default["default"]((res, req, next) => { this.loginPost(res, req, next); }));
-        this.router.post('/logout', asyncHandler__default["default"]((res, req, next) => { this.logout(res, req, next); }));
+        const exAsync = Utils.expressHandler();
+        this.router.use(exAsync((...args) => this.check(...args)));
+        this.router.post(
+            "/login",
+            exAsync((...args) => this.loginPost(...args))
+        );
+        this.router.post(
+            "/logout",
+            exAsync((...args) => this.logout(...args))
+        );
 
         return this.router;
     }
 
     /**
      * Controla que los usuarios tengan sesion para acceder a los metodos privados de la API
-     * 
-     * @param {*} request 
-     * @param {*} response 
-     * @param {*} next 
+     *
+     * @param {*} request
+     * @param {*} response
+     * @param {*} next
      */
     async check(request, response, next) {
         try {
-            //Rutas ublicas 
+            //Rutas ublicas
             for (let path of this.publicPathsList) {
                 const expr = pathToRegexp.pathToRegexp(path);
                 if (expr.exec(url__default["default"].parse(request.url).pathname) !== null) {
@@ -1051,24 +1059,23 @@ class AuthController {
             }
 
             if (await this.AuthHandler.check(request)) {
-                return next()
+                return next();
             }
 
-            return response.status(403).json(new JsonResponse(false, null, 'Forbidden').toJson());
+            return response.status(403).json(new JsonResponse(false, null, "Forbidden").toJson());
         } catch (ex) {
             console.error(ex);
-            return response.status(403).json(new JsonResponse(false, null, 'Forbidden').toJson());
+            return response.status(403).json(new JsonResponse(false, null, "Forbidden").toJson());
         }
     }
 
-
     /**
      * Valida los credenciales de un usuario
-     * 
+     *
      * TODO logger console.custom("access", INFO);
-     * 
-     * @param {*} request 
-     * @param {*} response 
+     *
+     * @param {*} request
+     * @param {*} response
      */
     async loginPost(request, response) {
         if (request.body.username) {
@@ -1077,7 +1084,7 @@ class AuthController {
                 if (data) {
                     return response.status(200).json(new JsonResponse(true, data).toJson());
                 }
-                return response.status(401).json(new JsonResponse(false, null, 'Unauthorized - Incorrect credentials').toJson());
+                return response.status(401).json(new JsonResponse(false, null, "Unauthorized - Incorrect credentials").toJson());
             } catch (ex) {
                 console.error(ex);
                 return response.status(401).json(new JsonResponse(false, null, "Unauthorized - Error, check log").toJson());
@@ -1088,12 +1095,13 @@ class AuthController {
 
     /**
      * Cierra la sesion del usuario
-     * 
-     * @param {*} request 
-     * @param {*} response 
+     *
+     * @param {*} request
+     * @param {*} response
      */
     async logout(request, response) {
-        if (this.AuthHandler.logout) { //Depende de que el authHandler implementado pueda realizar esta accion
+        if (this.AuthHandler.logout) {
+            //Depende de que el authHandler implementado pueda realizar esta accion
             try {
                 await this.AuthHandler.logout(request);
                 return response.status(200).json(new JsonResponse(true).toJson());
@@ -1104,8 +1112,6 @@ class AuthController {
         }
         return response.status(200).json(new JsonResponse(true).toJson());
     }
-
-
 }
 
 class IAuthHandler {
@@ -1242,8 +1248,6 @@ class CookieAuthHandler extends IAuthHandler {
     async validate(request, username, password) {
 
         const user = await this.userDao.findByUsername(username);
-
-        //TODO quizas poder configurar los nombres de username y password
 
         if (user && user.username === username && user.password === Utils.encrypt(password)) {
             request.session = { ...request.session, ...lodash__default["default"].omit(user, ['password']) };
@@ -4995,6 +4999,49 @@ unicodeScripts(XRegExp);
 
 function r(){r=function(e,t){return new l(e,void 0,t)};var e=RegExp.prototype,t=new WeakMap;function l(e,r,s){var n=new RegExp(e,r);return t.set(n,s||t.get(e)),i(n,l.prototype)}function n(e,r){var s=t.get(r);return Object.keys(s).reduce(function(t,r){return t[r]=e[s[r]],t},Object.create(null))}return s(l,RegExp),l.prototype.exec=function(t){var r=e.exec.call(this,t);return r&&(r.groups=n(r,this)),r},l.prototype[Symbol.replace]=function(r,s){if("string"==typeof s){var i=t.get(this);return e[Symbol.replace].call(this,r,s.replace(/\$<([^>]+)>/g,function(e,t){return "$"+i[t]}))}if("function"==typeof s){var l=this;return e[Symbol.replace].call(this,r,function(){var e=arguments;return "object"!=typeof e[e.length-1]&&(e=[].slice.call(e)).push(n(e,l)),s.apply(this,e)})}return e[Symbol.replace].call(this,r,s)},r.apply(this,arguments)}function s(e,t){if("function"!=typeof t&&null!==t)throw new TypeError("Super expression must either be null or a function");e.prototype=Object.create(t&&t.prototype,{constructor:{value:e,writable:!0,configurable:!0}}),Object.defineProperty(e,"prototype",{writable:!1}),t&&i(e,t);}function i(e,t){return i=Object.setPrototypeOf||function(e,t){return e.__proto__=t,e},i(e,t)}class l{constructor(s){this.LIKE="LIKE",this.parse=e=>{let r=[],s=e;const i=this.splitPatentheses(e);if(!lodash__default["default"].isEmpty(i))for(const e in i)s=s.replace(`${i[e]}`,`#${e}`),r.push(this.parse(i[e]));return this.parseQS(s,r)},this.splitPatentheses=t=>XRegExp.matchRecursive(t,"\\(","\\)","g"),this.parseQS=(e,t)=>{const s=/*#__PURE__*/r(/(([^\s|^:|^!:|^>:|^<:]+)(:|!:|>:|<:)([^\s|"|\[]+|".*?"|\[.*?\]))? ?(OR|AND)? ?([\+|\-|\(#][^\s]+|)? ?/gm,{key:2,operator:3,value:4,logic:5,plain:6});let i,l=[];for(;null!==(i=s.exec(e));){if(i.index===s.lastIndex&&s.lastIndex++,null===i)continue;let{key:e,value:r,operator:n,plain:a,logic:o}=i.groups;n||(n=":");let c=this.LIKE;switch(n){case":":default:c=this.LIKE;break;case"!:":c=`NOT ${this.LIKE}`;break;case">:":c=">";break;case"<:":c="<";}if(r&&r.match(/\[.*?\]/)&&(c=c===`NOT ${this.LIKE}`?"NOT BETWEEN":"BETWEEN"),r&&-1!==r.indexOf(",")&&(c=c===`NOT ${this.LIKE}`?"NOT IN":"IN"),e&&l.push({key:this.checkAliases(e),operator:c,value:this.parseValue(r),logic:o||"AND"}),a&&-1!==a.indexOf("#")){const e=a.replace(/#|\(|\)/g,"");l.push(t[parseInt(e)]);}else if(this.allowGlobalSearch&&a&&-1===a.indexOf("#")){let e="plain_+";a.startsWith("-")&&(e="plain_-"),l.push({operator:e,value:this.parseValue(a.replace(/\+|\-/gm,"")),logic:o||"AND"});}}return l},this.aliases=s&&s.aliases||{},this.allowGlobalSearch=s&&s.allowGlobalSearch||!1,s&&s.caseInsensitive&&(this.LIKE="ILIKE");}checkAliases(e){return this.aliases?this.aliases[e]?this.aliases[e].replaceAll("{{key}}",e):this.aliases["*"]?this.aliases["*"].replaceAll("{{key}}",e):e:e}parseValue(e){return e.replaceAll(/"|\?/g,"").replaceAll("*","%")}}class n{constructor(e,t="pg"){this.table=e,this.dialect=t;}parse(e){let t="",r=[];for(let s of e)if(Array.isArray(s)){const{query:e,bindings:i}=this.parse(s);t+=`(${e})`,r=[...r,...i];}else if("object"==typeof s){const{query:e,bindings:i}=this.convertCondition(s);t+=e,r=[...r,...i];}else console.warn("Unknown type detected in qry");return t=t.replace(/( AND | OR )$/gm,""),{query:t,bindings:r}}convertCondition(e){let{key:t,operator:r,value:s,logic:i}=e;if(!t){if("pg"!==this.dialect)return console.warn("Only PostgreSQL supports global searching"),"";let e="";return "plain_-"===r&&(e="NOT"),{query:`${e} to_tsvector(${this.table}::text) @@ to_tsquery(?) ${i} `,bindings:[s]}}let l="?",n=[s];return "BETWEEN"!==r&&"NOT BETWEEN"!==r||(n=s.replace(/\[|\]/gm,""),n=n.split(" TO "),l="? AND ?"),"IN"!==r&&"NOT IN"!==r||(n=[s.split(",")]),{query:`${t} ${r} ${l} ${i} `,bindings:n}}}class a extends n{toKnex(e,t){const r=this.parse(t);return e.whereRaw(r.query,r.bindings)}}
 
+class KnexConnector {
+
+
+    init(config) {
+
+        /**
+         * References the current connection of the app
+         * @type {Knex}
+         * @public
+         */
+        this.connection = Knex__default["default"](config);
+    }
+
+    /**
+     * Configura de forma global los aliases de las columnas para utilizar en FQL.
+     * 
+     * La estructura es 
+     * {
+            "table1": {
+                "alias1": "column1",
+                "alias2": "column2"
+            },
+            "table2": {
+                "alias1": "column1"
+            }
+        }
+     *
+     * @param {*} aliases 
+     */
+    setColumnAliases(aliases) {
+        this.columnAliases = aliases;
+    }
+    
+
+
+    test() {
+        return this.connection.raw('select 1+1 as result');
+    }
+}
+
+
+var KnexConnector$1 = new KnexConnector();
+
 class KnexFilterParser {
     /**
      *
@@ -5010,6 +5057,13 @@ class KnexFilterParser {
         //Agregar los aliases en caso de que se hayan configurado de forma global
         if (KnexConnector$1.columnAliases && KnexConnector$1.columnAliases[tableName]) {
             options.aliases = KnexConnector$1.columnAliases[tableName];
+        }
+        //Options
+        if (KnexConnector$1.caseInsensitive !== undefined) {
+            options.caseInsensitive = KnexConnector$1.caseInsensitive;
+        }
+        if (KnexConnector$1.allowGlobalSearch !== undefined) {
+            options.allowGlobalSearch = KnexConnector$1.allowGlobalSearch;
         }
         const parser = new l(options);
         const data = parser.parse(string);
@@ -5211,63 +5265,20 @@ class KnexFilterParser {
     }
 }
 
-class KnexConnector {
-
-
-    init(config) {
-
-        /**
-         * References the current connection of the app
-         * @type {Knex}
-         * @public
-         */
-        this.connection = Knex__default["default"](config);
-    }
-
-    /**
-     * Configura de forma global los aliases de las columnas para utilizar en FQL.
-     * 
-     * La estructura es 
-     * {
-            "table1": {
-                "alias1": "column1",
-                "alias2": "column2"
-            },
-            "table2": {
-                "alias1": "column1"
-            }
-        }
-     *
-     * @param {*} aliases 
-     */
-    setColumnAliases(aliases) {
-        this.columnAliases = aliases;
-    }
-    
-
-
-    test() {
-        return this.connection.raw('select 1+1 as result');
-    }
-}
-
-
-var KnexConnector$1 = new KnexConnector();
-
 /**
  * Crear un dao con los métodos básicos
  */
 class BaseKnexDao {
-
-    tableName = "";
-
     constructor() {
-
+        this.tableName = "";
     }
 
-
     loadAllData(start, limit) {
-        return KnexConnector$1.connection.select('*').from(this.tableName).limit(limit || 10000).offset(start)
+        return KnexConnector$1.connection
+            .select("*")
+            .from(this.tableName)
+            .limit(limit || 10000)
+            .offset(start);
     }
 
     async loadFilteredData(filters, start, limit) {
@@ -5276,23 +5287,25 @@ class BaseKnexDao {
             sorts = KnexFilterParser.parseSort(filters.sort);
         }
 
-        return KnexConnector$1.connection.from(this.tableName).where((builder) => (
-            KnexFilterParser.parseFilters(builder, lodash__default["default"].omit(filters, ['sort', 'start', 'limit']), this.tableName)
-        )).orderByRaw(sorts).limit(limit).offset(start);
-
+        return KnexConnector$1.connection
+            .from(this.tableName)
+            .where((builder) => KnexFilterParser.parseFilters(builder, lodash__default["default"].omit(filters, ["sort", "start", "limit"]), this.tableName))
+            .orderByRaw(sorts)
+            .limit(limit)
+            .offset(start);
     }
 
-    
     async countFilteredData(filters) {
-        let data = await KnexConnector$1.connection.from(this.tableName).where((builder) => (
-            KnexFilterParser.parseFilters(builder, lodash__default["default"].omit(filters, ['sort', 'start', 'limit']), this.tableName)
-        )).count('id', { as: 'total' });
+        let data = await KnexConnector$1.connection
+            .from(this.tableName)
+            .where((builder) => KnexFilterParser.parseFilters(builder, lodash__default["default"].omit(filters, ["sort", "start", "limit"]), this.tableName))
+            .count("id", { as: "total" });
 
         return data && data[0].total;
     }
 
     async loadById(objectId) {
-        const data = await KnexConnector$1.connection.from(this.tableName).where('id', objectId);
+        const data = await KnexConnector$1.connection.from(this.tableName).where("id", objectId);
 
         if (data && data[0]) {
             return data[0];
@@ -5311,7 +5324,7 @@ class BaseKnexDao {
         if (!existing) {
             throw "NotFound";
         }
-        return KnexConnector$1.connection.from(this.tableName).where("id", objectId).delete()
+        return KnexConnector$1.connection.from(this.tableName).where("id", objectId).delete();
     }
 }
 
@@ -5331,44 +5344,34 @@ class BaseController {
     }
 
     configure(entity, config) {
+        const exAsync = Utils.expressHandler();
         this.router.get(
             `/${entity}`,
-            asyncHandler__default["default"]((request, response, next) => {
-                this.listEntidad(request, response, next);
-            })
+            exAsync((...args) => this.listEntidad(...args))
         );
         this.router.post(
             `/${entity}/list`,
-            asyncHandler__default["default"]((request, response, next) => {
-                this.listEntidad(request, response, next);
-            })
+            exAsync((...args) => this.listEntidad(...args))
         );
         this.router.get(
             `/${entity}/:id`,
-            asyncHandler__default["default"]((request, response, next) => {
-                this.getEntidad(request, response, next);
-            })
+            exAsync((...args) => this.getEntidad(...args))
         );
         this.router.post(
             `/${entity}`,
-            asyncHandler__default["default"]((request, response, next) => {
-                this.saveEntidad(request, response, next);
-            })
+            exAsync((...args) => this.saveEntidad(...args))
         );
         this.router.put(
             `/${entity}/:id`,
-            asyncHandler__default["default"]((request, response, next) => {
-                this.updateEntidad(request, response, next);
-            })
+            exAsync((...args) => this.updateEntidad(...args))
         );
         this.router.delete(
             `/${entity}/:id`,
-            asyncHandler__default["default"]((request, response, next) => {
-                this.deleteEntidad(request, response, next);
-            })
+            exAsync((...args) => this.deleteEntidad(...args))
         );
 
         this.service = config.service;
+        this.table = config.table;
 
         return this.router;
     }
@@ -5388,13 +5391,8 @@ class BaseController {
      */
     async listEntidad(request, response, next) {
         try {
-            let service = new this.service();
-            let filters =
-                request.method === "POST"
-                    ? request.body
-                    : request.query && request.query.filters
-                    ? JSON.parse(request.query.filters)
-                    : {};
+            let service = new this.service(null, this.table);
+            let filters = request.method === "POST" ? request.body : request.query && request.query.filters ? JSON.parse(request.query.filters) : {};
 
             let data = await service.list(filters, filters.start, filters.limit);
             let jsRes = new JsonResponse(true, data.data, null, data.total);
@@ -5419,7 +5417,7 @@ class BaseController {
      */
     async getEntidad(request, response, next) {
         try {
-            let service = new this.service();
+            let service = new this.service(null, this.table);
             let data = await service.loadById(request.params.id);
             let jsRes = new JsonResponse(true, data);
             let code = 200;
@@ -5457,7 +5455,7 @@ class BaseController {
      */
     async saveEntidad(request, response, next) {
         try {
-            let service = new this.service();
+            let service = new this.service(null, this.table);
 
             let data = await service.save(request.body);
             let jsRes = new JsonResponse(true, (data && data[0]) || { id: request.body.id });
@@ -5484,7 +5482,7 @@ class BaseController {
      */
     async updateEntidad(request, response, next) {
         try {
-            let service = new this.service();
+            let service = new this.service(null, this.table);
 
             let data = await service.update(request.params.id, request.body);
             let jsRes = new JsonResponse(true, (data && data[0]) || { id: request.body.id });
@@ -5510,7 +5508,7 @@ class BaseController {
      */
     async deleteEntidad(request, response, next) {
         try {
-            let service = new this.service();
+            let service = new this.service(null, this.table);
             let data = await service.delete(request.params.id);
             let jsRes = new JsonResponse(true, data);
 
@@ -5529,13 +5527,14 @@ class BaseController {
 }
 
 class BaseService {
-
-
-    constructor(cls) {
+    constructor(cls, table) {
         if (cls) {
             this.dao = new cls();
         } else {
             this.dao = new BaseKnexDao(); //El sistema por defecto utiliza knex, si se pasa un dao personalizado se puede sobreescribir este comportamiento
+        }
+        if (table) {
+            this.dao.tableName = table;
         }
     }
     /**
@@ -5545,14 +5544,14 @@ class BaseService {
      */
     async list(filters, start, limit) {
         //Pagination
-        var start = start || 0;
-        var limit = limit || 1000;//Default limit
+        const st = start || 0;
+        const lm = limit || 1000; //Default limit
 
         let response = {};
-        response.total = await this.dao.countFilteredData(filters, start, limit);
+        response.total = await this.dao.countFilteredData(filters, st, lm);
 
         if (filters && Object.keys(filters).length !== 0) {
-            let filteredData = await this.dao.loadFilteredData(filters, start, limit);
+            let filteredData = await this.dao.loadFilteredData(filters, st, lm);
             response.data = filteredData;
             return response;
         }
@@ -5560,7 +5559,6 @@ class BaseService {
         response.data = await this.dao.loadAllData(start, limit);
         return response;
     }
-
 
     /**
      * Obtencion de un elemento mediante su identificador
@@ -5603,13 +5601,14 @@ class BaseService {
 }
 
 class App {
-
-    serverClass = Server
-    clusterClass = ClusterServer
+    constructor() {
+        this.serverClass = Server;
+        this.clusterClass = ClusterServer;
+    }
 
     /**
      * Initializa las configuraciones para la app
-     * 
+     *
      */
     async init(serverConfig) {
         if (process.env.DISABLE_LOGGER != "true") {
@@ -5634,7 +5633,7 @@ class App {
          * @public
          */
         this.events = new EventHandler(this);
-        
+
         /**
          * Gestor de traducciones
          * @type {I18nLoader}
@@ -5669,11 +5668,10 @@ class App {
         await this.server.start();
     }
 
-
     /**
      * Inicia el server replify para poder conectar terminales remotas
-     * 
-     * 
+     *
+     *
      * Para que arranque es necesario especificar REPL_ENABLED en el archivo .env
      */
     startRepl() {
@@ -5685,18 +5683,18 @@ class App {
                     output: socket,
                     terminal: true,
                     useColors: true,
-                    preview: false
+                    preview: false,
                 });
                 remote.context.app = this;
                 remote.context.Utils = Utils;
-                remote.on('exit', socket.end.bind(socket));
+                remote.context.db = KnexConnector$1.connection;
+                remote.on("exit", socket.end.bind(socket));
             }).listen(process.env.REPL_PORT || 5001);
         } catch (e) {
             console.log("Remote REPL Conn: " + e);
         }
 
-        console.log(`Remote REPL started on port ${(process.env.REPL_PORT || 5001)}`);
-
+        console.log(`Remote REPL started on port ${process.env.REPL_PORT || 5001}`);
     }
 }
 

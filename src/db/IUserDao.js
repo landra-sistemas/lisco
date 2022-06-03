@@ -9,4 +9,3 @@ export default class IUserDao extends BaseKnexDao {
         }
     }
 }
-
