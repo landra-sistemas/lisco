@@ -62,6 +62,7 @@ import { App } from '@landra_sistemas/lisco'
 //const { App } = require('@landra_sistemas/lisco') -> common js
 
 module.exports = async () => {
+    App.runtime(); //(Opcional) Arranca la runtime para recibir parámetros por consola (ver Runtime)
 
     App.customizeExpress = (app) => { 
         // En este punto se pueden incluir personalizaciones sobre la app de express como se verá mas adelante
@@ -702,3 +703,26 @@ App.routes = [
     ...
 ];
 ```
+
+
+
+## Runtime
+
+Lisco proporciona una serie de parámetros de consola útiles para la generación de claves. Esta runtime **no está activada por defecto** pero puede activarse mediante:
+``` javascript
+//module.exports = async () => {
+    App.runtime();
+
+    [...]
+//};
+```
+> Se recomienda iniciar la runtime como primera llamada del index.js (Antes del resto de cosas)
+
+
+Una vez que esta runtime se encuentra activada la aplicación aceptará, al arrancar, los siguientes parámetros por terminal:
+
+- -h o --help: Muestra la ayuda con los parámetros disponibles
+- --generateKeys: Genera las claves de encriptación únicas para la aplicación (iv y key)
+- --encrypt string: Encripta una cadena pasada como parámetro utilizando las claves proporcionadas. Util para la generación de contraseñas.
+
+

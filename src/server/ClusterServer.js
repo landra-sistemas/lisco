@@ -28,7 +28,7 @@ export default class ClusterServer extends EventEmitter {
     }
 
     setServerCls(cls) {
-        this.cls = cls;
+        this.server = cls;
     }
 
     /**
@@ -51,8 +51,8 @@ export default class ClusterServer extends EventEmitter {
      * Se puede desactivar mediante la config socketio: false al realizar el App.init()
      */
     configureSocketIO() {
-        if (this.cls.express_config && this.cls.express_config.socketio) {
-            this.app.io = new Server(this.cls.express_config && this.cls.express_config.socketio);
+        if (this.server.express_config && this.server.express_config.socketio) {
+            this.app.io = new Server(this.server.express_config && this.server.express_config.socketio);
             this.app.io.listen(this.port + 1);
         }
     }
@@ -113,9 +113,6 @@ export default class ClusterServer extends EventEmitter {
      *
      */
     async initUnclustered() {
-        //Initialize clustered servers
-        this.server = this.cls;
-
         this.server.port = this.port;
         //create http server
         let server = http.Server(this.server.app);

@@ -6,11 +6,20 @@ import { Logger } from "./logger";
 import net from "net";
 import repl from "repl";
 import { KnexConnector } from "./db";
+import Runtime from "./common/Runtime";
 
 class App {
     constructor() {
         this.serverClass = Server;
         this.clusterClass = ClusterServer;
+    }
+
+    /**
+     * Inicializa la runtime de la aplicación para poder recibir parámetros por consola y generar claves.
+     * @returns
+     */
+    runtime() {
+        return Runtime();
     }
 
     /**
