@@ -1,12 +1,11 @@
-import helmet from 'helmet';
-import express from 'express';
-import compression from 'compression';
-import cors from 'cors';
-import fileUpload from 'express-fileupload';
-import url from 'url';
-import lodash from 'lodash';
-import { JsonResponse } from '../common';
-
+import helmet from "helmet";
+import express from "express";
+import compression from "compression";
+import cors from "cors";
+import fileUpload from "express-fileupload";
+import url from "url";
+import lodash from "lodash";
+import { JsonResponse } from "../common";
 
 /**
  * Clase servidor encargada de configurar las rutas.
@@ -14,12 +13,11 @@ import { JsonResponse } from '../common';
  * que el codigo se disperse entre diferentes proyectos.
  */
 export default class Server {
-
     /**
-     * 
-     * @param {*} config 
-     * @param {*} statics 
-     * @param {*} routes 
+     *
+     * @param {*} config
+     * @param {*} statics
+     * @param {*} routes
      */
     constructor(config, statics, routes) {
         this.app = express();
@@ -31,12 +29,11 @@ export default class Server {
             cors: { origin: true, credentials: true },
             fileupload: true,
             socketio: { transports: ["websocket"] },
-            traceRequests: false
+            traceRequests: false,
         });
         this.statics = statics;
         this.routes = routes;
     }
-
 
     /**
      * Inicializa el servidor
@@ -44,7 +41,7 @@ export default class Server {
     async initialize() {
         this.config(this.express_config);
         if (this.customizeExpress) {
-            await this.customizeExpress(this.app)
+            await this.customizeExpress(this.app);
         }
         this.configureRoutes(this.routes);
         this.errorHandler();
@@ -52,19 +49,18 @@ export default class Server {
 
     /**
      * Funcion sobreescribible para personalizar los componentes cargados en Express
-     * 
+     *
      * Aqui se pueden poner cosas como:
-     * 
+     *
      * this.app.use(cookieParser())... etc
      */
-    customizeExpress() { }
+    customizeExpress() {}
 
     /**
      * Se encarga de realizar la configuración inicial del servidor
-     * 
+     *
      */
     config(config) {
-
         if (config && config.helmet) {
             //Security
             this.app.use(helmet(config && lodash.isObject(config.helmet) && config.helmet));
@@ -84,7 +80,7 @@ export default class Server {
         }
         if (config && config.cors) {
             //Enable cors to allow external references
-            this.app.options('*', cors(config && lodash.isObject(config.cors) && config.cors));
+            this.app.options("*", cors(config && lodash.isObject(config.cors) && config.cors));
             this.app.use(cors(config && lodash.isObject(config.cors) && config.cors));
         }
         if (config && config.fileupload) {
@@ -100,7 +96,7 @@ export default class Server {
         }
 
         //Logging
-        if ((config && config.traceRequests === true) && process.env.DISABLE_LOGGER != "true") {
+        if (config && config.traceRequests === true && process.env.DISABLE_LOGGER != "true") {
             this.app.use((request, response, next) => {
                 request.requestTime = Date.now();
                 response.on("finish", () => {
@@ -108,7 +104,7 @@ export default class Server {
                     let end = Date.now() - request.requestTime;
                     let user = (request && request.session && request.session.user_id) || "";
 
-                    console.debug('APIRequest[' + process.pid + ']::. [' + request.method + '] (user:' + user + ')  ' + pathname + ' |-> took: ' + end + ' ms');
+                    console.debug("APIRequest[" + process.pid + "]::. [" + request.method + "] (user:" + user + ")  " + pathname + " |-> took: " + end + " ms");
                     console.debug(JSON.stringify(request.body));
                 });
                 next();
@@ -124,7 +120,7 @@ export default class Server {
         this.app.use(router);
 
         //create controllers
-        this.loadRoutes(this.app, routes)
+        this.loadRoutes(this.app, routes);
     }
 
     /**

@@ -3,17 +3,19 @@ import { EventHandler } from "./events";
 import { ClusterServer, Server } from "./server";
 import { Logger } from "./logger";
 
-import net from 'net';
-import repl from 'repl';
+import net from "net";
+import repl from "repl";
+import { KnexConnector } from "./db";
 
 class App {
-
-    serverClass = Server
-    clusterClass = ClusterServer
+    constructor() {
+        this.serverClass = Server;
+        this.clusterClass = ClusterServer;
+    }
 
     /**
      * Initializa las configuraciones para la app
-     * 
+     *
      */
     async init(serverConfig) {
         if (process.env.DISABLE_LOGGER != "true") {
@@ -38,7 +40,7 @@ class App {
          * @public
          */
         this.events = new EventHandler(this);
-        
+
         /**
          * Gestor de traducciones
          * @type {I18nLoader}
@@ -60,7 +62,7 @@ class App {
             if (process.env.REPL_ENABLED == "true") {
                 this.startRepl();
             }
-        }
+        };
     }
 
     /**
@@ -73,11 +75,10 @@ class App {
         await this.server.start();
     }
 
-
     /**
      * Inicia el server replify para poder conectar terminales remotas
-     * 
-     * 
+     *
+     *
      * Para que arranque es necesario especificar REPL_ENABLED en el archivo .env
      */
     startRepl() {
@@ -89,18 +90,18 @@ class App {
                     output: socket,
                     terminal: true,
                     useColors: true,
-                    preview: false
+                    preview: false,
                 });
                 remote.context.app = this;
                 remote.context.Utils = Utils;
-                remote.on('exit', socket.end.bind(socket))
+                remote.context.db = KnexConnector.connection;
+                remote.on("exit", socket.end.bind(socket));
             }).listen(process.env.REPL_PORT || 5001);
         } catch (e) {
             console.log("Remote REPL Conn: " + e);
         }
 
-        console.log(`Remote REPL started on port ${(process.env.REPL_PORT || 5001)}`);
-
+        console.log(`Remote REPL started on port ${process.env.REPL_PORT || 5001}`);
     }
 }
 

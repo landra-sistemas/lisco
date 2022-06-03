@@ -4,9 +4,7 @@ import fs from "fs";
 import util from "util";
 
 const { configure, getLogger } = log4js;
-/**
- *
- */
+
 export default class Logger {
     static async configure() {
         const readfile = util.promisify(fs.readFile);
@@ -19,11 +17,6 @@ export default class Logger {
         // Esto sobreescribe los metodos de console.log
         // Es necesario que la sitaxis se mantenga tal cual....
         (() => {
-            const log = console.log;
-            const error = console.error;
-            const info = console.info;
-            const debug = console.debug;
-
             const log_logger = getLogger("log");
             const error_logger = getLogger("error");
             const debug_logger = getLogger("debug");
@@ -49,9 +42,9 @@ export default class Logger {
                 debug_logger.log("debug", args[0]);
             };
 
-            console.custom = function (logger, message) {
+            console.custom = function (logger, level, message) {
                 const custom_logger = getLogger(logger);
-                custom_logger.log(logger, message);
+                custom_logger.log(level, message);
             };
         })();
     }

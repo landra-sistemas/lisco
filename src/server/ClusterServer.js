@@ -1,13 +1,13 @@
-import http from 'http';
-import https from 'https';
-import fs from 'fs';
-import path from 'path';
-import cluster from 'cluster';
+import http from "http";
+import https from "https";
+import fs from "fs";
+import path from "path";
+import cluster from "cluster";
 import { Server } from "socket.io";
-import os from 'os'
-import { EventEmitter } from 'events';
+import os from "os";
+import { EventEmitter } from "events";
 
-import ClusterMessages from 'cluster-messages';
+import ClusterMessages from "cluster-messages";
 
 /**
  * Inicializa la escucha del server en modo cluster
@@ -17,20 +17,19 @@ export default class ClusterServer extends EventEmitter {
         super();
 
         if (!process.env.PORT) {
-            console.log('Using 3000 as default port. Customize via env PORT.')
+            console.log("Using 3000 as default port. Customize via env PORT.");
         }
         this.port = this.normalizePort(process.env.PORT || 3000);
         this.clustered = process.env.CLUSTERED;
         this.workers = [];
         this.app = app;
 
-        this.executeOnlyMain = () => { };
+        this.executeOnlyMain = () => {};
     }
 
     setServerCls(cls) {
         this.cls = cls;
     }
-
 
     /**
      * Iniciar el servidor en el puerto y con la configuración seleccionadas.
@@ -39,7 +38,6 @@ export default class ClusterServer extends EventEmitter {
         if (this.clustered == "true") {
             this.initClustered();
         } else {
-
             this.configureSocketIO();
             this.executeOnlyMain();
 
@@ -48,12 +46,15 @@ export default class ClusterServer extends EventEmitter {
     }
 
     /**
-     * 
-     * @param {*} server 
+     * Inicializa el servidor de socketio en el puerto siguiente al configurado.
+     *
+     * Se puede desactivar mediante la config socketio: false al realizar el App.init()
      */
     configureSocketIO() {
-        this.app.io = new Server(this.cls.express_config && this.cls.express_config.socketio);
-        this.app.io.listen(this.port + 1);
+        if (this.cls.express_config && this.cls.express_config.socketio) {
+            this.app.io = new Server(this.cls.express_config && this.cls.express_config.socketio);
+            this.app.io.listen(this.port + 1);
+        }
     }
 
     /**
@@ -67,12 +68,11 @@ export default class ClusterServer extends EventEmitter {
 
             this.executeOnlyMain();
 
-
             let messages = new ClusterMessages();
-            messages.on('event', (msg, callback) => {
+            messages.on("event", (msg, callback) => {
                 if (msg && msg.event) {
                     if (process.env.DEBUG_EVENTS == true) {
-                        console.debug(`Received '${msg.event}' from ${msg.props.owner} at Master`)
+                        console.debug(`Received '${msg.event}' from ${msg.props.owner} at Master`);
                     }
                     //Desencadenar en el proceso principal tambien
                     this.app.events.emit(msg.event, msg.props, callback);
@@ -88,12 +88,10 @@ export default class ClusterServer extends EventEmitter {
             }
 
             //Listen for dying workers
-            cluster.on('exit', (worker) => {
-
+            cluster.on("exit", (worker) => {
                 //Replace the dead worker, we're not sentimental
-                console.log('Worker ' + worker.id + ' died :(');
+                console.log("Worker " + worker.id + " died :(");
                 this.initWorker();
-
             });
         } else {
             await this.initUnclustered();
@@ -105,7 +103,7 @@ export default class ClusterServer extends EventEmitter {
      */
     initWorker() {
         let worker = cluster.fork();
-        console.log(`Running worker ${worker.process.pid}`)
+        console.log(`Running worker ${worker.process.pid}`);
 
         this.workers.push(worker);
     }
@@ -136,18 +134,18 @@ export default class ClusterServer extends EventEmitter {
         });
         //start listening on port
         server.on("listening", () => {
-            console.log('Server Worker running on port: ' + this.port + '!');
-            this.emit('listening', this.port);
+            console.log("Server Worker running on port: " + this.port + "!");
+            this.emit("listening", this.port);
         });
 
         if (process.env.SSL && process.env.SSL == "true") {
             if (!process.env.SSL_KEY || !process.env.SSL_CERT || !process.env.SSL_PASS) {
-                console.error('Invalid SSL configuration. SLL_KEY, SSL_CERT and SSL_PASS needed');
+                console.error("Invalid SSL configuration. SLL_KEY, SSL_CERT and SSL_PASS needed");
                 process.exit(0);
             }
 
-            var key = fs.readFileSync(path.resolve(process.cwd(), process.env.SSL_KEY || 'key.pem'));
-            var cert = fs.readFileSync(path.resolve(process.cwd(), process.env.SSL_CERT || 'cert.pem'));
+            var key = fs.readFileSync(path.resolve(process.cwd(), process.env.SSL_KEY || "key.pem"));
+            var cert = fs.readFileSync(path.resolve(process.cwd(), process.env.SSL_CERT || "cert.pem"));
 
             var options = {
                 key: key,
@@ -156,19 +154,19 @@ export default class ClusterServer extends EventEmitter {
             };
 
             if (!process.env.SSL_PORT) {
-                console.log('Using 3443 as ssl default port. Customize via env SSL_PORT.')
+                console.log("Using 3443 as ssl default port. Customize via env SSL_PORT.");
             }
             var sslPort = this.normalizePort(process.env.SSL_PORT || 3443);
             var serverSsl = https.createServer(options, this.server.app);
             serverSsl.listen(sslPort);
             //add error handler
-            serverSsl.on("error", function (err) {
-                self.handleErrors(err, sslPort);
+            serverSsl.on("error", (err) => {
+                this.handleErrors(err, sslPort);
             });
             //start listening on port
-            serverSsl.on("listening", function () {
-                console.log('Server Worker running on port: ' + sslPort + '!');
-                this.emit('listening_ssl', sslPort);
+            serverSsl.on("listening", () => {
+                console.log("Server Worker running on port: " + sslPort + "!");
+                this.emit("listening_ssl", sslPort);
             });
         }
     }
@@ -201,9 +199,7 @@ export default class ClusterServer extends EventEmitter {
             throw error;
         }
 
-        let bind = typeof port === "string"
-            ? "Pipe " + port
-            : "Port " + port;
+        let bind = typeof port === "string" ? "Pipe " + port : "Port " + port;
 
         //handle specific listen errors with friendly messages
         switch (error.code) {

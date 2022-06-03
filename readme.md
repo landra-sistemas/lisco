@@ -7,22 +7,31 @@ Framework nodejs con express y knex para el desarrollo de backends.
 
 
 ## Quick Setup
+Inicializar un proyecto en blanco
 
-Install
+``` shell
+> npm init
+```
+> Introducir los datos del proyecto
+
+Instalar dependencias necesarias
 ``` shell
 
-> npm install lisco
-
-> npm install esm dotenv
+> npm install @landra_sistemas/lisco dotenv-defaults
 
 ```
 
-Runtime principal. Archivo desde el que se arranca el proyecto.
+*Opcionales*: esm -> Para la resolución de los import. Ya hay soporte nativo en nodejs para esto pero es un poco raro todavía
 
+``` bash
+> npm install esm
+```
+
+Runtime principal. Archivo desde el que se arranca el proyecto. **Modificar el package.json para que el script start apunte a este archivo.**
+
+**run.js**
 ``` javascript
-//run.js
-
-require = require("esm")(module/*, options*/)
+require = require("esm")(module/*, options*/) // -> Esto solo no hace falta si se utiliza CommonJS o se pone type: module en el package json.
 
 require('dotenv-defaults').config();
 //module dependencies.
@@ -37,41 +46,52 @@ process.on('uncaughtException', (err) => {
     // handle the error safely
     console.error(`Error: ${err || err.stack || err.message}`);
 });
+//Capturar promises perdidos
+process.on('unhandledPromiseException', (err) => {
+    // handle the error safely
+    console.error(`Error: ${err || err.stack || err.message}`);
+});
+
 ```
 
-Archivo index encargado de aplicar la configuración
-``` javascript
-//index.js
+Archivo index encargado de aplicar la configuración e inicialización de componentes.
 
-import { App } from 'lisco'
+**index.js**
+``` javascript
+import { App } from '@landra_sistemas/lisco'
+//const { App } = require('@landra_sistemas/lisco') -> common js
 
 module.exports = async () => {
 
-    App.customizeExpress = (app) => { };
-    App.statics = {
+    App.customizeExpress = (app) => { 
+        // En este punto se pueden incluir personalizaciones sobre la app de express como se verá mas adelante
+    };
+    App.statics = { //Archivos estáticos que serán servidos
         "/temp": "/temp"
     }
-    App.routes = [
+    App.routes = [ //Controladores que se cargarán para servir la api o las vistas
         //new CustomController()
     ]
 
-    App.executeOnlyMain = () => {
-        //Acciones a ejecutar sobre el mainWorker
+    App.executeOnlyMain = () => { 
+        //Acciones a ejecutar sobre el mainWorker. Util en modo cluster para ejecutar cosas una única vez
         console.log("MainThread")
     }
 
-    await App.init();
+    await App.init(); //Inicializar la configuración de la App con los parámetros proporcionados
 
-    App.start();
+    App.start(); //Arrancar el servidor
     App.server.on('listening', () => {
+        //Evento desencadenado cuando el sistema se encuentra disponible
         console.log('listening');
     })
-
 };
 ```
 
 
 Archivo `.env` con las configuraciones de inicio
+
+**.env**
 ``` properties
 # Determina el scope actual del producto (development, production)
 NODE_ENV=development
@@ -84,7 +104,7 @@ DEFAULT_LANG='es'
 # (Opcional) Deshabilita el logger para la ejecución de testing 
 DISABLE_LOGGER=false
 # (Opcional) Habilita la consola remota accesible mediante telnet o lisco_terminal
-REPL_ENABLED=true
+REPL_ENABLED=false
 # (Opcional) Determina el puerto en el que se desplegará la terminal remota
 REPL_PORT=5001
 
@@ -118,9 +138,10 @@ JWT_ISSUER=Landra Sistemas
 JWT_SUBJECT=MySub
 ```
 
-Archivo `log4js.json` encargado de la configuración del logger.
+Archivo `log4js.json` encargado de la configuración del logger. Mas información y configuraciones en: https://log4js-node.github.io/log4js-node/index.html
+
+**log4js.json**
 ``` json
-//log4js.json
 {
     "disableClustering": true,
     "appenders": {
@@ -148,13 +169,10 @@ Archivo `log4js.json` encargado de la configuración del logger.
 
 ```
 
-
-
-
 ## Arranque del proyecto
 
 ```
-> node run.js
+> node run.js o npm start
 
 [2021-03-06T19:39:52.987] [INFO] log - MainThread
 [2021-03-06T19:39:53.061] [INFO] log - Started
@@ -183,6 +201,7 @@ Para hacer que al ejecutar una aplicación los mensajes de log del `consoleApend
 
 Crear un archivo `knex-cli.js` en la raíz del proyecto con el siguiente contenido:
 
+**knex-cli.js**
 ``` javascript
 var migrate = require('knex/bin/cli');
 
@@ -192,15 +211,13 @@ var migrate = require('knex/bin/cli');
 Necesario crear un knexfile con los datos de conexión a BD.
 
 ``` shell
-> node knex-cli init
+> node knex-cli.js init
 
 ```
 
 Esto creará un archivo similar a:
 
 ``` javascript
-// Update with your config settings.
-
 module.exports = {
 
     development: {
@@ -233,23 +250,37 @@ module.exports = {
 };
 ```
 
-Conectarse a la base de datos añadiendo al `index.js` de la aplicaciión:
+Conectarse a la base de datos añadiendo al `index.js` de la aplicación:
 
+**index.js**
 ``` javascript
-//index.js
 
-//Antes de App.start()
+    import knexfile from "./knexfile";
+    //const knexfile = require('./knexfile'); -> common js
 
-KnexConnector.init(require('./knexfile').development);
+    [...] //Antes del App.init()
+    KnexConnector.init(knexfile[process.env.NODE_ENV]);
+    await KnexConnector.test(); //Comprueba la conexión con BD
 
-//Esto habilita una conexión (o pool) accesible mediante el singleton KnexConnector. Para ello:
+    [...]
 
-KnexConnector.connection.[...] // Insert, Where, etc...
-
+    //
+    
 
 ```
 
+Esto habilita una conexión (o pool) accesible mediante el singleton KnexConnector. Este singleton puede ser accedido desde cualquier punto aunque se recomienda utilizarlo en la capa DAO.
 
+Para la realización de consultas a base de datos basta con:
+``` javascript
+import {KnexConnector} from '@landra_sistemas/lisco';
+//const {KnexConnector} = require("@landra_sistemas/lisco");
+
+    [...]
+    KnexConnector.connection.[...] // Insert, Where, etc...
+    [...]
+```
+> `connection` es una instancia de knex con lo que dispone de todos los métodos `.from`, `.where`, etc. definidos por su API.
 
 
 ### Mas info KNEX
@@ -285,12 +316,12 @@ Al extender de BaseController se proporciona una interfaz genérica CRUD sobre u
 Por ejemplo si hablamos de la tabla `user` crearíamos
 
 ``` javascript
-import { BaseController, BaseService } from 'lisco'
+import { BaseController, BaseService } from '@landra_sistemas/lisco'
 
 export default class UserController extends BaseController {
-    configure() { //Necesario
-        super.configure('user', { service: BaseService, table: 'user' });
 
+    configure() { //Necesario metodo configure que retorne this.router
+        super.configure('user', { service: BaseService, table: 'user' });
         
         return this.router;
     }
@@ -315,7 +346,9 @@ export default class UserController extends BaseController {
     configure() { //Necesario
         super.configure('user', { service: BaseService, table: 'user' });
 
-        this.router.get('/session', Utils.expressHandler((res, req, next) => { this.getSession(res, req, next); }));
+        this.router.get('/session',Utils.expressHandler((...args) => { 
+            this.getSession(...args); 
+        }));
 
         return this.router;
     }
@@ -354,9 +387,8 @@ De forma automática, una vez configurado, este controlador escucha todas las so
 
 Para habilitar el sistema es necesario añadir, como primera ruta, lo siguiente:
 
+**index.js** 
 ``` javascript
-//index.js 
-
 [...]
 
 const publicPaths = [
@@ -459,7 +491,7 @@ console.log(mensaje)
 console.error(mensaje)
 console.info(mensaje)
 console.debug(mensaje)
-console.custom(level, mensaje)
+console.custom(type, level, mensaje)
 ```
 
 
@@ -487,7 +519,7 @@ El método `App.i18n.translate(key, [lang])` traduce una clave en base al idioma
 
  Para iniciar la escucha de un evento es necesario:
  ``` javascript
-import { App } from 'lisco'
+import { App } from '@landra_sistemas/lisco'
 
 App.events.on('custom', function cosa(props) {
     console.log(props);
@@ -499,7 +531,7 @@ Esto implica que la aplicación comienza a escuchar el evento 'custom' con unos 
 Para ejecutar un evento desde otro punto de la aplicación es necesario:
 
  ``` javascript
-import { App } from 'lisco'
+import { App } from '@landra_sistemas/lisco'
 
 App.events.emit('custom', { test: "test" })
  ```
@@ -537,8 +569,10 @@ La clase `KnexFilterParser`  convierte un objeto clave valor en un conjunto de f
 
       
 - Definicion de tipos:
+    - **fql**: filtro especial en lenguaje FQL (https://github.com/landra-sistemas/fql_parser)
     - **date**: filtro de fechas desde y hasta
     - **between**: filtro entre dos valores concretos
+    - **full-text-psql**: búsqueda especial sobre cualquier columna de una tabla, solo vale para Postgre (`to_tsvector(${prop}::text) @@ to_tsquery(?)`)
     - **exists**: busca si existe la propiedad
     - **notexists**: busca si existe la propiedad
     - **greater**: mayor que
@@ -546,10 +580,125 @@ La clase `KnexFilterParser`  convierte un objeto clave valor en un conjunto de f
     - **less**: menor que
     - **lessEq**: menor o igual que
     - **exact**: valor exacto
-    - **exactI**: valor exacto ignorando mayusculas y minusculas
     - **not**: distinto de
     - **null**: igual a null
     - **notnull**: distinto de null
     - **like**: filtro like
     - **likeI**: filtro like ignorando mayusculas y minusculas
+
+> Todos los filtros excepto exists, notexists, fql y full-text-psql tienen una opción 'raw' (dateraw, betweenraw) que permite personalizar mediante sintaxis sql la columna. Esto suele ser util para, en Postgres, ejecutar consultas sobre columnas de tipo Json (`column->>'test'`)
  
+
+ ## Views
+
+ La utilización de `express` permite el uso de cualquier sistema de renderizado del lado de servidor soportado por el. Mas info aqui https://expressjs.com/en/resources/template-engines.html y aqui https://expressjs.com/en/guide/using-template-engines.html
+
+ Para su inclusión en **lisco** es necesario:
+``` bash
+> npm install express-handlebars
+```
+> Para el ejemplo se usará handlebars pero se puede usar la que mas nos guste.
+
+
+Una vez instalada la dependencia es necesario cargarla en App. Para ello:
+
+**index.js**
+``` javascript
+import { create } from "express-handlebars";
+
+
+module.exports = async () => {
+    [...]
+
+    App.customizeExpress = (app) => {
+        const hbs = create({
+            // Estos helpers pueden ser funciones que se llamen posteriormente desde nuestras vistas para renderizar contenido.
+            helpers: {
+                foo() {
+                    return "FOO!";
+                },
+                bar() {
+                    return "BAR!";
+                },
+            },
+        });
+        app.engine("handlebars", hbs.engine);
+        app.set("view engine", "handlebars");
+        app.set("views", "./views");
+    };
+
+    [...]
+};
+```
+
+Crear la carpeta `views` en la raiz del proyecto e introducir nuestras vistas:
+
+**views/home.handlebars**
+``` handlebars
+<h1>Example App: Home</h1>
+```
+
+**views/layouts/main.handlebars**
+``` handlebars
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Example App</title>
+    </head>
+    <body>
+        {{#if showTitle}}
+        <h1>Home</h1>
+        {{/if}}
+
+        {{{body}}}
+
+
+        <!-- Calls `foo` helper, overridden at render-level. -->
+        <p>{{foo}}</p>
+
+        <!-- Calls `bar` helper, defined at instance-level. -->
+        <p>{{bar}}</p>
+
+    </body>
+</html>
+```
+
+Con las vistas creadas lo único que queda es crear los controladores que se encargarán de servirlas. El proceso es el mismo que se describe mas arriba en este mismo documento:
+
+**controllers/HomeController.js**
+``` javascript
+import { BaseController, Utils } from "@landra_sistemas/lisco";
+
+export default class HomeController extends BaseController {
+    configure() {
+        const exAsync = Utils.expressHandler();
+        this.router.get( "/", exAsync((...args) => this.home(...args)));
+        
+        return this.router;
+    }
+
+    home(req, res) {
+        res.render("home", {
+            showTitle: true,
+
+            // También se pueden especificar y sobreescribir helpers directamente en el render de cada vista.
+            helpers: {
+                foo() {
+                    return "foo.";
+                },
+            },
+        });
+    }
+}
+```
+
+Este controlador ha de ser añadido a la App como cualquier otro:
+**index.js**
+``` javascript
+App.routes = [
+    ...
+    new HomeController(),
+    ...
+];
+```
