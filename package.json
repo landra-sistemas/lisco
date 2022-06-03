@@ -1,6 +1,6 @@
 {
     "name": "@landra_sistemas/lisco",
-    "version": "0.0.7-rc.2",
+    "version": "0.0.7-beta.0",
     "author": "LandraSistemas",
     "description": "Framework nodejs con Knex y Express",
     "repository": {
