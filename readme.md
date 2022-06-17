@@ -326,7 +326,7 @@ Un controlador se encarga de desplegar rutas para construir la Api. Existen dos 
 - Crear uno **personalizado**
 
 
-Al extender de BaseController se proporciona una interfaz genérica CRUD sobre una entidad concreta.
+Al extender de BaseController se simplifica el proceso con una interfaz genérica CRUD sobre la entidad configurada.
 
 Por ejemplo si hablamos de la tabla `user` crearíamos
 
@@ -385,6 +385,53 @@ Visualizar el código de `BaseController` puede ayudar a la creación de control
 
 
 Durante estos ejemplos se ha utilizado `BaseService` su funcionamiento es similar a lo descrito con el `BaseController` este utiliza el `BaseDaoKnex` para la ejecución de los métodos CRUD básicos.
+
+
+### Shorthands
+
+A partir de la version `0.3.0` de lisco se ha añadido la posibilidad de definir las rutas de los controladores con una sintáxis simplificada.
+
+Para esto basta con añadir, al controlador, la propiedad `routes`. Ejemplo:
+
+``` javascript
+class HomeController extends BaseController {
+    constructor() {
+        super();
+
+        //Shorthand for defining routes
+        this.routes = {
+            "/": {
+                get: this.home.bind(this),
+            },
+        };
+    }
+
+    home(req, res) {
+        res.send("Hello world!");
+    }
+}
+```
+
+Su sintáxis es sencilla, se trata de un objeto cuyas claves son las rutas y sus valores son objetos que contienen el método.
+
+``` javascript
+{
+    "/": {
+        "get": this.home.bind(this),
+        "post": this.method2.bind(this)
+    },
+    "/path/:id": {
+        "get": this.method3.bind(this),
+    }
+}
+``` 
+
+Esta forma de definir tiene las siguientes particularidades: 
+
+- Las rutas shorthand se cargan **después** de inicializar el controlador mediante el método configure. 
+- No es necesario definir un método **configure()** en el controlador.
+- Es necesario extender de `BaseController`.
+- Es posible definir callbacks dobles cambiando la sintáxis por: `"get": [keycloak.protect(...), this.method.bind(this)]`. **Solo se pueden introducir dos elementos!**
 
 ## Autenticación
 
