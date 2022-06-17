@@ -144,7 +144,13 @@ export default class Server {
                 for (const path in route.routes) {
                     const cfg = route.routes[path];
                     for (const method in cfg) {
-                        router[method](path, exAsync(cfg[method]));
+                        const handler = cfg[method];
+                        if (Array.isArray(handler)) {
+                            //Securización (keycloak)
+                            router[method](path, handler[0], exAsync(handler[1]));
+                        } else {
+                            router[method](path, exAsync(handler));
+                        }
                     }
                 }
             }
