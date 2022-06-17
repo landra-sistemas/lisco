@@ -494,6 +494,105 @@ La cookie se almacenará, mediante esta configuración, en una tabla de postgre.
 Esta cookie dispondrá de los datos devueltos por la clase UserDao a excepción del campo `password`.
 
 
+### Autenticación Keycloak
+
+Keycloak es un sistema de federación de usuarios que simplifica la implementación de la autenticación y autorización. Este componente se trata de una aplicación externa la cual es necesario instalar siguiendo su documentación. 
+
+Su integración en lisco se realiza de la siguiente forma:
+
+``` bash
+> npm install keycloak-connect@x.x.x //Version de keycloak
+```
+
+Una vez instalado, crear una carpeta `config` en la raiz del proyecto con el siguiente contenido:
+
+`keycloak-config.js`
+```javascript
+import Keycloak from "keycloak-connect";
+import { App } from "@landra_sistemas/lisco";
+
+let _keycloak;
+
+function initKeycloak() {
+    var keycloakConfig = {
+        realm: process.env.KEYCLOAK_REALM,
+        "auth-server-url": process.env.KEYCLOAK_REDIRECT_URL,
+        "ssl-required": "external",
+        resource: process.env.KEYCLOAK_BACK_CLI,
+        "public-client": true,
+        "confidential-port": 0,
+    };
+
+    if (_keycloak) {
+        console.warn("Trying to init Keycloak again!");
+    } else {
+        console.log("Initializing Keycloak...");
+        _keycloak = new Keycloak({}, keycloakConfig);
+    }
+}
+
+function getKeycloak() {
+    if (!_keycloak) {
+        console.error("Keycloak has not been initialized. Please called init first.");
+    }
+    return _keycloak;
+}
+
+export { initKeycloak, getKeycloak };
+
+```
+
+Con este archivo creado, modificar el archivo  `index.js` de la aplicación de la siguiente forma:
+
+``` javascript
+import { initKeycloak, getKeycloak } from "./config/keycloak-config";
+
+[...]
+     App.customizeExpress = async (app) => {
+        [...]
+        //Inicializa keycloak
+        initKeycloak();
+
+         /**
+         * Current keycloak
+         * @type {Keycloak}
+         * @public
+         */
+        App.keycloak = getKeycloak();
+        app.use(App.keycloak.middleware({ logout: "/logout" }));
+        [...]
+    };
+[...]
+```
+
+Añadir al archivo `.env` la configuración mediante los siguientes parámetros:
+
+```
+#Keycloak
+KEYCLOAK_REDIRECT_URL=http://localhost:3114/auth
+KEYCLOAK_REALM=REALMNAME
+KEYCLOAK_BACK_CLI=backend-client
+```
+#### Uso
+
+Una vez realizados los pasos indicados el sistema ya estará listo para utilizarse.
+
+Para proteger ciertas url en base a los roles de los usuarios autenticados basta con añadir a las rutas de los controladores:
+
+``` javascript
+this.router.get(
+    "/login",
+    App.keycloak.protect("realm:rolename"),
+    exAsync((...args) => this.login(...args))
+);
+```
+
+El sistema se basa en que el frontend ya ha iniciado sesión y dispone de un token JWT con lo que el backend lo recibe sin mayor problema.
+
+`//TODO documentar como hacer login contra keycloak`
+
+Ver la docu de keycloak para mas info.
+
 
 ## Logger
 
