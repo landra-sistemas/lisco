@@ -4,9 +4,23 @@ import { JsonResponse, Utils } from "../common/index.js";
 export class BaseController {
     constructor() {
         this.router = express.Router();
+        this.routes = {};
+        //Example routes shorthand
+        /*
+         {
+            "/": {
+                "get": this.listEntidad.bind(this),
+                "post": this.listEntidad.bind(this)
+            }
+         } 
+         */
     }
 
     configure(entity, config) {
+        if (!entity) {
+            return this.router;
+        }
+
         const exAsync = Utils.expressHandler();
         this.router.get(
             `/${entity}`,

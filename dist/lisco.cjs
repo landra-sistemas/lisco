@@ -653,9 +653,26 @@ var Server = /*#__PURE__*/function () {
 
     for (var _iterator = _createForOfIteratorHelperLoose(routes), _step; !(_step = _iterator()).done;) {
       var route = _step.value;
-      if (!route) continue; //TODO -> FIXME traze if null?
+
+      if (!route) {
+        console.warn("Empty route");
+        continue;
+      }
 
       var router = route.configure();
+
+      if (!lodash__default["default"].isEmpty(route.routes)) {
+        var exAsync = Utils.expressHandler();
+        console.log("loading shorthand routes");
+
+        for (var path in route.routes) {
+          var cfg = route.routes[path];
+
+          for (var method in cfg) {
+            router[method](path, exAsync(cfg[method]));
+          }
+        }
+      }
 
       if (router) {
         app.use(router);
@@ -1911,12 +1928,26 @@ function _catch(body, recover) {
 var BaseController = /*#__PURE__*/function () {
   function BaseController() {
     this.router = express__default["default"].Router();
+    this.routes = {}; //Example routes shorthand
+
+    /*
+     {
+        "/": {
+            "get": this.listEntidad.bind(this),
+            "post": this.listEntidad.bind(this)
+        }
+     } 
+     */
   }
 
   var _proto = BaseController.prototype;
 
   _proto.configure = function configure(entity, config) {
     var _this = this;
+
+    if (!entity) {
+      return this.router;
+    }
 
     var exAsync = Utils.expressHandler();
     this.router.get("/" + entity, exAsync(function () {
