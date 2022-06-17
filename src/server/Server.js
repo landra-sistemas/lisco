@@ -5,7 +5,7 @@ import cors from "cors";
 import fileUpload from "express-fileupload";
 import url from "url";
 import lodash from "lodash";
-import { JsonResponse } from "../common/index.js";
+import { JsonResponse, Utils } from "../common/index.js";
 
 /**
  * Clase servidor encargada de configurar las rutas.
@@ -132,9 +132,28 @@ export default class Server {
         if (!routes) return;
 
         for (const route of routes) {
-            if (!route) continue;
-            //TODO -> FIXME traze if null?
+            if (!route) {
+                console.warn("Empty route");
+                continue;
+            }
             const router = route.configure();
+
+            if (!lodash.isEmpty(route.routes)) {
+                const exAsync = Utils.expressHandler();
+                console.log("loading shorthand routes");
+                for (const path in route.routes) {
+                    const cfg = route.routes[path];
+                    for (const method in cfg) {
+                        const handler = cfg[method];
+                        if (Array.isArray(handler)) {
+                            //Securización (keycloak)
+                            router[method](path, handler[0], exAsync(handler[1]));
+                        } else {
+                            router[method](path, exAsync(handler));
+                        }
+                    }
+                }
+            }
             if (router) {
                 app.use(router);
             }

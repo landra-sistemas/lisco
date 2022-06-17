@@ -472,9 +472,25 @@ class Server {
     if (!routes) return;
 
     for (const route of routes) {
-      if (!route) continue; //TODO -> FIXME traze if null?
+      if (!route) {
+        console.warn("Empty route");
+        continue;
+      }
 
       const router = route.configure();
+
+      if (!lodash.isEmpty(route.routes)) {
+        const exAsync = Utils.expressHandler();
+        console.log("loading shorthand routes");
+
+        for (const path in route.routes) {
+          const cfg = route.routes[path];
+
+          for (const method in cfg) {
+            router[method](path, exAsync(cfg[method]));
+          }
+        }
+      }
 
       if (router) {
         app.use(router);
@@ -1467,9 +1483,23 @@ class IUserDao extends BaseKnexDao {
 class BaseController {
   constructor() {
     this.router = express.Router();
+    this.routes = {}; //Example routes shorthand
+
+    /*
+     {
+        "/": {
+            "get": this.listEntidad.bind(this),
+            "post": this.listEntidad.bind(this)
+        }
+     } 
+     */
   }
 
   configure(entity, config) {
+    if (!entity) {
+      return this.router;
+    }
+
     const exAsync = Utils.expressHandler();
     this.router.get(`/${entity}`, exAsync((...args) => this.listEntidad(...args)));
     this.router.post(`/${entity}/list`, exAsync((...args) => this.listEntidad(...args)));
