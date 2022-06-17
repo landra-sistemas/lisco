@@ -1,5 +1,5 @@
-import { TokenGenerator, Utils } from '../../common';
-import IAuthHandler from '../IAuthHandler'
+import { TokenGenerator, Utils } from '../../common/index.js';
+import IAuthHandler from '../IAuthHandler.js'
 import lodash from 'lodash';
 import moment from 'moment';
 

@@ -1,6 +1,6 @@
 import express from "express";
 import url from "url";
-import { JsonResponse, Utils } from "../common";
+import { JsonResponse, Utils } from "../common/index.js";
 
 import { pathToRegexp } from "path-to-regexp";
 

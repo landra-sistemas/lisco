@@ -1,4 +1,4 @@
-import Utils from "./Utils";
+import Utils from "./Utils.js";
 
 import _optimist from "optimist";
 export default function Runtime() {

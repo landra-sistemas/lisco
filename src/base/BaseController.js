@@ -1,5 +1,5 @@
 import express from "express";
-import { JsonResponse, Utils } from "../common";
+import { JsonResponse, Utils } from "../common/index.js";
 
 export class BaseController {
     constructor() {

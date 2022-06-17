@@ -1,7 +1,7 @@
-import AuthController from './AuthController'
-import JwtAuthHandler from './jwt/JwtAuthHandler'
-import CookieAuthHandler from './cookie/CookieAuthHandler'
-import IAuthHandler from './IAuthHandler'
+import AuthController from './AuthController.js'
+import JwtAuthHandler from './jwt/JwtAuthHandler.js'
+import CookieAuthHandler from './cookie/CookieAuthHandler.js'
+import IAuthHandler from './IAuthHandler.js'
 
 export {
     AuthController,

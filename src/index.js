@@ -1,13 +1,13 @@
-import { ClusterServer, Server } from "./server";
-import { EventHandler } from "./events";
-import { Logger } from "./logger";
-import { I18nLoader, JsonResponse, Utils, TokenGenerator } from "./common";
-import { AuthController, JwtAuthHandler, IAuthHandler, CookieAuthHandler } from "./auth";
-import { KnexFilterParser, BaseKnexDao, KnexConnector, IUserDao } from "./db";
+import { ClusterServer, Server } from "./server/index.js";
+import { EventHandler } from "./events/index.js";
+import { Logger } from "./logger/index.js";
+import { I18nLoader, JsonResponse, Utils, TokenGenerator } from "./common/index.js";
+import { AuthController, JwtAuthHandler, IAuthHandler, CookieAuthHandler } from "./auth/index.js";
+import { KnexFilterParser, BaseKnexDao, KnexConnector, IUserDao } from "./db/index.js";
 
-import { BaseController, BaseService } from "./base";
+import { BaseController, BaseService } from "./base/index.js";
 
-import App from "./App";
+import App from "./App.js";
 
 export {
     App,

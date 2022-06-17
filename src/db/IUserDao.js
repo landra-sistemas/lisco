@@ -1,4 +1,4 @@
-import BaseKnexDao from "./knex/dao/BaseKnexDao";
+import BaseKnexDao from "./knex/dao/BaseKnexDao.js";
 
 export default class IUserDao extends BaseKnexDao {
     constructor(tableName) {

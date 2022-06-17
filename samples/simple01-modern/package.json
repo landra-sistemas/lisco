@@ -1,0 +1,14 @@
+{
+  "name": "lisco_sample01-modern",
+  "version": "1.0.0",
+  "description": "Simple sample project for lisco written in modern js",
+  "main": "index.mjs",
+  "scripts": {
+    "start": "node index.mjs"
+  },
+  "author": "thorin8k",
+  "license": "MIT",
+  "dependencies": {
+    "@landra_sistemas/lisco": "^0.2.0"
+  }
+}

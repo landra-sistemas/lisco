@@ -1,7 +1,7 @@
-import { Utils } from "../../../common";
+import { Utils } from "../../../common/index.js";
 
 import { FQLParser, KnexParser } from "@landra_sistemas/fql-parser";
-import KnexConnector from "../KnexConnector";
+import KnexConnector from "../KnexConnector.js";
 
 export default class KnexFilterParser {
     /**

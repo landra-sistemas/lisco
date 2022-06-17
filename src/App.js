@@ -1,12 +1,12 @@
-import { I18nLoader, Utils } from "./common";
-import { EventHandler } from "./events";
-import { ClusterServer, Server } from "./server";
-import { Logger } from "./logger";
+import { I18nLoader, Utils } from "./common/index.js";
+import { EventHandler } from "./events/index.js";
+import { ClusterServer, Server } from "./server/index.js";
+import { Logger } from "./logger/index.js";
 
 import net from "net";
 import repl from "repl";
-import { KnexConnector } from "./db";
-import Runtime from "./common/Runtime";
+import { KnexConnector } from "./db/index.js";
+import Runtime from "./common/Runtime.js";
 
 class App {
     constructor() {

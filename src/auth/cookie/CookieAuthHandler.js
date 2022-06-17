@@ -1,7 +1,6 @@
-import { Utils } from '../../common';
-import IAuthHandler from '../IAuthHandler'
-import lodash from 'lodash';
-
+import { Utils } from "../../common/index.js";
+import IAuthHandler from "../IAuthHandler.js";
+import lodash from "lodash";
 
 /**
  * Necesario:
@@ -31,23 +30,25 @@ export default class CookieAuthHandler extends IAuthHandler {
 
     /**
      * Metodo encargado de realizar la comprobacion para validar si la sesion del usuario es válida
-     * 
-     * @param {*} request 
+     *
+     * @param {*} request
      */
     async check(request) {
-        if (request.headers.authorization) { //Si se recibe por Auth Basic
-            const token = (request.headers.authorization || '').split(' ')[1] || '';
+        if (request.headers.authorization) {
+            //Si se recibe por Auth Basic
+            const token = (request.headers.authorization || "").split(" ")[1] || "";
 
-            const creds = Buffer.from(token, 'base64').toString().split(':');
+            const creds = Buffer.from(token, "base64").toString().split(":");
             const login = creds[0];
             const password = creds[1];
 
-            if (!await this.validate(request, login, password)) {
+            if (!(await this.validate(request, login, password))) {
                 return false;
             }
             return true;
         }
-        if (request.session && request.session.username) {//Si hay sesion almacenada
+        if (request.session && request.session.username) {
+            //Si hay sesion almacenada
             return true;
         }
         return false;
@@ -55,33 +56,30 @@ export default class CookieAuthHandler extends IAuthHandler {
 
     /**
      * Método encargado de realizar la validación de un usuario. Utiliza IUserDao como interfaz para la realización de la query a BD.
-     * 
-     * @param {*} username 
-     * @param {*} password 
+     *
+     * @param {*} username
+     * @param {*} password
      */
     async validate(request, username, password) {
-
         const user = await this.userDao.findByUsername(username);
 
         if (user && user.username === username && user.password === Utils.encrypt(password)) {
-            request.session = { ...request.session, ...lodash.omit(user, ['password']) };
+            request.session = { ...request.session, ...lodash.omit(user, ["password"]) };
 
             return true;
         }
         return false;
     }
 
-
     /**
-     * 
-     * @param {*} request 
+     *
+     * @param {*} request
      */
     logout(request) {
         return new Promise((resolve) => {
             if (request.session) {
                 request.session.destroy(resolve);
             }
-        })
+        });
     }
-
 }

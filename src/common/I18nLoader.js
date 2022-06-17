@@ -1,6 +1,6 @@
 import fs from "fs";
 import util from "util";
-import Utils from "./Utils";
+import Utils from "./Utils.js";
 
 import chokidar from "chokidar";
 
@@ -53,8 +53,10 @@ export default class I18nLoader {
             this.currentDataFlat[lang] = Utils.flattenObject(parsedData);
             this.currentData[lang] = parsedData;
         } catch (ex) {
+            if (ex?.code === "ENOENT") {
+                return console.log("Lang file does not exist. Create it on ./i18n/lang_{xx}.json");
+            }
             console.error(ex);
-            console.log("Lang file does not exist. Create it on ./i18n/lang_{xx}.json");
         }
     }
 
