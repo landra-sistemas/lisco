@@ -1,5 +1,5 @@
-import KnexFilterParser from "../filters/KnexFilterParser";
-import KnexConnector from "../KnexConnector";
+import KnexFilterParser from "../filters/KnexFilterParser.js";
+import KnexConnector from "../KnexConnector.js";
 
 import lodash from "lodash";
 

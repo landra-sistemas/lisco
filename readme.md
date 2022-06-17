@@ -21,47 +21,20 @@ Instalar dependencias necesarias
 
 ```
 
-*Opcionales*: esm -> Para la resolución de los import. Ya hay soporte nativo en nodejs para esto pero es un poco raro todavía
-
-``` bash
-> npm install esm
-```
-
-Runtime principal. Archivo desde el que se arranca el proyecto. **Modificar el package.json para que el script start apunte a este archivo.**
-
-**run.js**
-``` javascript
-require = require("esm")(module/*, options*/) // -> Esto solo no hace falta si se utiliza CommonJS o se pone type: module en el package json.
-
-require('dotenv-defaults').config();
-//module dependencies.
-require('./index.js')().then(() => {
-    console.log("Started");
-}).catch((ex) => {
-    console.error(ex)
-});
-
-//Capturar errores perdidos
-process.on('uncaughtException', (err) => {
-    // handle the error safely
-    console.error(`Error: ${err || err.stack || err.message}`);
-});
-//Capturar promises perdidos
-process.on('unhandledPromiseException', (err) => {
-    // handle the error safely
-    console.error(`Error: ${err || err.stack || err.message}`);
-});
-
-```
 
 Archivo index encargado de aplicar la configuración e inicialización de componentes.
 
 **index.js**
 ``` javascript
+import { config } from 'dotenv-defaults';
 import { App } from '@landra_sistemas/lisco'
+//const { config } = require('dotenv-defaults') -> common js
 //const { App } = require('@landra_sistemas/lisco') -> common js
 
-module.exports = async () => {
+//dotenv
+config();
+
+const main = async () => {
     App.runtime(); //(Opcional) Arranca la runtime para recibir parámetros por consola (ver Runtime)
 
     App.customizeExpress = (app) => { 
@@ -87,10 +60,57 @@ module.exports = async () => {
         console.log('listening');
     })
 };
+
+main();
+
+//!! Se recomienda incluir handlers para errores no controlados:
+process.on("uncaughtException", (err) => {
+    // handle the error safely
+    console.error(`Error: ${err || err.stack || err.message}`);
+});
+process.on("unhandledPromiseException", (err) => {
+    // handle the error safely
+    console.error(`Error: ${err || err.stack || err.message}`);
+});
+
 ```
 
 
-Archivo `.env` con las configuraciones de inicio
+> **Opcional: ESM**
+> 
+>  Para la resolución de los import. Ya hay soporte nativo en nodejs para > esto pero en ciertos escenarios puede ser necesario
+> 
+> ``` bash
+> > npm install esm
+> ```
+> 
+> Para esto es necesario arrancar el proyecto desde un archivo previo al index.js. 
+> **Modificar el package.json para que el script start apunte a este archivo.**
+> 
+> **run.js**
+> ``` javascript
+> require = require("esm")(module/*, options*/) // -> Esto solo no hace > falta si se utiliza CommonJS o se pone type: module en el package json.
+> 
+> //module dependencies.
+> require('./index.js')().then(() => {
+>     console.log("Started");
+> }).catch((ex) => {
+>     console.error(ex)
+> });
+> 
+> //En esta configuración se pueden mover los handlers aqui para asegurar que se ejecutan.
+> process.on('uncaughtException', (err) => {
+>     // handle the error safely
+>     console.error(`Error: ${err || err.stack || err.message}`);
+> });
+> process.on('unhandledPromiseException', (err) => {
+>     // handle the error safely
+>     console.error(`Error: ${err || err.stack || err.message}`);
+> });
+> 
+> ```
+
+Archivo `.env` y `.env.defaults` con las configuraciones de inicio
 
 **.env**
 ``` properties
@@ -139,6 +159,10 @@ JWT_ISSUER=Landra Sistemas
 JWT_SUBJECT=MySub
 ```
 
+> El archivo `.env.defaults` es un archivo que contiene las configuraciones por defecto de la aplicación. Este archivo **se debe commitear** y sirve como base para todos los entornos.
+
+
+
 Archivo `log4js.json` encargado de la configuración del logger. Mas información y configuraciones en: https://log4js-node.github.io/log4js-node/index.html
 
 **log4js.json**
@@ -169,6 +193,7 @@ Archivo `log4js.json` encargado de la configuración del logger. Mas informació
 }
 
 ```
+> Este archivo es obligatorio, sin esta configuración la aplicación no arrancará.
 
 ## Arranque del proyecto
 

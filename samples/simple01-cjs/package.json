@@ -1,0 +1,14 @@
+{
+  "name": "lisco_sample01-cjs",
+  "version": "1.0.0",
+  "description": "Simple sample project for lisco written in cjs",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "Landra",
+  "license": "MIT",
+  "dependencies": {
+    "@landra_sistemas/lisco": "^0.2.0"
+  }
+}

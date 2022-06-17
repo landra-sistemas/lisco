@@ -8,14 +8,15 @@
         "url": "https://github.com/landra-sistemas/lisco.git"
     },
     "license": "MIT License",
-    "source": "src/index",
+    "source": "src/index.js",
     "exports": {
         "require": "./dist/lisco.cjs",
-        "import": "./dist/lisco.esm.js"
+        "import": "./dist/lisco.modern.js"
     },
     "type": "module",
     "main": "dist/lisco.cjs",
     "module": "./dist/lisco.esm.js",
+    "unpkg": "./dist/lisco.umd.js",
     "dependencies": {
         "@landra_sistemas/fql-parser": "^0.0.2",
         "chokidar": "^3.5.3",
@@ -29,6 +30,7 @@
         "helmet": "^5.1.0",
         "jsonwebtoken": "^8.5.1",
         "knex": "^2.1.0",
+        "lodash": "^4.17.21",
         "log4js": "^6.5.2",
         "moment": "^2.29.3",
         "optimist": "^0.6.1",
@@ -39,8 +41,8 @@
         "uuid": "^8.3.2"
     },
     "scripts": {
-        "build": "rollup -c",
-        "dev": "rollup -c -w",
+        "build": "microbundle",
+        "dev": "microbundle watch --compress false",
         "start": "node execute.js",
         "test": "mocha test --exit",
         "clean": "rimraf node_modules",
@@ -55,22 +57,13 @@
         "release:rc": "npm version prerelease --preid=rc -m \"Bump version %s\""
     },
     "devDependencies": {
-        "@haensl/rollup-plugin-local-resolve": "^1.1.8",
-        "@rollup/plugin-commonjs": "^22.0.0",
-        "@rollup/plugin-json": "^4.1.0",
-        "@rollup/plugin-node-resolve": "^13.3.0",
-        "@rollup/plugin-replace": "^4.0.0",
-        "@vscode/sqlite3": "^5.0.8",
         "chai": "^4.3.6",
         "chai-http": "^4.3.0",
         "cookie": "^0.5.0",
         "eslint": "^8.16.0",
+        "microbundle": "^0.15.0",
         "mocha": "^10.0.0",
         "ms": "^2.1.3",
-        "rimraf": "^3.0.2",
-        "rollup": "^2.75.5",
-        "rollup-plugin-peer-deps-external": "^2.2.4",
-        "rollup-plugin-terser": "^7.0.2",
-        "sqlite3": "^5.0.8"
+        "rimraf": "^3.0.2"
     }
 }

@@ -1,3 +1,3 @@
-import EventHandler from "./EventHandler";
+import EventHandler from "./EventHandler.js";
 
 export { EventHandler };

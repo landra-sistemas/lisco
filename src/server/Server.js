@@ -5,7 +5,7 @@ import cors from "cors";
 import fileUpload from "express-fileupload";
 import url from "url";
 import lodash from "lodash";
-import { JsonResponse } from "../common";
+import { JsonResponse } from "../common/index.js";
 
 /**
  * Clase servidor encargada de configurar las rutas.
@@ -43,8 +43,8 @@ export default class Server {
         if (this.customizeExpress) {
             await this.customizeExpress(this.app);
         }
-        this.configureRoutes(this.routes);
-        this.errorHandler();
+        await this.configureRoutes(this.routes);
+        await this.errorHandler();
     }
 
     /**

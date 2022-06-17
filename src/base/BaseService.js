@@ -1,4 +1,4 @@
-import { BaseKnexDao } from "../db";
+import { BaseKnexDao } from "../db/index.js";
 
 export class BaseService {
     constructor(cls, table) {
