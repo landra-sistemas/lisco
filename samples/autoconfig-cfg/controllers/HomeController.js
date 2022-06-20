@@ -1,20 +1,18 @@
 const { BaseController, Utils } = require("../../../"); //require("@landra_sistemas/lisco")
 
+const { UserService } = null; //require("../services/UserService");
+
 class HomeController extends BaseController {
-    routes = {
-        "/": {
-            get: this.home.bind(this),
-        },
-    };
+    entity = "user";
+    service = UserService;
+    table = "user";
 
     // Si el linter utilizado no soporta attributos de clase
     // constructor() {
     //     super();
-    //     this.routes = {
-    //         "/": {
-    //             get: this.home.bind(this),
-    //         },
-    //     };
+    //     this.entity = "user";
+    //     this.service = UserService;
+    //     this.table = "user";
     // }
 
     home(req, res) {

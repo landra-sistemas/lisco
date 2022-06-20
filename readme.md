@@ -887,7 +887,26 @@ Una vez que esta runtime se encuentra activada la aplicación aceptará, al arra
 - --generateKeys: Genera las claves de encriptación únicas para la aplicación (iv y key)
 - --encrypt string: Encripta una cadena pasada como parámetro utilizando las claves proporcionadas. Util para la generación de contraseñas.
 
+### Opciones adicionales
 
+La este método puede recibir como parámetro una lista de elementos adicionales de forma que se pueda extender la funcionalidad de la runtime. Esta lista tendrá la siguiente estructura:
+
+``` javascript
+[
+    {
+        "key": "c", //clave abreviada de la opción
+        "alias": "config", //Alias para llamarlo con --
+        "describe": "Configuración", //Descripción
+        "fn": function(argv) { }, //Función a ejecutar
+        "nargs": 0, //Número de argumentos
+        "required": false, //Indica si es obligatorio
+        "boolean": false, //indica si es un campo boolean (true, false)
+        "choices": ["asdf", "fsa"], //Lista de opciones posibles
+    }   
+]
+```	
+
+> Para poder utilizar funciones asíncronas, será necesario utilizar await al inicializar la runtime (`await App.runtime(extra);`)
 
 ## Monitoring
 

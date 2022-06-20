@@ -18,8 +18,8 @@ class App {
      * Inicializa la runtime de la aplicación para poder recibir parámetros por consola y generar claves.
      * @returns
      */
-    runtime() {
-        return Runtime();
+    runtime(extra) {
+        return Runtime(extra);
     }
 
     /**

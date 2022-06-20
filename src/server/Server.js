@@ -136,11 +136,16 @@ export default class Server {
                 console.warn("Empty route");
                 continue;
             }
-            const router = route.configure();
+            let router = route.configure();
 
+            //perform autoconfig for base api crud operations
+            if (route.entity) {
+                router = route.configure(route.entity, { service: route.service, table: route.table });
+            }
+
+            //load shorthand routes
             if (!lodash.isEmpty(route.routes)) {
                 const exAsync = Utils.expressHandler();
-                console.log("loading shorthand routes");
                 for (const path in route.routes) {
                     const cfg = route.routes[path];
                     for (const method in cfg) {
