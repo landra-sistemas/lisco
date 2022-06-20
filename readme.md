@@ -1,5 +1,7 @@
 # Lisco Framework
 
+![npm](https://img.shields.io/npm/v/@landra_sistemas/lisco?label=version)
+![GitHub](https://img.shields.io/github/license/landra-sistemas/lisco)
 
 ![alt](https://raw.githubusercontent.com/landra-sistemas/lisco/master/logo.png)
 
