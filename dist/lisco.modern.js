@@ -26,7 +26,8 @@ import { FQLParser, KnexParser } from '@landra_sistemas/fql-parser';
 import Knex from 'knex';
 import net from 'net';
 import repl from 'repl';
-import _optimist from 'optimist';
+import yargs from 'yargs/yargs';
+import { hideBin } from 'yargs/helpers';
 
 class Utils {
   static arrayToLower(mcArray) {
@@ -487,7 +488,14 @@ class Server {
           const cfg = route.routes[path];
 
           for (const method in cfg) {
-            router[method](path, exAsync(cfg[method]));
+            const handler = cfg[method];
+
+            if (Array.isArray(handler)) {
+              //Securización (keycloak)
+              router[method](path, handler[0], exAsync(handler[1]));
+            } else {
+              router[method](path, exAsync(handler));
+            }
           }
         }
       }
@@ -1756,9 +1764,10 @@ class BaseService {
 }
 
 function Runtime() {
-  const optimist = _optimist.usage("Como usar: \n node execute.js [--generateKeys , --encrypt xxx] \n\n Opciones:\n --generateKeys: Genera unas claves para la aplicación\n --encrypt String: Codifica el String proporcionado en base a la contraseña de .env \n\n ---> Si no se especifican parámetros el servidor arrancará normalmente.");
-
-  const argv = optimist.argv; //Parámetro para no arrancar el servidor y generar las claves JWT
+  const argv = yargs(hideBin(process.argv)).usage(`Como usar: 
+            node execute.js [--generateKeys , --encrypt xxx] 
+            
+            ---> Si no se especifican parámetros el servidor arrancará normalmente.`).alias('g', 'generateKeys').describe('g', 'Genera unas claves para la aplicación').alias('c', 'encrypt').describe('c', 'Codifica el String proporcionado en base a la contraseña de .env').nargs('c', 1).help("h").alias("h", "help").argv; //Parámetro para no arrancar el servidor y generar las claves JWT
 
   if (argv.generateKeys) {
     console.log("Generando claves para encriptación:");
@@ -1769,11 +1778,6 @@ function Runtime() {
   if (argv.encrypt) {
     console.log("Resultado encryptación:");
     console.log(Utils.encrypt(argv.encrypt));
-    return process.exit(1);
-  }
-
-  if (argv.h || argv.help) {
-    console.log(optimist.help());
     return process.exit(1);
   }
 }

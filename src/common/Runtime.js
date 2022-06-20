@@ -1,11 +1,23 @@
 import Utils from "./Utils.js";
 
-import _optimist from "optimist";
+import yargs from "yargs/yargs";
+import { hideBin } from "yargs/helpers";
 export default function Runtime() {
-    const optimist = _optimist.usage(
-        "Como usar: \n node execute.js [--generateKeys , --encrypt xxx] \n\n Opciones:\n --generateKeys: Genera unas claves para la aplicación\n --encrypt String: Codifica el String proporcionado en base a la contraseña de .env \n\n ---> Si no se especifican parámetros el servidor arrancará normalmente."
-    );
-    const argv = optimist.argv;
+    const argv = yargs(hideBin(process.argv))
+        .usage(
+            `Como usar: 
+            node execute.js [--generateKeys , --encrypt xxx] 
+            
+            ---> Si no se especifican parámetros el servidor arrancará normalmente.`
+        )
+        .alias('g', 'generateKeys')
+        .describe('g', 'Genera unas claves para la aplicación')
+        .alias('c', 'encrypt')
+        .describe('c', 'Codifica el String proporcionado en base a la contraseña de .env')
+        .nargs('c', 1)
+        .help("h")
+        .alias("h", "help").argv;
+
     //Parámetro para no arrancar el servidor y generar las claves JWT
     if (argv.generateKeys) {
         console.log("Generando claves para encriptación:");
@@ -16,11 +28,6 @@ export default function Runtime() {
     if (argv.encrypt) {
         console.log("Resultado encryptación:");
         console.log(Utils.encrypt(argv.encrypt));
-        return process.exit(1);
-    }
-
-    if (argv.h || argv.help) {
-        console.log(optimist.help());
         return process.exit(1);
     }
 }

@@ -26,7 +26,8 @@ var fqlParser = require('@landra_sistemas/fql-parser');
 var Knex = require('knex');
 var net = require('net');
 var repl = require('repl');
-var _optimist = require('optimist');
+var yargs = require('yargs/yargs');
+var helpers = require('yargs/helpers');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
@@ -72,7 +73,7 @@ var moment__default = /*#__PURE__*/_interopDefaultLegacy(moment);
 var Knex__default = /*#__PURE__*/_interopDefaultLegacy(Knex);
 var net__default = /*#__PURE__*/_interopDefaultLegacy(net);
 var repl__default = /*#__PURE__*/_interopDefaultLegacy(repl);
-var _optimist__default = /*#__PURE__*/_interopDefaultLegacy(_optimist);
+var yargs__default = /*#__PURE__*/_interopDefaultLegacy(yargs);
 
 function _extends() {
   _extends = Object.assign ? Object.assign.bind() : function (target) {
@@ -669,7 +670,14 @@ var Server = /*#__PURE__*/function () {
           var cfg = route.routes[path];
 
           for (var method in cfg) {
-            router[method](path, exAsync(cfg[method]));
+            var handler = cfg[method];
+
+            if (Array.isArray(handler)) {
+              //Securización (keycloak)
+              router[method](path, handler[0], exAsync(handler[1]));
+            } else {
+              router[method](path, exAsync(handler));
+            }
           }
         }
       }
@@ -2286,9 +2294,7 @@ var BaseService = /*#__PURE__*/function () {
 }();
 
 function Runtime() {
-  var optimist = _optimist__default["default"].usage("Como usar: \n node execute.js [--generateKeys , --encrypt xxx] \n\n Opciones:\n --generateKeys: Genera unas claves para la aplicación\n --encrypt String: Codifica el String proporcionado en base a la contraseña de .env \n\n ---> Si no se especifican parámetros el servidor arrancará normalmente.");
-
-  var argv = optimist.argv; //Parámetro para no arrancar el servidor y generar las claves JWT
+  var argv = yargs__default["default"](helpers.hideBin(process.argv)).usage("Como usar: \n            node execute.js [--generateKeys , --encrypt xxx] \n            \n            ---> Si no se especifican par\xE1metros el servidor arrancar\xE1 normalmente.").alias('g', 'generateKeys').describe('g', 'Genera unas claves para la aplicación').alias('c', 'encrypt').describe('c', 'Codifica el String proporcionado en base a la contraseña de .env').nargs('c', 1).help("h").alias("h", "help").argv; //Parámetro para no arrancar el servidor y generar las claves JWT
 
   if (argv.generateKeys) {
     console.log("Generando claves para encriptación:");
@@ -2299,11 +2305,6 @@ function Runtime() {
   if (argv.encrypt) {
     console.log("Resultado encryptación:");
     console.log(Utils.encrypt(argv.encrypt));
-    return process.exit(1);
-  }
-
-  if (argv.h || argv.help) {
-    console.log(optimist.help());
     return process.exit(1);
   }
 }
