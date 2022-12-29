@@ -391,28 +391,63 @@ Durante estos ejemplos se ha utilizado `BaseService` su funcionamiento es simila
 
 ### Shorthands
 
-A partir de la version `0.3.0` de lisco se ha añadido la posibilidad de definir las rutas de los controladores con una sintáxis simplificada.
+A partir de la version `0.2.1-rc.0` de lisco se ha añadido la posibilidad de definir las rutas de los controladores con una sintáxis simplificada.
 
 Para esto basta con añadir, al controlador, la propiedad `routes`. Ejemplo:
 
 ``` javascript
 class HomeController extends BaseController {
-    constructor() {
-        super();
+    routes = {
+        "/": {
+            get: this.home.bind(this),
+        },
+    };
 
-        //Shorthand for defining routes
-        this.routes = {
-            "/": {
-                get: this.home.bind(this),
-            },
-        };
-    }
+    // Si el linter utilizado no soporta attributos de clase
+    // constructor() {
+    //     super();
+    //     this.routes = {
+    //         "/": {
+    //             get: this.home.bind(this),
+    //         },
+    //     };
+    // }
 
     home(req, res) {
         res.send("Hello world!");
     }
 }
 ```
+
+### Autoconfig
+
+A partir de la versión `0.2.1-rc.1` es posible configurar automáticamente los controladores de forma que, especificando a que entidad se refieren, el framework implemente todas las operaciones CRUD de forma automática.
+
+Para esto basta con definir en el controlador las siguientes propiedades:
+``` js
+entity = "entity_name";
+service = BaseService; //Class extending base service to perform operations
+table = "table_name";
+```
+
+Quedando la clase de la siguiente forma:
+
+``` js
+class HomeController extends BaseController {
+    entity = "user";
+    service = UserService;
+    table = "user";
+
+    // Si el linter utilizado no soporta attributos de clase
+    // constructor() {
+    //     super();
+    //     this.entity = "user";
+    //     this.service = UserService;
+    //     this.table = "user";
+    // }
+}
+
+``` 
 
 Su sintáxis es sencilla, se trata de un objeto cuyas claves son las rutas y sus valores son objetos que contienen el método.
 
