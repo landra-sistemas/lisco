@@ -35,7 +35,7 @@
         "gulp-if": "^3.0.0",
         "gulp-run-command": "^0.0.10",
         "gulp-uglify-es": "^3.0.0",
-        "helmet": "^5.1.0",
+        "helmet": "^6.0.1",
         "jsonwebtoken": "^8.5.1",
         "knex": "^2.2.0",
         "lodash": "^4.17.21",
