@@ -4,7 +4,6 @@ logs/
 temp/
 i18n/
 src/
-node_modules/
 coverage/
 samples/
 .mocharc.json
@@ -14,3 +13,6 @@ samples/
 .history
 .env
 rollup.config.js
+.nyc_output
+.github
+test
