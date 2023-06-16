@@ -16,14 +16,12 @@ const minify_js_Extension = (pathToFile) =>
 
 const EXTERNALS = [
   "compression",
-  "cookie-parser",
   "cors",
   "dotenv-defaults",
   "esm",
   "express",
   "express-fileupload",
   "helmet",
-  "jsonwebtoken",
   "knex",
   "log4js",
   "moment",

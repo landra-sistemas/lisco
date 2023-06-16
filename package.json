@@ -43,23 +43,15 @@
         "yargs": "^17.7.2"
     },
     "peerDependencies": {
-        "cookie-parser": "^1.4.6",
-        "jsonwebtoken": "^8.5.1",
         "knex": "^2.2.0"
     },
     "peerDependenciesMeta": {
         "knex": {
             "optional": true
-        },
-        "jsonwebtoken": {
-            "optional": true
-        },
-        "cookie-parser": {
-            "optional": true
         }
     },
     "scripts": {
-        "build": "microbundle --visualize",
+        "build": "microbundle",
         "dev": "microbundle watch --compress false",
         "start": "node execute.js",
         "test": "mocha test --exit",
