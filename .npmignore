@@ -1,0 +1,16 @@
+.idea/
+.vscode/
+logs/
+temp/
+i18n/
+src/
+node_modules/
+coverage/
+samples/
+.mocharc.json
+.eslintrc.json
+.eslintignore
+.prettierrc
+.history
+.env
+rollup.config.js

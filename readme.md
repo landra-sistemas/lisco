@@ -227,19 +227,12 @@ Para hacer que al ejecutar una aplicación los mensajes de log del `consoleApend
 
 ## Configuración de BD y migraciones
 
-Crear un archivo `knex-cli.js` en la raíz del proyecto con el siguiente contenido:
-
-**knex-cli.js**
-``` javascript
-var migrate = require('knex/bin/cli');
-
-```
 
 
-Necesario crear un knexfile con los datos de conexión a BD.
+Crear un knexfile con los datos de conexión a BD.
 
 ``` shell
-> node knex-cli.js init
+> ./node_modules/.bin/knex init
 
 ```
 
@@ -283,7 +276,7 @@ Conectarse a la base de datos añadiendo al `index.js` de la aplicación:
 **index.js**
 ``` javascript
 
-    import knexfile from "./knexfile";
+    import knexfile from "./knexfile.js";
     //const knexfile = require('./knexfile'); -> common js
 
     [...] //Antes del App.init()
@@ -418,6 +411,27 @@ class HomeController extends BaseController {
     }
 }
 ```
+Su sintáxis es sencilla, se trata de un objeto cuyas claves son las rutas y sus valores son objetos que contienen el método.
+
+``` javascript
+{
+    "/": {
+        "get": this.home.bind(this),
+        "post": this.method2.bind(this)
+    },
+    "/path/:id": {
+        "get": this.method3.bind(this),
+    }
+}
+``` 
+
+Esta forma de definir tiene las siguientes particularidades: 
+
+- Las rutas shorthand se cargan **después** de inicializar el controlador mediante el método configure. 
+- No es necesario definir un método **configure()** en el controlador.
+- Es necesario extender de `BaseController`.
+- Es posible definir callbacks dobles cambiando la sintáxis por: `"get": [keycloak.protect(...), this.method.bind(this)]`. **Solo se pueden introducir dos elementos!**
+
 
 ### Autoconfig
 
@@ -449,26 +463,6 @@ class HomeController extends BaseController {
 
 ``` 
 
-Su sintáxis es sencilla, se trata de un objeto cuyas claves son las rutas y sus valores son objetos que contienen el método.
-
-``` javascript
-{
-    "/": {
-        "get": this.home.bind(this),
-        "post": this.method2.bind(this)
-    },
-    "/path/:id": {
-        "get": this.method3.bind(this),
-    }
-}
-``` 
-
-Esta forma de definir tiene las siguientes particularidades: 
-
-- Las rutas shorthand se cargan **después** de inicializar el controlador mediante el método configure. 
-- No es necesario definir un método **configure()** en el controlador.
-- Es necesario extender de `BaseController`.
-- Es posible definir callbacks dobles cambiando la sintáxis por: `"get": [keycloak.protect(...), this.method.bind(this)]`. **Solo se pueden introducir dos elementos!**
 
 ## Autenticación
 

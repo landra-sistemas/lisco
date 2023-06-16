@@ -25,7 +25,6 @@
         "chokidar": "^3.5.3",
         "cluster-messages": "^1.2.1",
         "compression": "^1.7.4",
-        "cookie-parser": "^1.4.6",
         "cors": "^2.8.5",
         "del": "^6.1.1",
         "dotenv-defaults": "^5.0.2",
@@ -36,14 +35,10 @@
         "gulp-run-command": "^0.0.10",
         "gulp-uglify-es": "^3.0.0",
         "helmet": "^6.0.1",
-        "jsonwebtoken": "^8.5.1",
-        "knex": "^2.2.0",
         "lodash": "^4.17.21",
         "log4js": "^6.7.1",
         "moment": "^2.29.4",
         "path-to-regexp": "^6.2.1",
-        "pg": "^8.8.0",
-        "search-string": "^3.1.0",
         "socket.io": "^4.5.4",
         "uuid": "^8.3.2",
         "yargs": "^17.6.2"
@@ -65,6 +60,10 @@
         "release:rc": "npm version prerelease --preid=rc -m \"Bump version %s\""
     },
     "devDependencies": {
+        "pg": "^8.8.0",
+        "cookie-parser": "^1.4.6",
+        "jsonwebtoken": "^8.5.1",
+        "knex": "^2.2.0",
         "chai": "^4.3.7",
         "chai-http": "^4.3.0",
         "cookie": "^0.5.0",
