@@ -1,6 +1,6 @@
 {
     "name": "@landra_sistemas/lisco",
-    "version": "0.2.1-rc.6",
+    "version": "0.2.1-rc.5",
     "author": "LandraSistemas",
     "description": "Framework nodejs con Knex y Express",
     "repository": {
@@ -39,16 +39,9 @@
         "moment": "^2.29.4",
         "path-to-regexp": "^6.2.1",
         "socket.io": "^4.6.2",
+        "knex": "^2.2.0",
         "uuid": "^8.3.2",
         "yargs": "^17.7.2"
-    },
-    "peerDependencies": {
-        "knex": "^2.2.0"
-    },
-    "peerDependenciesMeta": {
-        "knex": {
-            "optional": true
-        }
     },
     "scripts": {
         "build": "microbundle",
@@ -73,7 +66,6 @@
         "cookie-parser": "^1.4.6",
         "eslint": "^8.42.0",
         "jsonwebtoken": "^8.5.1",
-        "knex": "^2.2.0",
         "microbundle": "^0.15.1",
         "mocha": "^10.2.0",
         "ms": "^2.1.3",
