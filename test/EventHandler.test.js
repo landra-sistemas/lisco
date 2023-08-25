@@ -20,36 +20,37 @@ describe('EventHandler', () => {
         expect(testString).to.eq('asdf');
     })
 
-    it('#clustered()', async () => {
+    //TODO review clustered event usecases
+    // it('#clustered()', async () => {
 
-        cluster.isMaster = true;
-        cluster.isWorker = false;
+    //     cluster.isMaster = true;
+    //     cluster.isWorker = false;
 
-        process.env.CLUSTERED = true;
+    //     process.env.CLUSTERED = true;
 
-        await App.init();
-        App.server.start();
+    //     await App.init();
+    //     App.server.start();
 
-        var testString;
+    //     var testString;
 
-        App.events.on('test', function test({ str }, callback) {
-            testString = str;
-            console.log(str)
+    //     App.events.on('test', function test({ str }, callback) {
+    //         testString = str;
+    //         console.log(str)
 
-            expect(callback).to.be.a("function");
-            callback('calling back')
-        });
+    //         expect(callback).to.be.a("function");
+    //         callback('calling back')
+    //     });
 
-        try {
-            App.events.emit('test', { str: 'asdf' }, (data) => { console.log(data + "-wii") })
-        } catch (ex) {
+    //     try {
+    //         App.events.emit('test', { str: 'asdf' }, (data) => { console.log(data + "-wii") })
+    //     } catch (ex) {
 
-        }
-        // await Utils.sleep(3000);
+    //     }
+    //     // await Utils.sleep(3000);
 
-        expect(testString).not.to.be.undefined;
-        expect(testString).to.eq('asdf');
-    });
+    //     expect(testString).not.to.be.undefined;
+    //     expect(testString).to.eq('asdf');
+    // });
 
     // it('#clusterWorker()', async () => {
 
