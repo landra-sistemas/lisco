@@ -5,8 +5,9 @@ import Utils from "./Utils.js";
 import chokidar from "chokidar";
 
 export default class I18nLoader {
-    constructor() {
+    constructor(disableWatchers) {
         this.watcher = {};
+        this.disableWatchers = disableWatchers;
     }
 
     /**
@@ -26,13 +27,15 @@ export default class I18nLoader {
 
         const file = process.cwd() + "/i18n/lang_" + lang + ".json";
 
-        // Initialize watcher.
-        this.watcher[lang] = chokidar.watch(file, {
-            ignored: /(^|[/\\])\../, // ignore dotfiles
-            persistent: true,
-        });
-        //Add change watcher
-        this.watcher[lang].on("change", (path) => this.loadFile(path, lang));
+        if(!this.disableWatchers){
+            // Initialize watcher.
+            this.watcher[lang] = chokidar.watch(file, {
+                ignored: /(^|[/\\])\../, // ignore dotfiles
+                persistent: true,
+            });
+            //Add change watcher
+            this.watcher[lang].on("change", (path) => this.loadFile(path, lang));
+        }
 
         //Initialize file load
         await this.loadFile(file, lang);

@@ -55,7 +55,7 @@ class App {
          * @type {I18nLoader}
          * @public
          */
-        this.i18n = new I18nLoader();
+        this.i18n = new I18nLoader(serverConfig?.disableI18nWatcher);
         await this.i18n.load();
         /**
          * Servidor actual
