@@ -63,7 +63,7 @@ export default class Server {
     config(config) {
         if (config && config.helmet) {
             //Security
-            this.app.use(helmet(config && lodash.isObject(config.helmet) && config.helmet));
+            this.app.use(helmet(config && lodash.isObject(config.helmet) ? config.helmet : undefined));
         }
         if (config && config.json) {
             //mount json form parser
