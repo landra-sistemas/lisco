@@ -21,7 +21,7 @@
     "module": "./dist/lisco.esm.js",
     "unpkg": "./dist/lisco.umd.js",
     "dependencies": {
-        "@landra_sistemas/fql-parser": "^0.1.5",
+        "@landra_sistemas/fql-parser": "^0.1.6",
         "chokidar": "^3.5.3",
         "cluster-messages": "^1.2.1",
         "compression": "^1.7.4",
@@ -34,12 +34,12 @@
         "gulp-if": "^3.0.0",
         "gulp-uglify-es": "^3.0.0",
         "helmet": "^6.0.1",
+        "knex": "^3.1.0",
         "lodash": "^4.17.21",
         "log4js": "^6.9.1",
         "moment": "^2.29.4",
         "path-to-regexp": "^6.2.1",
-        "socket.io": "^4.6.2",
-        "knex": "^2.2.0",
+        "socket.io": "^4.7.2",
         "uuid": "^9.0.1",
         "yargs": "^17.7.2"
     },
