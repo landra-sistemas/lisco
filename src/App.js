@@ -7,6 +7,7 @@ import net from "net";
 import repl from "repl";
 import { KnexConnector } from "./db/index.js";
 import Runtime from "./common/Runtime.js";
+import { showBanner } from "./common/Banner.js";
 
 class App {
     constructor() {
@@ -27,6 +28,7 @@ class App {
      *
      */
     async init(serverConfig) {
+        showBanner();
         if (process.env.DISABLE_LOGGER != "true") {
             await Logger.configure();
         }

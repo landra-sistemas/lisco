@@ -8,6 +8,34 @@
 Framework nodejs con express y knex para el desarrollo de backends.
 
 
+- [Lisco Framework](#lisco-framework)
+  - [Quick Setup](#quick-setup)
+  - [Arranque del proyecto](#arranque-del-proyecto)
+  - [VSCode development](#vscode-development)
+  - [Configuración de BD y migraciones](#configuración-de-bd-y-migraciones)
+    - [Ejecutando migraciones al inicio](#ejecutando-migraciones-al-inicio)
+    - [Mas info KNEX](#mas-info-knex)
+- [Descripción de Componentes](#descripción-de-componentes)
+  - [Rutas y Controladores](#rutas-y-controladores)
+    - [Shorthands](#shorthands)
+    - [Autoconfig](#autoconfig)
+  - [Autenticación](#autenticación)
+    - [JWT Authentication](#jwt-authentication)
+      - [Token](#token)
+    - [Cookie Authentication](#cookie-authentication)
+      - [Cookie](#cookie)
+    - [Autenticación Keycloak](#autenticación-keycloak)
+      - [Uso](#uso)
+  - [Logger](#logger)
+  - [Traducciones](#traducciones)
+  - [Eventos](#eventos)
+  - [Filtros](#filtros)
+  - [Server Views](#server-views)
+  - [Runtime CLI](#runtime-cli)
+    - [Opciones adicionales](#opciones-adicionales)
+
+
+
 ## Quick Setup
 Inicializar un proyecto en blanco
 
@@ -228,7 +256,6 @@ Para hacer que al ejecutar una aplicación los mensajes de log del `consoleApend
 ## Configuración de BD y migraciones
 
 
-
 Crear un knexfile con los datos de conexión a BD.
 
 ``` shell
@@ -303,6 +330,22 @@ import {KnexConnector} from '@landra_sistemas/lisco';
 ```
 > `connection` es una instancia de knex con lo que dispone de todos los métodos `.from`, `.where`, etc. definidos por su API.
 
+
+### Ejecutando migraciones al inicio
+
+Una vez configurada la conexión con la base de datos, justo después de cargarla (`init`) se puede indicar al sistema que ejecute las migraciones mediante el siguiente comando:
+
+```js
+    [...] //Antes del App.init()
+    try {
+        await KnexConnector.connection.migrate.latest();
+    } catch (e) {
+        console.log("Error running migrations:",e);
+    }
+    [...]
+
+    //
+```
 
 ### Mas info KNEX
 [http://knexjs.org/#Installation](http://knexjs.org/#Installation)
@@ -781,7 +824,7 @@ La clase `KnexFilterParser`  convierte un objeto clave valor en un conjunto de f
 > Todos los filtros excepto exists, notexists, fql y full-text-psql tienen una opción 'raw' (dateraw, betweenraw) que permite personalizar mediante sintaxis sql la columna. Esto suele ser util para, en Postgres, ejecutar consultas sobre columnas de tipo Json (`column->>'test'`)
  
 
- ## Views
+ ## Server Views
 
  La utilización de `express` permite el uso de cualquier sistema de renderizado del lado de servidor soportado por el. Mas info aqui https://expressjs.com/en/resources/template-engines.html y aqui https://expressjs.com/en/guide/using-template-engines.html
 
@@ -897,7 +940,7 @@ App.routes = [
 
 
 
-## Runtime
+## Runtime CLI
 
 Lisco proporciona una serie de parámetros de consola útiles para la generación de claves. Esta runtime **no está activada por defecto** pero puede activarse mediante:
 ``` javascript
@@ -934,10 +977,10 @@ La este método puede recibir como parámetro una lista de elementos adicionales
     }   
 ]
 ```	
-
 > Para poder utilizar funciones asíncronas, será necesario utilizar await al inicializar la runtime (`await App.runtime(extra);`)
 
-## Monitoring
+
+## Server Monitoring
 
 Se ha adaptado la librería: https://github.com/RafalWilinski/express-status-monitor. Al utilizar CDN's limita bastante el deploy del proyecto, pero esta adaptación la hace perfecta para incluir a modo de monitorización https://github.com/thorin8k/express-status-monitor.
 
