@@ -44,8 +44,8 @@
         "yargs": "^17.7.2"
     },
     "scripts": {
-        "build": "microbundle",
-        "dev": "microbundle watch --compress false",
+        "build": "microbundle --target node",
+        "dev": "microbundle watch --target node",
         "start": "node execute.js",
         "test": "mocha test --exit",
         "clean": "rimraf node_modules",

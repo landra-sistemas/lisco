@@ -1,2 +1,6537 @@
-var e=require("helmet"),r=require("express"),t=require("compression"),n=require("cors"),o=require("express-fileupload"),i=require("url"),s=require("lodash"),a=require("fs"),u=require("util"),c=require("crypto"),l=require("chokidar"),f=require("buffer"),p=require("stream"),h=require("uuid"),d=require("http"),v=require("https"),m=require("path"),y=require("cluster"),g=require("socket.io"),w=require("os"),b=require("events"),S=require("cluster-messages"),E=require("log4js"),j=require("path-to-regexp"),P=require("moment"),x=require("@landra_sistemas/fql-parser"),k=require("knex"),R=require("net"),A=require("repl"),O=require("yargs/yargs"),T=require("yargs/helpers");function I(e){return e&&"object"==typeof e&&"default"in e?e:{default:e}}function N(e){if(e&&e.__esModule)return e;var r=Object.create(null);return e&&Object.keys(e).forEach(function(t){if("default"!==t){var n=Object.getOwnPropertyDescriptor(e,t);Object.defineProperty(r,t,n.get?n:{enumerable:!0,get:function(){return e[t]}})}}),r.default=e,r}var B=/*#__PURE__*/I(e),_=/*#__PURE__*/I(r),L=/*#__PURE__*/I(t),D=/*#__PURE__*/I(n),q=/*#__PURE__*/I(o),C=/*#__PURE__*/I(i),U=/*#__PURE__*/I(s),F=/*#__PURE__*/I(a),$=/*#__PURE__*/I(u),H=/*#__PURE__*/I(c),J=/*#__PURE__*/I(l),V=/*#__PURE__*/I(f),K=/*#__PURE__*/I(p),G=/*#__PURE__*/N(h),M=/*#__PURE__*/I(d),z=/*#__PURE__*/I(v),W=/*#__PURE__*/I(m),Y=/*#__PURE__*/I(y),Z=/*#__PURE__*/I(w),X=/*#__PURE__*/I(S),Q=/*#__PURE__*/I(E),ee=/*#__PURE__*/I(P),re=/*#__PURE__*/I(k),te=/*#__PURE__*/I(R),ne=/*#__PURE__*/I(A),oe=/*#__PURE__*/I(O);function ie(){return ie=Object.assign?Object.assign.bind():function(e){for(var r=1;r<arguments.length;r++){var t=arguments[r];for(var n in t)Object.prototype.hasOwnProperty.call(t,n)&&(e[n]=t[n])}return e},ie.apply(this,arguments)}function se(e,r){e.prototype=Object.create(r.prototype),e.prototype.constructor=e,ae(e,r)}function ae(e,r){return ae=Object.setPrototypeOf?Object.setPrototypeOf.bind():function(e,r){return e.__proto__=r,e},ae(e,r)}function ue(e,r){(null==r||r>e.length)&&(r=e.length);for(var t=0,n=new Array(r);t<r;t++)n[t]=e[t];return n}function ce(e,r){var t="undefined"!=typeof Symbol&&e[Symbol.iterator]||e["@@iterator"];if(t)return(t=t.call(e)).next.bind(t);if(Array.isArray(e)||(t=function(e,r){if(e){if("string"==typeof e)return ue(e,r);var t=Object.prototype.toString.call(e).slice(8,-1);return"Object"===t&&e.constructor&&(t=e.constructor.name),"Map"===t||"Set"===t?Array.from(e):"Arguments"===t||/^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t)?ue(e,r):void 0}}(e))||r&&e&&"number"==typeof e.length){t&&(e=t);var n=0;return function(){return n>=e.length?{done:!0}:{done:!1,value:e[n++]}}}throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.")}var le=/*#__PURE__*/function(){function e(){}return e.arrayToLower=function(e){return e.join("~").toLowerCase().split("~")},e.replaceAll=function(e,r,t){return e.replace(new RegExp(r.replace(/[-/\\^$*+?.()|[\]{}]/g,"\\$&"),"g"),t)},e.encrypt=function(e){var r=Buffer.from(process.env.CRYPT_SECRET,"hex"),t=Buffer.from(process.env.CRYPT_IV,"hex"),n=H.default.createCipheriv("aes-256-cbc",r,t),o=n.update(e);return(o=Buffer.concat([o,n.final()])).toString("hex")},e.decrypt=function(e){var r=Buffer.from(process.env.CRYPT_SECRET,"hex"),t=Buffer.from(process.env.CRYPT_IV,"hex"),n=Buffer.from(e,"hex"),o=H.default.createDecipheriv("aes-256-cbc",r,t),i=o.update(n);return(i=Buffer.concat([i,o.final()])).toString()},e.sleep=function(e){return $.default.promisify(setTimeout)(e)},e.generateKeys=function(){return{key:H.default.randomBytes(32).toString("hex"),iv:H.default.randomBytes(16).toString("hex")}},e.flattenObject=function(r){var t,n={};for(var o in r)if(r.hasOwnProperty(o))if(r[o]&&Array===r[o].constructor)n[o]=r[o];else if("object"==typeof r[o])for(var i in t=e.flattenObject(r[o]))t.hasOwnProperty(i)&&(t[i]&&Array===t.constructor||(n[o+(isNaN(i)?"."+i:"")]=t[i]));else n[o]=r[o];return n},e.unflatten=function(e){var r={};for(var t in e){var n=t.split(".");n.reduce(function(r,o,i){return r[o]||(r[o]=isNaN(Number(n[i+1]))?n.length-1==i?e[t]:{}:[])},r)}return r},e.expressHandler=function(){return function(e){return function(){var r=[].slice.call(arguments),t=e.apply(void 0,r),n=r[r.length-1];return Promise.resolve(t).catch(function(e){return n(e)})}}},e}(),fe=/*#__PURE__*/function(){function e(e){this.watcher={},this.disableWatchers=e}var r=e.prototype;return r.load=function(e){try{var r=this,t=e||process.env.DEFAULT_LANG;r.currentData||(r.currentData={}),r.currentDataFlat||(r.currentDataFlat={});var n=process.cwd()+"/i18n/lang_"+t+".json";return r.disableWatchers||(r.watcher[t]=J.default.watch(n,{ignored:/(^|[/\\])\../,persistent:!0}),r.watcher[t].on("change",function(e){return r.loadFile(e,t)})),Promise.resolve(r.loadFile(n,t)).then(function(){})}catch(e){return Promise.reject(e)}},r.loadFile=function(e,r){try{var t=this,n=$.default.promisify(F.default.readFile);return Promise.resolve(function(o,i){try{var s=Promise.resolve(n(e,"utf8")).then(function(e){var n=JSON.parse(e);t.currentDataFlat[r]=le.flattenObject(n),t.currentData[r]=n})}catch(e){return i(e)}return s&&s.then?s.then(void 0,i):s}(0,function(e){if("ENOENT"===(null==e?void 0:e.code))return console.log("Lang file does not exist. Create it on ./i18n/lang_{xx}.json");console.error(e)}))}catch(e){return Promise.reject(e)}},r.translate=function(e,r){try{var t,n=function(r){return t?r:"undefined."+e},o=this;if(r||(r=process.env.DEFAULT_LANG),o.currentDataFlat&&o.currentDataFlat[r]&&o.currentDataFlat[r][e])return Promise.resolve(o.currentData[r][e]);var i=function(){if(!o.currentDataFlat||!o.currentDataFlat[r])return Promise.resolve(o.load(r)).then(function(){if(o.currentDataFlat&&o.currentDataFlat[r]&&o.currentDataFlat[e])return t=1,o.currentDataFlat[r][e]})}();return Promise.resolve(i&&i.then?i.then(n):n(i))}catch(e){return Promise.reject(e)}},e}(),pe=/*#__PURE__*/function(){function e(e,r,t,n){this.data=r,this.success=e,this.total=n,this.message=t||""}return e.prototype.toJson=function(){return this},e}();function he(e){var r={exports:{}};return e(r,r.exports),r.exports}var de=he(function(e,r){var t=V.default.Buffer;function n(e,r){for(var t in e)r[t]=e[t]}function o(e,r,n){return t(e,r,n)}t.from&&t.alloc&&t.allocUnsafe&&t.allocUnsafeSlow?e.exports=V.default:(n(V.default,r),r.Buffer=o),n(t,o),o.from=function(e,r,n){if("number"==typeof e)throw new TypeError("Argument must not be a number");return t(e,r,n)},o.alloc=function(e,r,n){if("number"!=typeof e)throw new TypeError("Argument must be a number");var o=t(e);return void 0!==r?"string"==typeof n?o.fill(r,n):o.fill(r):o.fill(0),o},o.allocUnsafe=function(e){if("number"!=typeof e)throw new TypeError("Argument must be a number");return t(e)},o.allocUnsafeSlow=function(e){if("number"!=typeof e)throw new TypeError("Argument must be a number");return V.default.SlowBuffer(e)}}),ve=de.Buffer;function me(e){if(this.buffer=null,this.writable=!0,this.readable=!0,!e)return this.buffer=ve.alloc(0),this;if("function"==typeof e.pipe)return this.buffer=ve.alloc(0),e.pipe(this),this;if(e.length||"object"==typeof e)return this.buffer=e,this.writable=!1,process.nextTick(function(){this.emit("end",e),this.readable=!1,this.emit("close")}.bind(this)),this;throw new TypeError("Unexpected data type ("+typeof e+")")}$.default.inherits(me,K.default),me.prototype.write=function(e){this.buffer=ve.concat([this.buffer,ve.from(e)]),this.emit("data",e)},me.prototype.end=function(e){e&&this.write(e),this.emit("end",e),this.emit("close"),this.writable=!1,this.readable=!1};var ye=me,ge=V.default.Buffer,we=V.default.SlowBuffer,be=Se;function Se(e,r){if(!ge.isBuffer(e)||!ge.isBuffer(r))return!1;if(e.length!==r.length)return!1;for(var t=0,n=0;n<e.length;n++)t|=e[n]^r[n];return 0===t}Se.install=function(){ge.prototype.equal=we.prototype.equal=function(e){return Se(this,e)}};var Ee=ge.prototype.equal,je=we.prototype.equal;function Pe(e){return(e/8|0)+(e%8==0?0:1)}Se.restore=function(){ge.prototype.equal=Ee,we.prototype.equal=je};var xe={ES256:Pe(256),ES384:Pe(384),ES512:Pe(521)},ke=function(e){var r=xe[e];if(r)return r;throw new Error('Unknown algorithm "'+e+'"')},Re=de.Buffer;function Ae(e){if(Re.isBuffer(e))return e;if("string"==typeof e)return Re.from(e,"base64");throw new TypeError("ECDSA signature must be a Base64 string or a Buffer")}function Oe(e,r,t){for(var n=0;r+n<t&&0===e[r+n];)++n;return e[r+n]>=128&&--n,n}var Te=function(e,r){e=Ae(e);var t=ke(r),n=t+1,o=e.length,i=0;if(48!==e[i++])throw new Error('Could not find expected "seq"');var s=e[i++];if(129===s&&(s=e[i++]),o-i<s)throw new Error('"seq" specified length of "'+s+'", only "'+(o-i)+'" remaining');if(2!==e[i++])throw new Error('Could not find expected "int" for "r"');var a=e[i++];if(o-i-2<a)throw new Error('"r" specified length of "'+a+'", only "'+(o-i-2)+'" available');if(n<a)throw new Error('"r" specified length of "'+a+'", max of "'+n+'" is acceptable');var u=i;if(i+=a,2!==e[i++])throw new Error('Could not find expected "int" for "s"');var c=e[i++];if(o-i!==c)throw new Error('"s" specified length of "'+c+'", expected "'+(o-i)+'"');if(n<c)throw new Error('"s" specified length of "'+c+'", max of "'+n+'" is acceptable');var l=i;if((i+=c)!==o)throw new Error('Expected to consume entire buffer, but "'+(o-i)+'" bytes remain');var f=t-a,p=t-c,h=Re.allocUnsafe(f+a+p+c);for(i=0;i<f;++i)h[i]=0;e.copy(h,i,u+Math.max(-f,0),u+a);for(var d=i=t;i<d+p;++i)h[i]=0;return e.copy(h,i,l+Math.max(-p,0),l+c),(h=h.toString("base64")).replace(/=/g,"").replace(/\+/g,"-").replace(/\//g,"_")},Ie=de.Buffer,Ne="secret must be a string or buffer",Be="key must be a string or a buffer",_e="function"==typeof H.default.createPublicKey;function Le(e){if(!Ie.isBuffer(e)&&"string"!=typeof e){if(!_e)throw Ue(Be);if("object"!=typeof e)throw Ue(Be);if("string"!=typeof e.type)throw Ue(Be);if("string"!=typeof e.asymmetricKeyType)throw Ue(Be);if("function"!=typeof e.export)throw Ue(Be)}}function De(e){if(!Ie.isBuffer(e)&&"string"!=typeof e&&"object"!=typeof e)throw Ue("key must be a string, a buffer or an object")}function qe(e){return e.replace(/=/g,"").replace(/\+/g,"-").replace(/\//g,"_")}function Ce(e){var r=4-(e=e.toString()).length%4;if(4!==r)for(var t=0;t<r;++t)e+="=";return e.replace(/\-/g,"+").replace(/_/g,"/")}function Ue(e){var r=[].slice.call(arguments,1),t=$.default.format.bind($.default,e).apply(null,r);return new TypeError(t)}function Fe(e){var r;return Ie.isBuffer(r=e)||"string"==typeof r||(e=JSON.stringify(e)),e}function $e(e){return function(r,t){!function(e){if(!Ie.isBuffer(e)){if("string"==typeof e)return e;if(!_e)throw Ue(Ne);if("object"!=typeof e)throw Ue(Ne);if("secret"!==e.type)throw Ue(Ne);if("function"!=typeof e.export)throw Ue(Ne)}}(t),r=Fe(r);var n=H.default.createHmac("sha"+e,t);return qe((n.update(r),n.digest("base64")))}}function He(e){return function(r,t,n){var o=$e(e)(r,n);return be(Ie.from(t),Ie.from(o))}}function Je(e){return function(r,t){De(t),r=Fe(r);var n=H.default.createSign("RSA-SHA"+e);return qe((n.update(r),n.sign(t,"base64")))}}function Ve(e){return function(r,t,n){Le(n),r=Fe(r),t=Ce(t);var o=H.default.createVerify("RSA-SHA"+e);return o.update(r),o.verify(n,t,"base64")}}function Ke(e){return function(r,t){De(t),r=Fe(r);var n=H.default.createSign("RSA-SHA"+e);return qe((n.update(r),n.sign({key:t,padding:H.default.constants.RSA_PKCS1_PSS_PADDING,saltLength:H.default.constants.RSA_PSS_SALTLEN_DIGEST},"base64")))}}function Ge(e){return function(r,t,n){Le(n),r=Fe(r),t=Ce(t);var o=H.default.createVerify("RSA-SHA"+e);return o.update(r),o.verify({key:n,padding:H.default.constants.RSA_PKCS1_PSS_PADDING,saltLength:H.default.constants.RSA_PSS_SALTLEN_DIGEST},t,"base64")}}function Me(e){var r=Je(e);return function(){var t=r.apply(null,arguments);return Te(t,"ES"+e)}}function ze(e){var r=Ve(e);return function(t,n,o){return n=function(e,r){e=Ae(e);var t=ke(r),n=e.length;if(n!==2*t)throw new TypeError('"'+r+'" signatures must be "'+2*t+'" bytes, saw "'+n+'"');var o=Oe(e,0,t),i=Oe(e,t,e.length),s=t-o,a=t-i,u=2+s+1+1+a,c=u<128,l=Re.allocUnsafe((c?2:3)+u),f=0;return l[f++]=48,c?l[f++]=u:(l[f++]=129,l[f++]=255&u),l[f++]=2,l[f++]=s,o<0?(l[f++]=0,f+=e.copy(l,f,0,t)):f+=e.copy(l,f,o,t),l[f++]=2,l[f++]=a,i<0?(l[f++]=0,e.copy(l,f,t)):e.copy(l,f,t+i),l}(n,"ES"+e).toString("base64"),r(t,n,o)}}function We(){return function(){return""}}function Ye(){return function(e,r){return""===r}}_e&&(Be+=" or a KeyObject",Ne+="or a KeyObject");var Ze=function(e){var r={hs:$e,rs:Je,ps:Ke,es:Me,none:We},t={hs:He,rs:Ve,ps:Ge,es:ze,none:Ye},n=e.match(/^(RS|PS|ES|HS)(256|384|512)$|^(none)$/i);if(!n)throw Ue('"%s" is not a valid algorithm.\n  Supported algorithms are:\n  "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "PS256", "PS384", "PS512", "ES256", "ES384", "ES512" and "none".',e);var o=(n[1]||n[3]).toLowerCase(),i=n[2];return{sign:r[o](i),verify:t[o](i)}},Xe=V.default.Buffer,Qe=function(e){return"string"==typeof e?e:"number"==typeof e||Xe.isBuffer(e)?e.toString():JSON.stringify(e)},er=de.Buffer;function rr(e,r){return er.from(e,r).toString("base64").replace(/=/g,"").replace(/\+/g,"-").replace(/\//g,"_")}function tr(e){var r=e.header,t=e.payload,n=e.secret||e.privateKey,o=e.encoding,i=Ze(r.alg),s=function(e,r,t){t=t||"utf8";var n=rr(Qe(e),"binary"),o=rr(Qe(r),t);return $.default.format("%s.%s",n,o)}(r,t,o),a=i.sign(s,n);return $.default.format("%s.%s",s,a)}function nr(e){var r=new ye(e.secret||e.privateKey||e.key);this.readable=!0,this.header=e.header,this.encoding=e.encoding,this.secret=this.privateKey=this.key=r,this.payload=new ye(e.payload),this.secret.once("close",function(){!this.payload.writable&&this.readable&&this.sign()}.bind(this)),this.payload.once("close",function(){!this.secret.writable&&this.readable&&this.sign()}.bind(this))}$.default.inherits(nr,K.default),nr.prototype.sign=function(){try{var e=tr({header:this.header,payload:this.payload.buffer,secret:this.secret.buffer,encoding:this.encoding});return this.emit("done",e),this.emit("data",e),this.emit("end"),this.readable=!1,e}catch(e){this.readable=!1,this.emit("error",e),this.emit("close")}},nr.sign=tr;var or=nr,ir=de.Buffer,sr=/^[a-zA-Z0-9\-_]+?\.[a-zA-Z0-9\-_]+?\.([a-zA-Z0-9\-_]+)?$/;function ar(e){var r=e.split(".",1)[0];return function(e){if(function(e){return"[object Object]"===Object.prototype.toString.call(e)}(e))return e;try{return JSON.parse(e)}catch(e){return}}(ir.from(r,"base64").toString("binary"))}function ur(e){return e.split(".")[2]}function cr(e){return sr.test(e)&&!!ar(e)}function lr(e,r,t){if(!r){var n=new Error("Missing algorithm parameter for jws.verify");throw n.code="MISSING_ALGORITHM",n}var o=ur(e=Qe(e)),i=function(e){return e.split(".",2).join(".")}(e);return Ze(r).verify(i,o,t)}function fr(e,r){if(r=r||{},!cr(e=Qe(e)))return null;var t=ar(e);if(!t)return null;var n=function(e,r){r=r||"utf8";var t=e.split(".")[1];return ir.from(t,"base64").toString(r)}(e);return("JWT"===t.typ||r.json)&&(n=JSON.parse(n,r.encoding)),{header:t,payload:n,signature:ur(e)}}function pr(e){var r=new ye((e=e||{}).secret||e.publicKey||e.key);this.readable=!0,this.algorithm=e.algorithm,this.encoding=e.encoding,this.secret=this.publicKey=this.key=r,this.signature=new ye(e.signature),this.secret.once("close",function(){!this.signature.writable&&this.readable&&this.verify()}.bind(this)),this.signature.once("close",function(){!this.secret.writable&&this.readable&&this.verify()}.bind(this))}$.default.inherits(pr,K.default),pr.prototype.verify=function(){try{var e=lr(this.signature.buffer,this.algorithm,this.key.buffer),r=fr(this.signature.buffer,this.encoding);return this.emit("done",e,r),this.emit("data",e),this.emit("end"),this.readable=!1,e}catch(e){this.readable=!1,this.emit("error",e),this.emit("close")}},pr.decode=fr,pr.isValid=cr,pr.verify=lr;var hr=pr,dr={ALGORITHMS:["HS256","HS384","HS512","RS256","RS384","RS512","PS256","PS384","PS512","ES256","ES384","ES512"],sign:or.sign,verify:hr.verify,decode:hr.decode,isValid:hr.isValid,createSign:function(e){return new or(e)},createVerify:function(e){return new hr(e)}},vr=function(e,r){Error.call(this,e),Error.captureStackTrace&&Error.captureStackTrace(this,this.constructor),this.name="JsonWebTokenError",this.message=e,r&&(this.inner=r)};(vr.prototype=Object.create(Error.prototype)).constructor=vr;var mr=vr,yr=function(e,r){mr.call(this,e),this.name="NotBeforeError",this.date=r};(yr.prototype=Object.create(mr.prototype)).constructor=yr;var gr=yr,wr=function(e,r){mr.call(this,e),this.name="TokenExpiredError",this.expiredAt=r};(wr.prototype=Object.create(mr.prototype)).constructor=wr;var br=wr,Sr=1e3,Er=60*Sr,jr=60*Er,Pr=24*jr;function xr(e,r,t,n){var o=r>=1.5*t;return Math.round(e/t)+" "+n+(o?"s":"")}var kr=function(e,r){var t=r||Math.floor(Date.now()/1e3);if("string"==typeof e){var n=function(e,r){r=r||{};var t,n,o=typeof e;if("string"===o&&e.length>0)return function(e){if(!((e=String(e)).length>100)){var r=/^(-?(?:\d+)?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|years?|yrs?|y)?$/i.exec(e);if(r){var t=parseFloat(r[1]);switch((r[2]||"ms").toLowerCase()){case"years":case"year":case"yrs":case"yr":case"y":return 315576e5*t;case"weeks":case"week":case"w":return 6048e5*t;case"days":case"day":case"d":return t*Pr;case"hours":case"hour":case"hrs":case"hr":case"h":return t*jr;case"minutes":case"minute":case"mins":case"min":case"m":return t*Er;case"seconds":case"second":case"secs":case"sec":case"s":return t*Sr;case"milliseconds":case"millisecond":case"msecs":case"msec":case"ms":return t;default:return}}}}(e);if("number"===o&&isFinite(e))return r.long?(t=e,(n=Math.abs(t))>=Pr?xr(t,n,Pr,"day"):n>=jr?xr(t,n,jr,"hour"):n>=Er?xr(t,n,Er,"minute"):n>=Sr?xr(t,n,Sr,"second"):t+" ms"):function(e){var r=Math.abs(e);return r>=Pr?Math.round(e/Pr)+"d":r>=jr?Math.round(e/jr)+"h":r>=Er?Math.round(e/Er)+"m":r>=Sr?Math.round(e/Sr)+"s":e+"ms"}(e);throw new Error("val is not a non-empty string or a valid number. val="+JSON.stringify(e))}(e);if(void 0===n)return;return Math.floor(t+n/1e3)}return"number"==typeof e?t+e:void 0},Rr=he(function(e,r){var t;r=e.exports=G,t="object"==typeof process&&process.env&&process.env.NODE_DEBUG&&/\bsemver\b/i.test(process.env.NODE_DEBUG)?function(){var e=Array.prototype.slice.call(arguments,0);e.unshift("SEMVER"),console.log.apply(console,e)}:function(){},r.SEMVER_SPEC_VERSION="2.0.0";var n=Number.MAX_SAFE_INTEGER||9007199254740991,o=r.re=[],i=r.src=[],s=0,a=s++;i[a]="0|[1-9]\\d*";var u=s++;i[u]="[0-9]+";var c=s++;i[c]="\\d*[a-zA-Z-][a-zA-Z0-9-]*";var l=s++;i[l]="("+i[a]+")\\.("+i[a]+")\\.("+i[a]+")";var f=s++;i[f]="("+i[u]+")\\.("+i[u]+")\\.("+i[u]+")";var p=s++;i[p]="(?:"+i[a]+"|"+i[c]+")";var h=s++;i[h]="(?:"+i[u]+"|"+i[c]+")";var d=s++;i[d]="(?:-("+i[p]+"(?:\\."+i[p]+")*))";var v=s++;i[v]="(?:-?("+i[h]+"(?:\\."+i[h]+")*))";var m=s++;i[m]="[0-9A-Za-z-]+";var y=s++;i[y]="(?:\\+("+i[m]+"(?:\\."+i[m]+")*))";var g=s++,w="v?"+i[l]+i[d]+"?"+i[y]+"?";i[g]="^"+w+"$";var b="[v=\\s]*"+i[f]+i[v]+"?"+i[y]+"?",S=s++;i[S]="^"+b+"$";var E=s++;i[E]="((?:<|>)?=?)";var j=s++;i[j]=i[u]+"|x|X|\\*";var P=s++;i[P]=i[a]+"|x|X|\\*";var x=s++;i[x]="[v=\\s]*("+i[P]+")(?:\\.("+i[P]+")(?:\\.("+i[P]+")(?:"+i[d]+")?"+i[y]+"?)?)?";var k=s++;i[k]="[v=\\s]*("+i[j]+")(?:\\.("+i[j]+")(?:\\.("+i[j]+")(?:"+i[v]+")?"+i[y]+"?)?)?";var R=s++;i[R]="^"+i[E]+"\\s*"+i[x]+"$";var A=s++;i[A]="^"+i[E]+"\\s*"+i[k]+"$";var O=s++;i[O]="(?:^|[^\\d])(\\d{1,16})(?:\\.(\\d{1,16}))?(?:\\.(\\d{1,16}))?(?:$|[^\\d])";var T=s++;i[T]="(?:~>?)";var I=s++;i[I]="(\\s*)"+i[T]+"\\s+",o[I]=new RegExp(i[I],"g");var N=s++;i[N]="^"+i[T]+i[x]+"$";var B=s++;i[B]="^"+i[T]+i[k]+"$";var _=s++;i[_]="(?:\\^)";var L=s++;i[L]="(\\s*)"+i[_]+"\\s+",o[L]=new RegExp(i[L],"g");var D=s++;i[D]="^"+i[_]+i[x]+"$";var q=s++;i[q]="^"+i[_]+i[k]+"$";var C=s++;i[C]="^"+i[E]+"\\s*("+b+")$|^$";var U=s++;i[U]="^"+i[E]+"\\s*("+w+")$|^$";var F=s++;i[F]="(\\s*)"+i[E]+"\\s*("+b+"|"+i[x]+")",o[F]=new RegExp(i[F],"g");var $=s++;i[$]="^\\s*("+i[x]+")\\s+-\\s+("+i[x]+")\\s*$";var H=s++;i[H]="^\\s*("+i[k]+")\\s+-\\s+("+i[k]+")\\s*$";var J=s++;i[J]="(<|>)?=?\\s*\\*";for(var V=0;V<35;V++)t(V,i[V]),o[V]||(o[V]=new RegExp(i[V]));function K(e,r){if(r&&"object"==typeof r||(r={loose:!!r,includePrerelease:!1}),e instanceof G)return e;if("string"!=typeof e)return null;if(e.length>256)return null;if(!(r.loose?o[S]:o[g]).test(e))return null;try{return new G(e,r)}catch(e){return null}}function G(e,r){if(r&&"object"==typeof r||(r={loose:!!r,includePrerelease:!1}),e instanceof G){if(e.loose===r.loose)return e;e=e.version}else if("string"!=typeof e)throw new TypeError("Invalid Version: "+e);if(e.length>256)throw new TypeError("version is longer than 256 characters");if(!(this instanceof G))return new G(e,r);t("SemVer",e,r),this.options=r,this.loose=!!r.loose;var i=e.trim().match(r.loose?o[S]:o[g]);if(!i)throw new TypeError("Invalid Version: "+e);if(this.raw=e,this.major=+i[1],this.minor=+i[2],this.patch=+i[3],this.major>n||this.major<0)throw new TypeError("Invalid major version");if(this.minor>n||this.minor<0)throw new TypeError("Invalid minor version");if(this.patch>n||this.patch<0)throw new TypeError("Invalid patch version");this.prerelease=i[4]?i[4].split(".").map(function(e){if(/^[0-9]+$/.test(e)){var r=+e;if(r>=0&&r<n)return r}return e}):[],this.build=i[5]?i[5].split("."):[],this.format()}r.parse=K,r.valid=function(e,r){var t=K(e,r);return t?t.version:null},r.clean=function(e,r){var t=K(e.trim().replace(/^[=v]+/,""),r);return t?t.version:null},r.SemVer=G,G.prototype.format=function(){return this.version=this.major+"."+this.minor+"."+this.patch,this.prerelease.length&&(this.version+="-"+this.prerelease.join(".")),this.version},G.prototype.toString=function(){return this.version},G.prototype.compare=function(e){return t("SemVer.compare",this.version,this.options,e),e instanceof G||(e=new G(e,this.options)),this.compareMain(e)||this.comparePre(e)},G.prototype.compareMain=function(e){return e instanceof G||(e=new G(e,this.options)),z(this.major,e.major)||z(this.minor,e.minor)||z(this.patch,e.patch)},G.prototype.comparePre=function(e){if(e instanceof G||(e=new G(e,this.options)),this.prerelease.length&&!e.prerelease.length)return-1;if(!this.prerelease.length&&e.prerelease.length)return 1;if(!this.prerelease.length&&!e.prerelease.length)return 0;var r=0;do{var n=this.prerelease[r],o=e.prerelease[r];if(t("prerelease compare",r,n,o),void 0===n&&void 0===o)return 0;if(void 0===o)return 1;if(void 0===n)return-1;if(n!==o)return z(n,o)}while(++r)},G.prototype.inc=function(e,r){switch(e){case"premajor":this.prerelease.length=0,this.patch=0,this.minor=0,this.major++,this.inc("pre",r);break;case"preminor":this.prerelease.length=0,this.patch=0,this.minor++,this.inc("pre",r);break;case"prepatch":this.prerelease.length=0,this.inc("patch",r),this.inc("pre",r);break;case"prerelease":0===this.prerelease.length&&this.inc("patch",r),this.inc("pre",r);break;case"major":0===this.minor&&0===this.patch&&0!==this.prerelease.length||this.major++,this.minor=0,this.patch=0,this.prerelease=[];break;case"minor":0===this.patch&&0!==this.prerelease.length||this.minor++,this.patch=0,this.prerelease=[];break;case"patch":0===this.prerelease.length&&this.patch++,this.prerelease=[];break;case"pre":if(0===this.prerelease.length)this.prerelease=[0];else{for(var t=this.prerelease.length;--t>=0;)"number"==typeof this.prerelease[t]&&(this.prerelease[t]++,t=-2);-1===t&&this.prerelease.push(0)}r&&(this.prerelease[0]===r?isNaN(this.prerelease[1])&&(this.prerelease=[r,0]):this.prerelease=[r,0]);break;default:throw new Error("invalid increment argument: "+e)}return this.format(),this.raw=this.version,this},r.inc=function(e,r,t,n){"string"==typeof t&&(n=t,t=void 0);try{return new G(e,t).inc(r,n).version}catch(e){return null}},r.diff=function(e,r){if(X(e,r))return null;var t=K(e),n=K(r),o="";if(t.prerelease.length||n.prerelease.length){o="pre";var i="prerelease"}for(var s in t)if(("major"===s||"minor"===s||"patch"===s)&&t[s]!==n[s])return o+s;return i},r.compareIdentifiers=z;var M=/^[0-9]+$/;function z(e,r){var t=M.test(e),n=M.test(r);return t&&n&&(e=+e,r=+r),e===r?0:t&&!n?-1:n&&!t?1:e<r?-1:1}function W(e,r,t){return new G(e,t).compare(new G(r,t))}function Y(e,r,t){return W(e,r,t)>0}function Z(e,r,t){return W(e,r,t)<0}function X(e,r,t){return 0===W(e,r,t)}function Q(e,r,t){return 0!==W(e,r,t)}function ee(e,r,t){return W(e,r,t)>=0}function re(e,r,t){return W(e,r,t)<=0}function te(e,r,t,n){switch(r){case"===":return"object"==typeof e&&(e=e.version),"object"==typeof t&&(t=t.version),e===t;case"!==":return"object"==typeof e&&(e=e.version),"object"==typeof t&&(t=t.version),e!==t;case"":case"=":case"==":return X(e,t,n);case"!=":return Q(e,t,n);case">":return Y(e,t,n);case">=":return ee(e,t,n);case"<":return Z(e,t,n);case"<=":return re(e,t,n);default:throw new TypeError("Invalid operator: "+r)}}function ne(e,r){if(r&&"object"==typeof r||(r={loose:!!r,includePrerelease:!1}),e instanceof ne){if(e.loose===!!r.loose)return e;e=e.value}if(!(this instanceof ne))return new ne(e,r);t("comparator",e,r),this.options=r,this.loose=!!r.loose,this.parse(e),this.value=this.semver===oe?"":this.operator+this.semver.version,t("comp",this)}r.rcompareIdentifiers=function(e,r){return z(r,e)},r.major=function(e,r){return new G(e,r).major},r.minor=function(e,r){return new G(e,r).minor},r.patch=function(e,r){return new G(e,r).patch},r.compare=W,r.compareLoose=function(e,r){return W(e,r,!0)},r.rcompare=function(e,r,t){return W(r,e,t)},r.sort=function(e,t){return e.sort(function(e,n){return r.compare(e,n,t)})},r.rsort=function(e,t){return e.sort(function(e,n){return r.rcompare(e,n,t)})},r.gt=Y,r.lt=Z,r.eq=X,r.neq=Q,r.gte=ee,r.lte=re,r.cmp=te,r.Comparator=ne;var oe={};function ie(e,r){if(r&&"object"==typeof r||(r={loose:!!r,includePrerelease:!1}),e instanceof ie)return e.loose===!!r.loose&&e.includePrerelease===!!r.includePrerelease?e:new ie(e.raw,r);if(e instanceof ne)return new ie(e.value,r);if(!(this instanceof ie))return new ie(e,r);if(this.options=r,this.loose=!!r.loose,this.includePrerelease=!!r.includePrerelease,this.raw=e,this.set=e.split(/\s*\|\|\s*/).map(function(e){return this.parseRange(e.trim())},this).filter(function(e){return e.length}),!this.set.length)throw new TypeError("Invalid SemVer Range: "+e);this.format()}function se(e){return!e||"x"===e.toLowerCase()||"*"===e}function ae(e,r,t,n,o,i,s,a,u,c,l,f,p){return((r=se(t)?"":se(n)?">="+t+".0.0":se(o)?">="+t+"."+n+".0":">="+r)+" "+(a=se(u)?"":se(c)?"<"+(+u+1)+".0.0":se(l)?"<"+u+"."+(+c+1)+".0":f?"<="+u+"."+c+"."+l+"-"+f:"<="+a)).trim()}function ue(e,r,n){for(var o=0;o<e.length;o++)if(!e[o].test(r))return!1;if(r.prerelease.length&&!n.includePrerelease){for(o=0;o<e.length;o++)if(t(e[o].semver),e[o].semver!==oe&&e[o].semver.prerelease.length>0){var i=e[o].semver;if(i.major===r.major&&i.minor===r.minor&&i.patch===r.patch)return!0}return!1}return!0}function ce(e,r,t){try{r=new ie(r,t)}catch(e){return!1}return r.test(e)}function le(e,r,t,n){var o,i,s,a,u;switch(e=new G(e,n),r=new ie(r,n),t){case">":o=Y,i=re,s=Z,a=">",u=">=";break;case"<":o=Z,i=ee,s=Y,a="<",u="<=";break;default:throw new TypeError('Must provide a hilo val of "<" or ">"')}if(ce(e,r,n))return!1;for(var c=0;c<r.set.length;++c){var l=null,f=null;if(r.set[c].forEach(function(e){e.semver===oe&&(e=new ne(">=0.0.0")),f=f||e,o(e.semver,(l=l||e).semver,n)?l=e:s(e.semver,f.semver,n)&&(f=e)}),l.operator===a||l.operator===u)return!1;if((!f.operator||f.operator===a)&&i(e,f.semver))return!1;if(f.operator===u&&s(e,f.semver))return!1}return!0}ne.prototype.parse=function(e){var r=e.match(this.options.loose?o[C]:o[U]);if(!r)throw new TypeError("Invalid comparator: "+e);this.operator=r[1],"="===this.operator&&(this.operator=""),this.semver=r[2]?new G(r[2],this.options.loose):oe},ne.prototype.toString=function(){return this.value},ne.prototype.test=function(e){return t("Comparator.test",e,this.options.loose),this.semver===oe||("string"==typeof e&&(e=new G(e,this.options)),te(e,this.operator,this.semver,this.options))},ne.prototype.intersects=function(e,r){if(!(e instanceof ne))throw new TypeError("a Comparator is required");var t;if(r&&"object"==typeof r||(r={loose:!!r,includePrerelease:!1}),""===this.operator)return t=new ie(e.value,r),ce(this.value,t,r);if(""===e.operator)return t=new ie(this.value,r),ce(e.semver,t,r);var n=!(">="!==this.operator&&">"!==this.operator||">="!==e.operator&&">"!==e.operator),o=!("<="!==this.operator&&"<"!==this.operator||"<="!==e.operator&&"<"!==e.operator),i=this.semver.version===e.semver.version,s=!(">="!==this.operator&&"<="!==this.operator||">="!==e.operator&&"<="!==e.operator),a=te(this.semver,"<",e.semver,r)&&(">="===this.operator||">"===this.operator)&&("<="===e.operator||"<"===e.operator),u=te(this.semver,">",e.semver,r)&&("<="===this.operator||"<"===this.operator)&&(">="===e.operator||">"===e.operator);return n||o||i&&s||a||u},r.Range=ie,ie.prototype.format=function(){return this.range=this.set.map(function(e){return e.join(" ").trim()}).join("||").trim(),this.range},ie.prototype.toString=function(){return this.range},ie.prototype.parseRange=function(e){var r=this.options.loose;e=(e=e.trim()).replace(r?o[H]:o[$],ae),t("hyphen replace",e),e=e.replace(o[F],"$1$2$3"),t("comparator trim",e,o[F]),e=(e=(e=e.replace(o[I],"$1~")).replace(o[L],"$1^")).split(/\s+/).join(" ");var n=r?o[C]:o[U],i=e.split(" ").map(function(e){return function(e,r){return t("comp",e,r),e=function(e,r){return e.trim().split(/\s+/).map(function(e){return function(e,r){return t("caret",e,r),e.replace(r.loose?o[q]:o[D],function(r,n,o,i,s){var a;return t("caret",e,r,n,o,i,s),se(n)?a="":se(o)?a=">="+n+".0.0 <"+(+n+1)+".0.0":se(i)?a="0"===n?">="+n+"."+o+".0 <"+n+"."+(+o+1)+".0":">="+n+"."+o+".0 <"+(+n+1)+".0.0":s?(t("replaceCaret pr",s),a="0"===n?"0"===o?">="+n+"."+o+"."+i+"-"+s+" <"+n+"."+o+"."+(+i+1):">="+n+"."+o+"."+i+"-"+s+" <"+n+"."+(+o+1)+".0":">="+n+"."+o+"."+i+"-"+s+" <"+(+n+1)+".0.0"):(t("no pr"),a="0"===n?"0"===o?">="+n+"."+o+"."+i+" <"+n+"."+o+"."+(+i+1):">="+n+"."+o+"."+i+" <"+n+"."+(+o+1)+".0":">="+n+"."+o+"."+i+" <"+(+n+1)+".0.0"),t("caret return",a),a})}(e,r)}).join(" ")}(e,r),t("caret",e),e=function(e,r){return e.trim().split(/\s+/).map(function(e){return function(e,r){return e.replace(r.loose?o[B]:o[N],function(r,n,o,i,s){var a;return t("tilde",e,r,n,o,i,s),se(n)?a="":se(o)?a=">="+n+".0.0 <"+(+n+1)+".0.0":se(i)?a=">="+n+"."+o+".0 <"+n+"."+(+o+1)+".0":s?(t("replaceTilde pr",s),a=">="+n+"."+o+"."+i+"-"+s+" <"+n+"."+(+o+1)+".0"):a=">="+n+"."+o+"."+i+" <"+n+"."+(+o+1)+".0",t("tilde return",a),a})}(e,r)}).join(" ")}(e,r),t("tildes",e),e=function(e,r){return t("replaceXRanges",e,r),e.split(/\s+/).map(function(e){return function(e,r){return(e=e.trim()).replace(r.loose?o[A]:o[R],function(r,n,o,i,s,a){t("xRange",e,r,n,o,i,s,a);var u=se(o),c=u||se(i),l=c||se(s);return"="===n&&l&&(n=""),u?r=">"===n||"<"===n?"<0.0.0":"*":n&&l?(c&&(i=0),s=0,">"===n?(n=">=",c?(o=+o+1,i=0,s=0):(i=+i+1,s=0)):"<="===n&&(n="<",c?o=+o+1:i=+i+1),r=n+o+"."+i+"."+s):c?r=">="+o+".0.0 <"+(+o+1)+".0.0":l&&(r=">="+o+"."+i+".0 <"+o+"."+(+i+1)+".0"),t("xRange return",r),r})}(e,r)}).join(" ")}(e,r),t("xrange",e),e=function(e,r){return t("replaceStars",e,r),e.trim().replace(o[J],"")}(e,r),t("stars",e),e}(e,this.options)},this).join(" ").split(/\s+/);return this.options.loose&&(i=i.filter(function(e){return!!e.match(n)})),i.map(function(e){return new ne(e,this.options)},this)},ie.prototype.intersects=function(e,r){if(!(e instanceof ie))throw new TypeError("a Range is required");return this.set.some(function(t){return t.every(function(t){return e.set.some(function(e){return e.every(function(e){return t.intersects(e,r)})})})})},r.toComparators=function(e,r){return new ie(e,r).set.map(function(e){return e.map(function(e){return e.value}).join(" ").trim().split(" ")})},ie.prototype.test=function(e){if(!e)return!1;"string"==typeof e&&(e=new G(e,this.options));for(var r=0;r<this.set.length;r++)if(ue(this.set[r],e,this.options))return!0;return!1},r.satisfies=ce,r.maxSatisfying=function(e,r,t){var n=null,o=null;try{var i=new ie(r,t)}catch(e){return null}return e.forEach(function(e){i.test(e)&&(n&&-1!==o.compare(e)||(o=new G(n=e,t)))}),n},r.minSatisfying=function(e,r,t){var n=null,o=null;try{var i=new ie(r,t)}catch(e){return null}return e.forEach(function(e){i.test(e)&&(n&&1!==o.compare(e)||(o=new G(n=e,t)))}),n},r.minVersion=function(e,r){e=new ie(e,r);var t=new G("0.0.0");if(e.test(t))return t;if(t=new G("0.0.0-0"),e.test(t))return t;t=null;for(var n=0;n<e.set.length;++n)e.set[n].forEach(function(e){var r=new G(e.semver.version);switch(e.operator){case">":0===r.prerelease.length?r.patch++:r.prerelease.push(0),r.raw=r.format();case"":case">=":t&&!Y(t,r)||(t=r);break;case"<":case"<=":break;default:throw new Error("Unexpected operation: "+e.operator)}});return t&&e.test(t)?t:null},r.validRange=function(e,r){try{return new ie(e,r).range||"*"}catch(e){return null}},r.ltr=function(e,r,t){return le(e,r,"<",t)},r.gtr=function(e,r,t){return le(e,r,">",t)},r.outside=le,r.prerelease=function(e,r){var t=K(e,r);return t&&t.prerelease.length?t.prerelease:null},r.intersects=function(e,r,t){return e=new ie(e,t),r=new ie(r,t),e.intersects(r)},r.coerce=function(e){if(e instanceof G)return e;if("string"!=typeof e)return null;var r=e.match(o[O]);return null==r?null:K(r[1]+"."+(r[2]||"0")+"."+(r[3]||"0"))}}),Ar=Rr.satisfies(process.version,"^6.12.0 || >=8.0.0"),Or=["RS256","RS384","RS512","ES256","ES384","ES512"],Tr=["RS256","RS384","RS512"],Ir=["HS256","HS384","HS512"];Ar&&(Or.splice(3,0,"PS256","PS384","PS512"),Tr.splice(3,0,"PS256","PS384","PS512"));var Nr=/^\s+|\s+$/g,Br=/^[-+]0x[0-9a-f]+$/i,_r=/^0b[01]+$/i,Lr=/^0o[0-7]+$/i,Dr=/^(?:0|[1-9]\d*)$/,qr=parseInt;function Cr(e){return e!=e}var Ur,Fr,$r=Object.prototype,Hr=$r.hasOwnProperty,Jr=$r.toString,Vr=$r.propertyIsEnumerable,Kr=(Ur=Object.keys,Fr=Object,function(e){return Ur(Fr(e))}),Gr=Math.max;function Mr(e,r){return!!(r=null==r?9007199254740991:r)&&("number"==typeof e||Dr.test(e))&&e>-1&&e%1==0&&e<r}var zr=Array.isArray;function Wr(e){return null!=e&&function(e){return"number"==typeof e&&e>-1&&e%1==0&&e<=9007199254740991}(e.length)&&!function(e){var r=Yr(e)?Jr.call(e):"";return"[object Function]"==r||"[object GeneratorFunction]"==r}(e)}function Yr(e){var r=typeof e;return!!e&&("object"==r||"function"==r)}function Zr(e){return!!e&&"object"==typeof e}var Xr=Object.prototype.toString,Qr=function(e){return!0===e||!1===e||function(e){return!!e&&"object"==typeof e}(e)&&"[object Boolean]"==Xr.call(e)},et=/^\s+|\s+$/g,rt=/^[-+]0x[0-9a-f]+$/i,tt=/^0b[01]+$/i,nt=/^0o[0-7]+$/i,ot=parseInt,it=Object.prototype.toString;function st(e){var r=typeof e;return!!e&&("object"==r||"function"==r)}var at=function(e){return"number"==typeof e&&e==function(e){var r=function(e){return e?Infinity===(e=function(e){if("number"==typeof e)return e;if(function(e){return"symbol"==typeof e||function(e){return!!e&&"object"==typeof e}(e)&&"[object Symbol]"==it.call(e)}(e))return NaN;if(st(e)){var r="function"==typeof e.valueOf?e.valueOf():e;e=st(r)?r+"":r}if("string"!=typeof e)return 0===e?e:+e;e=e.replace(et,"");var t=tt.test(e);return t||nt.test(e)?ot(e.slice(2),t?2:8):rt.test(e)?NaN:+e}(e))||-Infinity===e?17976931348623157e292*(e<0?-1:1):e==e?e:0:0===e?e:0}(e),t=r%1;return r==r?t?r-t:r:0}(e)},ut=Object.prototype.toString,ct=function(e){return"number"==typeof e||function(e){return!!e&&"object"==typeof e}(e)&&"[object Number]"==ut.call(e)},lt=Object.prototype,ft=Function.prototype.toString,pt=lt.hasOwnProperty,ht=ft.call(Object),dt=lt.toString,vt=function(e,r){return function(t){return e(r(t))}}(Object.getPrototypeOf,Object),mt=function(e){if(!function(e){return!!e&&"object"==typeof e}(e)||"[object Object]"!=dt.call(e)||function(e){var r=!1;if(null!=e&&"function"!=typeof e.toString)try{r=!!(e+"")}catch(e){}return r}(e))return!1;var r=vt(e);if(null===r)return!0;var t=pt.call(r,"constructor")&&r.constructor;return"function"==typeof t&&t instanceof t&&ft.call(t)==ht},yt=Object.prototype.toString,gt=Array.isArray,wt=function(e){return"string"==typeof e||!gt(e)&&function(e){return!!e&&"object"==typeof e}(e)&&"[object String]"==yt.call(e)},bt=/^\s+|\s+$/g,St=/^[-+]0x[0-9a-f]+$/i,Et=/^0b[01]+$/i,jt=/^0o[0-7]+$/i,Pt=parseInt,xt=Object.prototype.toString;function kt(e){var r=typeof e;return!!e&&("object"==r||"function"==r)}var Rt=["RS256","RS384","RS512","ES256","ES384","ES512","HS256","HS384","HS512","none"];Ar&&Rt.splice(3,0,"PS256","PS384","PS512");var At={expiresIn:{isValid:function(e){return at(e)||wt(e)&&e},message:'"expiresIn" should be a number of seconds or string representing a timespan'},notBefore:{isValid:function(e){return at(e)||wt(e)&&e},message:'"notBefore" should be a number of seconds or string representing a timespan'},audience:{isValid:function(e){return wt(e)||Array.isArray(e)},message:'"audience" must be a string or array'},algorithm:{isValid:function(e,r,t,n){var o;e=Wr(e)?e:(o=e)?function(e,r){return function(r,t){for(var n=-1,o=r?r.length:0,i=Array(o);++n<o;)i[n]=e[r[n]];return i}(r)}(o,function(e){return Wr(e)?function(e,r){var t=zr(e)||function(e){return function(e){return Zr(e)&&Wr(e)}(e)&&Hr.call(e,"callee")&&(!Vr.call(e,"callee")||"[object Arguments]"==Jr.call(e))}(e)?function(e,r){for(var t=-1,n=Array(e);++t<e;)n[t]=r(t);return n}(e.length,String):[],n=t.length,o=!!n;for(var i in e)!Hr.call(e,i)||o&&("length"==i||Mr(i,n))||t.push(i);return t}(e):function(e){if((r=e)!==("function"==typeof(t=r&&r.constructor)&&t.prototype||$r))return Kr(e);var r,t,n=[];for(var o in Object(e))Hr.call(e,o)&&"constructor"!=o&&n.push(o);return n}(e)}(o)):[],t=t&&!n?function(e){var r=function(e){return e?Infinity===(e=function(e){if("number"==typeof e)return e;if(function(e){return"symbol"==typeof e||Zr(e)&&"[object Symbol]"==Jr.call(e)}(e))return NaN;if(Yr(e)){var r="function"==typeof e.valueOf?e.valueOf():e;e=Yr(r)?r+"":r}if("string"!=typeof e)return 0===e?e:+e;e=e.replace(Nr,"");var t=_r.test(e);return t||Lr.test(e)?qr(e.slice(2),t?2:8):Br.test(e)?NaN:+e}(e))||-Infinity===e?17976931348623157e292*(e<0?-1:1):e==e?e:0:0===e?e:0}(e),t=r%1;return r==r?t?r-t:r:0}(t):0;var i=e.length;return t<0&&(t=Gr(i+t,0)),function(e){return"string"==typeof e||!zr(e)&&Zr(e)&&"[object String]"==Jr.call(e)}(e)?t<=i&&e.indexOf(r,t)>-1:!!i&&function(e,r,t){if(r!=r)return function(e,r,t,n){for(var o=e.length,i=t+-1;++i<o;)if(r(e[i],i,e))return i;return-1}(e,Cr,t);for(var n=t-1,o=e.length;++n<o;)if(e[n]===r)return n;return-1}(e,r,t)>-1}.bind(null,Rt),message:'"algorithm" must be a valid string enum value'},header:{isValid:mt,message:'"header" must be an object'},encoding:{isValid:wt,message:'"encoding" must be a string'},issuer:{isValid:wt,message:'"issuer" must be a string'},subject:{isValid:wt,message:'"subject" must be a string'},jwtid:{isValid:wt,message:'"jwtid" must be a string'},noTimestamp:{isValid:Qr,message:'"noTimestamp" must be a boolean'},keyid:{isValid:wt,message:'"keyid" must be a string'},mutatePayload:{isValid:Qr,message:'"mutatePayload" must be a boolean'}},Ot={iat:{isValid:ct,message:'"iat" should be a number of seconds'},exp:{isValid:ct,message:'"exp" should be a number of seconds'},nbf:{isValid:ct,message:'"nbf" should be a number of seconds'}};function Tt(e,r,t,n){if(!mt(t))throw new Error('Expected "'+n+'" to be a plain object.');Object.keys(t).forEach(function(o){var i=e[o];if(i){if(!i.isValid(t[o]))throw new Error(i.message)}else if(!r)throw new Error('"'+o+'" is not allowed in "'+n+'"')})}var It={audience:"aud",issuer:"iss",subject:"sub",jwtid:"jti"},Nt=["expiresIn","notBefore","noTimestamp","audience","issuer","subject","jwtid"],Bt=function(e,r,t,n){var o;if("function"!=typeof t||n||(n=t,t={}),t||(t={}),t=Object.assign({},t),o=n||function(e,r){if(e)throw e;return r},t.clockTimestamp&&"number"!=typeof t.clockTimestamp)return o(new mr("clockTimestamp must be a number"));if(void 0!==t.nonce&&("string"!=typeof t.nonce||""===t.nonce.trim()))return o(new mr("nonce must be a non-empty string"));var i=t.clockTimestamp||Math.floor(Date.now()/1e3);if(!e)return o(new mr("jwt must be provided"));if("string"!=typeof e)return o(new mr("jwt must be a string"));var s,a=e.split(".");if(3!==a.length)return o(new mr("jwt malformed"));try{s=function(e,r){var t=dr.decode(e,r=r||{});if(!t)return null;var n=t.payload;if("string"==typeof n)try{var o=JSON.parse(n);null!==o&&"object"==typeof o&&(n=o)}catch(e){}return!0===r.complete?{header:t.header,payload:n,signature:t.signature}:n}(e,{complete:!0})}catch(e){return o(e)}if(!s)return o(new mr("invalid token"));var u,c=s.header;if("function"==typeof r){if(!n)return o(new mr("verify must be called asynchronous if secret or public key is provided as a callback"));u=r}else u=function(e,t){return t(null,r)};return u(c,function(r,n){if(r)return o(new mr("error in secret or public key callback: "+r.message));var u,l=""!==a[2].trim();if(!l&&n)return o(new mr("jwt signature is required"));if(l&&!n)return o(new mr("secret or public key must be provided"));if(l||t.algorithms||(t.algorithms=["none"]),t.algorithms||(t.algorithms=~n.toString().indexOf("BEGIN CERTIFICATE")||~n.toString().indexOf("BEGIN PUBLIC KEY")?Or:~n.toString().indexOf("BEGIN RSA PUBLIC KEY")?Tr:Ir),!~t.algorithms.indexOf(s.header.alg))return o(new mr("invalid algorithm"));try{u=dr.verify(e,s.header.alg,n)}catch(e){return o(e)}if(!u)return o(new mr("invalid signature"));var f=s.payload;if(void 0!==f.nbf&&!t.ignoreNotBefore){if("number"!=typeof f.nbf)return o(new mr("invalid nbf value"));if(f.nbf>i+(t.clockTolerance||0))return o(new gr("jwt not active",new Date(1e3*f.nbf)))}if(void 0!==f.exp&&!t.ignoreExpiration){if("number"!=typeof f.exp)return o(new mr("invalid exp value"));if(i>=f.exp+(t.clockTolerance||0))return o(new br("jwt expired",new Date(1e3*f.exp)))}if(t.audience){var p=Array.isArray(t.audience)?t.audience:[t.audience];if(!(Array.isArray(f.aud)?f.aud:[f.aud]).some(function(e){return p.some(function(r){return r instanceof RegExp?r.test(e):r===e})}))return o(new mr("jwt audience invalid. expected: "+p.join(" or ")))}if(t.issuer&&("string"==typeof t.issuer&&f.iss!==t.issuer||Array.isArray(t.issuer)&&-1===t.issuer.indexOf(f.iss)))return o(new mr("jwt issuer invalid. expected: "+t.issuer));if(t.subject&&f.sub!==t.subject)return o(new mr("jwt subject invalid. expected: "+t.subject));if(t.jwtid&&f.jti!==t.jwtid)return o(new mr("jwt jwtid invalid. expected: "+t.jwtid));if(t.nonce&&f.nonce!==t.nonce)return o(new mr("jwt nonce invalid. expected: "+t.nonce));if(t.maxAge){if("number"!=typeof f.iat)return o(new mr("iat required when maxAge is specified"));var h=kr(t.maxAge,f.iat);if(void 0===h)return o(new mr('"maxAge" should be a number of seconds or string representing a timespan eg: "1d", "20h", 60'));if(i>=h+(t.clockTolerance||0))return o(new br("maxAge exceeded",new Date(1e3*h)))}return o(null,!0===t.complete?{header:c,payload:f,signature:s.signature}:f)})},_t=function(e,r,t,n){"function"==typeof t?(n=t,t={}):t=t||{};var o="object"==typeof e&&!Buffer.isBuffer(e),i=Object.assign({alg:t.algorithm||"HS256",typ:o?"JWT":void 0,kid:t.keyid},t.header);function s(e){if(n)return n(e);throw e}if(!r&&"none"!==t.algorithm)return s(new Error("secretOrPrivateKey must have a value"));if(void 0===e)return s(new Error("payload is required"));if(o){try{!function(e){Tt(Ot,!0,e,"payload")}(e)}catch(e){return s(e)}t.mutatePayload||(e=Object.assign({},e))}else{var a=Nt.filter(function(e){return void 0!==t[e]});if(a.length>0)return s(new Error("invalid "+a.join(",")+" option for "+typeof e+" payload"))}if(void 0!==e.exp&&void 0!==t.expiresIn)return s(new Error('Bad "options.expiresIn" option the payload already has an "exp" property.'));if(void 0!==e.nbf&&void 0!==t.notBefore)return s(new Error('Bad "options.notBefore" option the payload already has an "nbf" property.'));try{!function(e){Tt(At,!1,e,"options")}(t)}catch(e){return s(e)}var u=e.iat||Math.floor(Date.now()/1e3);if(t.noTimestamp?delete e.iat:o&&(e.iat=u),void 0!==t.notBefore){try{e.nbf=kr(t.notBefore,u)}catch(e){return s(e)}if(void 0===e.nbf)return s(new Error('"notBefore" should be a number of seconds or string representing a timespan eg: "1d", "20h", 60'))}if(void 0!==t.expiresIn&&"object"==typeof e){try{e.exp=kr(t.expiresIn,u)}catch(e){return s(e)}if(void 0===e.exp)return s(new Error('"expiresIn" should be a number of seconds or string representing a timespan eg: "1d", "20h", 60'))}Object.keys(It).forEach(function(r){var n=It[r];if(void 0!==t[r]){if(void 0!==e[n])return s(new Error('Bad "options.'+r+'" option. The payload already has an "'+n+'" property.'));e[n]=t[r]}});var c=t.encoding||"utf8";if("function"!=typeof n)return dr.sign({header:i,payload:e,secret:r,encoding:c});n=n&&function(e){return function(e,r){var t;if("function"!=typeof r)throw new TypeError("Expected a function");return e=function(e){var r=function(e){return e?Infinity===(e=function(e){if("number"==typeof e)return e;if(function(e){return"symbol"==typeof e||function(e){return!!e&&"object"==typeof e}(e)&&"[object Symbol]"==xt.call(e)}(e))return NaN;if(kt(e)){var r="function"==typeof e.valueOf?e.valueOf():e;e=kt(r)?r+"":r}if("string"!=typeof e)return 0===e?e:+e;e=e.replace(bt,"");var t=Et.test(e);return t||jt.test(e)?Pt(e.slice(2),t?2:8):St.test(e)?NaN:+e}(e))||-Infinity===e?17976931348623157e292*(e<0?-1:1):e==e?e:0:0===e?e:0}(e),t=r%1;return r==r?t?r-t:r:0}(e),function(){return--e>0&&(t=r.apply(this,arguments)),e<=1&&(r=void 0),t}}(2,e)}(n),dr.createSign({header:i,privateKey:r,payload:e,encoding:c}).once("error",n).once("done",function(e){n(null,e)})},Lt=/*#__PURE__*/function(){function e(e,r){this.privateKey=e,this.options=r}var r=e.prototype;return r.sign=function(e){var r=ie({},this.options,{jwtid:G.v4()});return _t(e,this.privateKey,r)},r.verify=function(e){return Bt(e,this.privateKey,this.options)},r.refresh=function(e){var r=Bt(e,this.privateKey,this.options);delete r.sub,delete r.iss,delete r.aud,delete r.iat,delete r.exp,delete r.nbf,delete r.jti;var t=ie({},this.options,{jwtid:G.v4()});return _t(r,this.privateKey,t)},e}(),Dt=/*#__PURE__*/function(){function e(e,r,t){this.app=_.default(),this.express_config=U.default.defaultsDeep(e,{helmet:!0,json:!0,urlencoded:!0,compression:!0,cors:{origin:!0,credentials:!0},fileupload:!0,socketio:{transports:["websocket"]},traceRequests:!1}),this.statics=r,this.routes=t}var r=e.prototype;return r.initialize=function(){try{var e=function(){return Promise.resolve(r.configureRoutes(r.routes)).then(function(){return Promise.resolve(r.errorHandler()).then(function(){})})},r=this;r.config(r.express_config);var t=function(){if(r.customizeExpress)return Promise.resolve(r.customizeExpress(r.app)).then(function(){})}();return Promise.resolve(t&&t.then?t.then(e):e())}catch(e){return Promise.reject(e)}},r.customizeExpress=function(){},r.config=function(e){if(e&&e.helmet&&this.app.use(B.default(e&&U.default.isObject(e.helmet)?e.helmet:void 0)),e&&e.json&&this.app.use(_.default.json()),e&&e.urlencoded&&this.app.use(_.default.urlencoded({extended:!0})),e&&e.compression&&this.app.use(L.default()),e&&e.cors&&(this.app.options("*",D.default(e&&U.default.isObject(e.cors)&&e.cors)),this.app.use(D.default(e&&U.default.isObject(e.cors)&&e.cors))),e&&e.fileupload&&this.app.use(q.default()),this.statics)for(var r in this.statics)this.app.use(r,_.default.static(this.statics[r]));e&&!0===e.traceRequests&&"true"!=process.env.DISABLE_LOGGER&&this.app.use(function(e,r,t){e.requestTime=Date.now(),r.on("finish",function(){var r=C.default.parse(e.url).pathname,t=Date.now()-e.requestTime;console.debug("APIRequest["+process.pid+"]::. ["+e.method+"] (user:"+(e&&e.session&&e.session.user_id||"")+")  "+r+" |-> took: "+t+" ms"),console.debug(JSON.stringify(e.body))}),t()})},r.configureRoutes=function(e){var r=_.default.Router();this.app.use(r),this.loadRoutes(this.app,e)},r.loadRoutes=function(e,r){if(r)for(var t,n=ce(r);!(t=n()).done;){var o=t.value;if(o){var i=o.configure();if(o.entity&&(i=o.configure(o.entity,{service:o.service,table:o.table})),!U.default.isEmpty(o.routes)){var s=le.expressHandler();for(var a in o.routes){var u=o.routes[a];for(var c in u){var l=u[c];Array.isArray(l)?i[c](a,l[0],s(l[1])):i[c](a,s(l))}}}i&&e.use(i)}else console.warn("Empty route")}},r.errorHandler=function(){this.app.use(function(e,r,t,n){var o=new pe;o.success=!1,o.message=e.message,console.error(e),t.status(500).json(o.toJson())})},e}(),qt=/*#__PURE__*/function(e){function r(r){var t;return t=e.call(this)||this,process.env.PORT||console.log("Using 3000 as default port. Customize via env PORT."),t.port=t.normalizePort(process.env.PORT||3e3),t.clustered=process.env.CLUSTERED,t.workers=[],t.app=r,t.executeOnlyMain=function(){},t}se(r,e);var t=r.prototype;return t.setServerCls=function(e){this.server=e},t.start=function(){try{var e=this,r=function(){if("true"!=e.clustered)return e.configureSocketIO(),e.executeOnlyMain(),Promise.resolve(e.initUnclustered()).then(function(){});e.initClustered()}();return Promise.resolve(r&&r.then?r.then(function(){}):void 0)}catch(e){return Promise.reject(e)}},t.configureSocketIO=function(){this.server.express_config&&this.server.express_config.socketio&&(this.app.io=new g.Server(this.server.express_config&&this.server.express_config.socketio),this.app.io.listen(this.port+1))},t.initClustered=function(){try{var e=this,r=function(){if(!Y.default.isPrimary)return Promise.resolve(e.initUnclustered()).then(function(){console.log("Worker "+process.pid+" started")});e.configureSocketIO(),e.executeOnlyMain(),(new X.default).on("event",function(r,t){r&&r.event&&(1==process.env.DEBUG_EVENTS&&console.debug("Received '"+r.event+"' from "+r.props.owner+" at Master"),e.app.events.emit(r.event,r.props,t))});for(var r=Z.default.cpus().length,t=0;t<r;t+=1)e.initWorker();Y.default.on("exit",function(r){console.log("Worker "+r.id+" died :("),e.initWorker()})}();return Promise.resolve(r&&r.then?r.then(function(){}):void 0)}catch(e){return Promise.reject(e)}},t.initWorker=function(){var e=Y.default.fork();console.log("Running worker "+e.process.pid),this.workers.push(e)},t.initUnclustered=function(){try{var e=this;e.server.port=e.port;var r=M.default.Server(e.server.app);return Promise.resolve(e.server.initialize()).then(function(){function t(){function t(){if(r.on("error",function(r){e.handleErrors(r,e.server.port)}),r.on("listening",function(){console.log("Server Worker running on port: "+e.port+"!"),e.emit("listening",e.port)}),process.env.SSL&&"true"==process.env.SSL){process.env.SSL_KEY&&process.env.SSL_CERT&&process.env.SSL_PASS||(console.error("Invalid SSL configuration. SLL_KEY, SSL_CERT and SSL_PASS needed"),process.exit(0));var t={key:F.default.readFileSync(W.default.resolve(process.cwd(),process.env.SSL_KEY||"key.pem")),cert:F.default.readFileSync(W.default.resolve(process.cwd(),process.env.SSL_CERT||"cert.pem")),passphrase:process.env.SSL_PASS};process.env.SSL_PORT||console.log("Using 3443 as ssl default port. Customize via env SSL_PORT.");var n=e.normalizePort(process.env.SSL_PORT||3443),o=z.default.createServer(t,e.server.app);o.listen(n),o.on("error",function(r){e.handleErrors(r,n)}),o.on("listening",function(){console.log("Server Worker running on port: "+n+"!"),e.emit("listening_ssl",n)})}}r.listen(e.server.port);var n=function(){if(e.server.afterListen)return Promise.resolve(e.server.afterListen()).then(function(){})}();return n&&n.then?n.then(t):t()}var n=function(){if(e.server.beforeListen)return Promise.resolve(e.server.beforeListen()).then(function(){})}();return n&&n.then?n.then(t):t()})}catch(e){return Promise.reject(e)}},t.normalizePort=function(e){var r=parseInt(e,10);return isNaN(r)?e:r>=0&&r},t.handleErrors=function(e,r){if("listen"!==e.syscall)throw e;var t="string"==typeof r?"Pipe "+r:"Port "+r;switch(e.code){case"EACCES":console.error(t+" requires elevated privileges"),process.exit(1);break;case"EADDRINUSE":console.error(t+" is already in use"),process.exit(1);break;default:throw e}},r}(b.EventEmitter),Ct=/*#__PURE__*/function(e){function r(r){var t;return(t=e.call(this)||this).messages=new X.default,t.app=r,Y.default.isWorker&&t.messages.on("event",function(r,n){r&&r.event&&process.pid!==r.props.owner&&(1==process.env.DEBUG_EVENTS&&console.debug("Receiving broadcast "+r.event+" - "+process.pid),e.prototype.emit.call(function(e){if(void 0===e)throw new ReferenceError("this hasn't been initialised - super() hasn't been called");return e}(t),r.event,ie({},r.props),n))}),t}return se(r,e),r.prototype.emit=function(r,t,n){e.prototype.emit.call(this,r,t,n),r&&t&&Y.default.isWorker&&process.pid!==t.owner&&(1==process.env.DEBUG_EVENTS&&console.debug(r+" -> Firing from "+process.pid+" to master"),t||(t={}),t.owner=process.pid,this.messages.send("event",{event:r,props:ie({},t)},n)),r&&t&&Y.default.isPrimary&&this.app&&this.app.server&&this.app.server.workers&&(1==process.env.DEBUG_EVENTS&&console.debug(r+" -> Firing from master to workers"),this.messages.send("event",{event:r,props:ie({},t)},n))},r}(b.EventEmitter),Ut=Q.default.configure,Ft=Q.default.getLogger,$t=/*#__PURE__*/function(){function e(){}return e.configure=function(){try{var e=$.default.promisify(F.default.readFile);return Promise.resolve(e(W.default.resolve(process.cwd(),"./log4js.json"),"utf8")).then(function(e){var r,t,n;Ut(JSON.parse(e)),r=Ft("log"),t=Ft("error"),n=Ft("debug"),console.log=function(){var e=Array.prototype.slice.call(arguments);r.log("info",e[0])},console.error=function(){var e=Array.prototype.slice.call(arguments);t.log("error",e[0])},console.info=function(){var e=Array.prototype.slice.call(arguments);r.log("info",e[0])},console.debug=function(){var e=Array.prototype.slice.call(arguments);n.log("debug",e[0])},console.custom=function(e,r,t){Ft(e).log(r,t)}})}catch(e){return Promise.reject(e)}},e}();function Ht(e,r){try{var t=e()}catch(e){return r(e)}return t&&t.then?t.then(void 0,r):t}var Jt=/*#__PURE__*/function(){function e(e,r){this.router=_.default.Router(),this.publicPathsList=[].concat(e,["/login"]),this.AuthHandler=r}var r=e.prototype;return r.configure=function(){var e=this,r=le.expressHandler();return this.router.use(r(function(){return e.check.apply(e,[].slice.call(arguments))})),this.router.post("/login",r(function(){return e.loginPost.apply(e,[].slice.call(arguments))})),this.router.post("/logout",r(function(){return e.logout.apply(e,[].slice.call(arguments))})),this.router},r.check=function(e,r,t){try{var n=this;return Promise.resolve(Ht(function(){for(var o,i=ce(n.publicPathsList);!(o=i()).done;)if(null!==j.pathToRegexp(o.value).exec(C.default.parse(e.url).pathname))return t();return Promise.resolve(n.AuthHandler.check(e)).then(function(e){return e?t():r.status(403).json(new pe(!1,null,"Forbidden").toJson())})},function(e){return console.error(e),r.status(403).json(new pe(!1,null,"Forbidden").toJson())}))}catch(e){return Promise.reject(e)}},r.loginPost=function(e,r){try{var t,n=function(e){return t?e:r.status(401).json(new pe(!1,null,"Unauthorized - Missing parameters").toJson())},o=this,i=function(){if(e.body.username)return Ht(function(){return Promise.resolve(o.AuthHandler.validate(e,e.body.username,e.body.password)).then(function(e){if(e){var n=r.status(200).json(new pe(!0,e).toJson());return t=1,n}var o=r.status(401).json(new pe(!1,null,"Unauthorized - Incorrect credentials").toJson());return t=1,o})},function(e){console.error(e);var n=r.status(401).json(new pe(!1,null,"Unauthorized - Error, check log").toJson());return t=1,n})}();return Promise.resolve(i&&i.then?i.then(n):n(i))}catch(e){return Promise.reject(e)}},r.logout=function(e,r){try{var t,n=function(e){return t?e:r.status(200).json(new pe(!0).toJson())},o=this,i=function(){if(o.AuthHandler.logout)return Ht(function(){return Promise.resolve(o.AuthHandler.logout(e)).then(function(){var e=r.status(200).json(new pe(!0).toJson());return t=1,e})},function(e){console.error(e);var n=r.status(500).json(new pe(!1,null,e).toJson());return t=1,n})}();return Promise.resolve(i&&i.then?i.then(n):n(i))}catch(e){return Promise.reject(e)}},e}(),Vt=function(){if(!this.check)throw new Error("AuthHandler must have 'check' vethod");if(!this.validate)throw new Error("AuthHandler must have 'validate' vethod")},Kt=/*#__PURE__*/function(e){function r(r){var t;if((t=e.call(this)||this).tokenGenerator=new Lt(process.env.JWT_SECRET,{audience:process.env.JWT_AUDIENCE,issuer:process.env.JWT_ISSUER,subject:process.env.JWT_SUBJECT,algorithm:process.env.JWT_ALGORITHM,expiresIn:process.env.JWT_EXPIRES}),!r)throw new Error("Need 'UserDao' for user validation. Create 'UserDao' class extending 'IUserDao'");return t.userDao=r,t}se(r,e);var t=r.prototype;return t.check=function(e){try{if(e.headers.authorization){var r=(e.headers.authorization||"").split(" ")[1]||"";if(!r)return console.error("Token needed"),Promise.resolve(!1);try{var t=this.tokenGenerator.verify(r);return t.sub&&t.username&&!ee.default(t.exp).isAfter(new Date)?(e.session=ie({},e.session,t),Promise.resolve(!0)):Promise.resolve(!1)}catch(e){return console.error(e),Promise.resolve(!1)}}return Promise.resolve(!1)}catch(e){return Promise.reject(e)}},t.validate=function(e,r,t){try{var n=this;return Promise.resolve(n.userDao.findByUsername(r)).then(function(e){return!(!e||e.username!==r||e.password!==le.encrypt(t))&&n.tokenGenerator.sign(U.default.omit(e,["password"]))})}catch(e){return Promise.reject(e)}},r}(Vt),Gt=/*#__PURE__*/function(e){function r(r){var t;if(t=e.call(this)||this,!r)throw new Error("Need 'UserDao' for user validation. Create 'UserDao' class extending 'IUserDao'");return t.userDao=r,t}se(r,e);var t=r.prototype;return t.check=function(e){try{var r,t=function(t){return r?t:!(!e.session||!e.session.username)},n=this,o=function(){if(e.headers.authorization){var t=(e.headers.authorization||"").split(" ")[1]||"",o=Buffer.from(t,"base64").toString().split(":");return Promise.resolve(n.validate(e,o[0],o[1])).then(function(e){return e?r=!0:(r=1,!1)})}}();return Promise.resolve(o&&o.then?o.then(t):t(o))}catch(e){return Promise.reject(e)}},t.validate=function(e,r,t){try{return Promise.resolve(this.userDao.findByUsername(r)).then(function(n){return!(!n||n.username!==r||n.password!==le.encrypt(t)||(e.session=ie({},e.session,U.default.omit(n,["password"])),0))})}catch(e){return Promise.reject(e)}},t.logout=function(e){return new Promise(function(r){e.session&&e.session.destroy(r)})},r}(Vt),Mt=new(/*#__PURE__*/function(){function e(){}var r=e.prototype;return r.init=function(e){this.connection=re.default(e)},r.setColumnAliases=function(e){this.columnAliases=e},r.test=function(){return this.connection.raw("select 1+1 as result")},e}()),zt=/*#__PURE__*/function(){function e(){}return e.parseQueryString=function(e,r,t){var n={allowGlobalSearch:!0,caseInsensitive:!0};Mt.columnAliases&&Mt.columnAliases[t]&&(n.aliases=Mt.columnAliases[t]),void 0!==Mt.caseInsensitive&&(n.caseInsensitive=Mt.caseInsensitive),void 0!==Mt.allowGlobalSearch&&(n.allowGlobalSearch=Mt.allowGlobalSearch);var o=new x.FQLParser(n).parse(r);return new x.KnexParser(t).toKnex(e,o)},e.parseFilters=function(r,t,n){var o=r;for(var i in t){var s=t[i];if("object"==typeof s)switch(s.type){case"fql":o=e.parseQueryString(o,s.value,n);break;case"date":case"between":s.start&&s.end&&(o=o.whereBetween(i,[s.start,s.end])),s.start&&!s.end&&(o=o.where(i,">=",s.start)),!s.start&&s.end&&(o=o.where(i,">=",s.end));break;case"dateraw":case"betweenraw":s.start&&s.end&&(o=o.whereRaw(i+" BETWEEN ? AND ?",[s.start,s.end])),s.start&&!s.end&&(o=o.whereRaw(i+" >= ?",[s.start])),!s.start&&s.end&&(o=o.whereRaw(i+" >= ?",[s.end]));break;case"jsonb":o=o.whereRaw(i+" ILIKE ?",["%"+s.value+"%"]);break;case"full-text-psql":o=o.whereRaw("to_tsvector("+i+"::text) @@ to_tsquery(?)",[s.value]);break;case"greater":case"greaterraw":o=o.whereRaw(i+" > ?",[s.value]);break;case"greaterEq":case"greaterEqraw":o=o.whereRaw(i+" >= ?",[s.value]);break;case"less":case"lessraw":o=o.whereRaw(i+" < ?",[s.value]);break;case"lessEq":case"lessEqraw":o=o.whereRaw(i+" <= ?",[s.value]);break;case"exists":o=o.whereExists(i);break;case"notexists":o=o.whereNotExists(i);break;case"exact":case"exactraw":o=o.whereRaw(i+" = ?",[s.value]);break;case"in":var a=i;a.includes(",")&&(a=i.split(",")),Array.isArray(s.value)||null==s.value?null!=s.value&&(o=o.whereIn(a,s.value)):o=o.whereIn(a,s.value.split(","));break;case"inraw":Array.isArray(s.value)||null==s.value?null!=s.value&&(o=o.whereRaw(i+" IN (?)",[s.value.map(function(e){return"'"+e+"'"}).join(",")])):o=o.whereRaw(i+" IN (?)",[s.value.split(",").map(function(e){return"'"+e+"'"}).join(",")]);break;case"not":case"notraw":o=o.whereRaw(i+" != ?",[s.value]);break;case"like":case"likeraw":var u=le.replaceAll(s.value,"*","%");o=o.whereRaw(" "+i+" LIKE ?",[u]);break;case"notlike":case"notlikeraw":var c=le.replaceAll(s.value,"*","%");o=o.whereRaw(" "+i+" NOT LIKE ?",[c]);break;case"likeI":var l=le.replaceAll(s.value,"*","%");o=o.whereRaw(" "+i+" ILIKE ?",[l]);break;case"notlikeI":var f=le.replaceAll(s.value,"*","%");o=o.whereRaw(" "+i+" NOT ILIKE ?",[f]);break;case"null":case"nullraw":o=o.whereRaw(i+" is NULL");break;case"notnull":case"notnullraw":o=o.whereRaw(i+" is not NULL")}else o=o.where(i,s)}return o},e.parseSort=function(e){if(!e.field||!e.direction)return 1;var r="ASC";return"descend"===e.direction&&(r="DESC"),e.field+" "+r},e}(),Wt=/*#__PURE__*/function(){function e(){this.tableName=""}var r=e.prototype;return r.loadAllData=function(e,r){return Mt.connection.select("*").from(this.tableName).limit(r||1e4).offset(e)},r.loadFilteredData=function(e,r,t){try{var n=this,o=1;return e.sort&&(o=zt.parseSort(e.sort)),Promise.resolve(Mt.connection.from(n.tableName).where(function(r){return zt.parseFilters(r,U.default.omit(e,["sort","start","limit"]),n.tableName)}).orderByRaw(o).limit(t).offset(r))}catch(e){return Promise.reject(e)}},r.countFilteredData=function(e){try{var r=this;return Promise.resolve(Mt.connection.from(r.tableName).where(function(t){return zt.parseFilters(t,U.default.omit(e,["sort","start","limit"]),r.tableName)}).count("id",{as:"total"})).then(function(e){return e&&e[0].total})}catch(e){return Promise.reject(e)}},r.loadById=function(e){try{return Promise.resolve(Mt.connection.from(this.tableName).where("id",e)).then(function(e){return e&&e[0]?e[0]:null})}catch(e){return Promise.reject(e)}},r.save=function(e){return Mt.connection.from(this.tableName).insert(e).returning("*")},r.update=function(e,r){return Mt.connection.from(this.tableName).where("id",e).update(r).returning("*")},r.delete=function(e){try{var r=this;return Promise.resolve(r.loadById(e)).then(function(t){if(!t)throw"NotFound";return Mt.connection.from(r.tableName).where("id",e).delete()})}catch(e){return Promise.reject(e)}},e}(),Yt=/*#__PURE__*/function(e){function r(r){var t;if(!(t=e.call(this,r)||this).findByUsername)throw new Error("AuthHandler must have 'findByUsername' method");return t}return se(r,e),r}(Wt);function Zt(e,r){try{var t=e()}catch(e){return r(e)}return t&&t.then?t.then(void 0,r):t}var Xt=/*#__PURE__*/function(){function e(){this.router=_.default.Router(),this.routes={}}var r=e.prototype;return r.configure=function(e,r){var t=this;if(!e)return this.router;var n=le.expressHandler();return this.router.get("/"+e,n(function(){return t.listEntidad.apply(t,[].slice.call(arguments))})),this.router.post("/"+e+"/list",n(function(){return t.listEntidad.apply(t,[].slice.call(arguments))})),this.router.get("/"+e+"/:id",n(function(){return t.getEntidad.apply(t,[].slice.call(arguments))})),this.router.post("/"+e,n(function(){return t.saveEntidad.apply(t,[].slice.call(arguments))})),this.router.put("/"+e+"/:id",n(function(){return t.updateEntidad.apply(t,[].slice.call(arguments))})),this.router.delete("/"+e+"/:id",n(function(){return t.deleteEntidad.apply(t,[].slice.call(arguments))})),this.service=r.service,this.table=r.table,this.router},r.listEntidad=function(e,r,t){try{var n=this,o=Zt(function(){var t=new n.service(null,n.table),o="POST"===e.method?e.body:e.query&&e.query.filters?JSON.parse(e.query.filters):{};return Promise.resolve(t.list(o,o.start,o.limit)).then(function(e){var t=new pe(!0,e.data,null,e.total);r.json(t.toJson())})},function(e){t(e)});return Promise.resolve(o&&o.then?o.then(function(){}):void 0)}catch(e){return Promise.reject(e)}},r.getEntidad=function(e,r,t){try{var n=this,o=Zt(function(){var t=new n.service(null,n.table);return Promise.resolve(t.loadById(e.params.id)).then(function(e){var t=new pe(!0,e),n=200;null==e&&(n=404,t=new pe(!1,null,"Element not found",0)),r.status(n).json(t.toJson())})},function(e){console.error(e);var t="";"22P02"==e.code&&(t="Expected uiid");var n=new pe(!1,null,t,0);r.status(400).json(n.toJson())});return Promise.resolve(o&&o.then?o.then(function(){}):void 0)}catch(e){return Promise.reject(e)}},r.saveEntidad=function(e,r,t){try{var n=this,o=Zt(function(){var t=new n.service(null,n.table);return Promise.resolve(t.save(e.body)).then(function(t){var n=new pe(!0,t&&t[0]||{id:e.body.id});r.setHeader("Location","/entity/"+n.data.id),r.status(201).json(n.toJson())})},function(e){t(e)});return Promise.resolve(o&&o.then?o.then(function(){}):void 0)}catch(e){return Promise.reject(e)}},r.updateEntidad=function(e,r,t){try{var n=this,o=Zt(function(){var t=new n.service(null,n.table);return Promise.resolve(t.update(e.params.id,e.body)).then(function(t){var n=new pe(!0,t&&t[0]||{id:e.body.id});r.json(n.toJson())})},function(e){t(e)});return Promise.resolve(o&&o.then?o.then(function(){}):void 0)}catch(e){return Promise.reject(e)}},r.deleteEntidad=function(e,r,t){try{var n=this,o=Zt(function(){var t=new n.service(null,n.table);return Promise.resolve(t.delete(e.params.id)).then(function(e){var t=new pe(!0,e);r.status(204).json(t.toJson())})},function(e){if(console.error(e),"NotFound"==e){var n=new pe(!1,null,"Element not found",0);r.status(404).json(n.toJson())}else t(e)});return Promise.resolve(o&&o.then?o.then(function(){}):void 0)}catch(e){return Promise.reject(e)}},e}(),Qt=/*#__PURE__*/function(){function e(e,r){this.dao=e?new e:new Wt,r&&(this.dao.tableName=r)}var r=e.prototype;return r.list=function(e,r,t){try{var n=this,o=r||0,i=t||1e3,s={};return Promise.resolve(n.dao.countFilteredData(e,o,i)).then(function(a){var u;function c(e){return u?e:Promise.resolve(n.dao.loadAllData(r,t)).then(function(e){return s.data=e,s})}s.total=a;var l=function(){if(e&&0!==Object.keys(e).length)return Promise.resolve(n.dao.loadFilteredData(e,o,i)).then(function(e){return s.data=e,u=1,s})}();return l&&l.then?l.then(c):c(l)})}catch(e){return Promise.reject(e)}},r.loadById=function(e){return this.dao.loadById(e)},r.save=function(e){return this.dao.save(e)},r.update=function(e,r){if(e)return this.dao.update(e,r)},r.delete=function(e){if(e)return this.dao.delete(e)},e}();function en(e,r,t){if(!e.s){if(t instanceof rn){if(!t.s)return void(t.o=en.bind(null,e,r));1&r&&(r=t.s),t=t.v}if(t&&t.then)return void t.then(en.bind(null,e,r),en.bind(null,e,2));e.s=r,e.v=t;var n=e.o;n&&n(e)}}const rn=/*#__PURE__*/function(){function e(){}return e.prototype.then=function(r,t){const n=new e,o=this.s;if(o){const e=1&o?r:t;if(e){try{en(n,1,e(this.v))}catch(e){en(n,2,e)}return n}return this}return this.o=function(e){try{const o=e.v;1&e.s?en(n,1,r?r(o):o):t?en(n,1,t(o)):en(n,2,o)}catch(e){en(n,2,e)}},n},e}();function tn(e){return e instanceof rn&&1&e.s}var nn=new(/*#__PURE__*/function(){function e(){this.serverClass=Dt,this.clusterClass=qt}var r=e.prototype;return r.runtime=function(e){return function(e){try{var r,t,n,o,i,s,a,u=oe.default(T.hideBin(process.argv)).usage("Como usar: \n            node $0 [options] \n            \n            ** Si no se especifican parámetros el servidor arrancará normalmente. **").alias("g","generateKeys").describe("g","Genera unas claves para la aplicación").alias("c","encrypt").describe("c","Codifica el String proporcionado en base a la contraseña de .env").nargs("c",1).help("h").alias("h","help"),c=[];if(e)for(t=ce(e);!(n=t()).done;)u.alias((o=n.value).key,o.alias),o.describe&&u.describe(o.key,o.describe),0!==o.nargs&&u.nargs(o.key,o.nargs),o.boolean&&u.boolean(o.key),o.choices&&u.choices(o.key,o.choices),o.required&&c.push(o.key);0!==c.length&&u.demandOption(c);var l=u.argv;return l.generateKeys?(console.log("Generando claves para encriptación:"),console.log(le.generateKeys()),Promise.resolve(process.exit(1))):l.encrypt?(console.log("Resultado encryptación:"),console.log(le.encrypt(l.encrypt)),Promise.resolve(process.exit(1))):Promise.resolve(function(){if(e)return i=ce(e),function(e,r,t){for(var n;;){var o=e();if(tn(o)&&(o=o.v),!o)return i;if(o.then){n=0;break}var i=t();if(i&&i.then){if(!tn(i)){n=1;break}i=i.s}}var s=new rn,a=en.bind(null,s,2);return(0===n?o.then(c):1===n?i.then(u):(void 0).then(function(){(o=e())?o.then?o.then(c).then(void 0,a):c(o):en(s,1,i)})).then(void 0,a),s;function u(r){i=r;do{if(!(o=e())||tn(o)&&!o.v)return void en(s,1,i);if(o.then)return void o.then(c).then(void 0,a);tn(i=t())&&(i=i.v)}while(!i||!i.then);i.then(u).then(void 0,a)}function c(e){e?(i=t())&&i.then?i.then(u).then(void 0,a):u(i):en(s,1,i)}}(function(){return!r&&!(s=i()).done},0,function(){return a=s.value,function(){if(l[a.key])return Promise.resolve(a.fn(l)).then(function(){var e=process.exit(1);return r=1,e})}()})}())}catch(e){return Promise.reject(e)}}(e)},r.init=function(e){try{var r=function(){var r=new t.serverClass(e,t.statics,t.routes);return t.customizeExpress&&(r.customizeExpress=t.customizeExpress),t.beforeListen&&(r.beforeListen=t.beforeListen),t.afterListen&&(r.afterListen=t.afterListen),t.events=new Ct(t),t.i18n=new fe(null==e?void 0:e.disableI18nWatcher),Promise.resolve(t.i18n.load()).then(function(){t.server=new t.clusterClass(t),t.server.setServerCls(r),t.server.executeOnlyMain=function(){t.executeOnlyMain&&t.executeOnlyMain(),"true"==process.env.REPL_ENABLED&&t.startRepl()}})},t=this,n=function(){if("true"!=process.env.DISABLE_LOGGER)return Promise.resolve($t.configure()).then(function(){})}();return Promise.resolve(n&&n.then?n.then(r):r())}catch(e){return Promise.reject(e)}},r.start=function(){try{if(!this.server)throw new Error("Call init first");return Promise.resolve(this.server.start()).then(function(){})}catch(e){return Promise.reject(e)}},r.startRepl=function(){var e=this;try{te.default.createServer(function(r){var t=ne.default.start({prompt:"lisco::remote> ",input:r,output:r,terminal:!0,useColors:!0,preview:!1});t.context.app=e,t.context.Utils=le,t.context.db=Mt.connection,t.on("exit",r.end.bind(r))}).listen(process.env.REPL_PORT||5001)}catch(e){console.log("Remote REPL Conn: "+e)}console.log("Remote REPL started on port "+(process.env.REPL_PORT||5001))},e}());exports.App=nn,exports.AuthController=Jt,exports.BaseController=Xt,exports.BaseKnexDao=Wt,exports.BaseService=Qt,exports.ClusterServer=qt,exports.CookieAuthHandler=Gt,exports.EventHandler=Ct,exports.I18nLoader=fe,exports.IAuthHandler=Vt,exports.IUserDao=Yt,exports.JsonResponse=pe,exports.JwtAuthHandler=Kt,exports.KnexConnector=Mt,exports.KnexFilterParser=zt,exports.Logger=$t,exports.Server=Dt,exports.TokenGenerator=Lt,exports.Utils=le;
+var helmet = require('helmet');
+var express = require('express');
+var compression = require('compression');
+var cors = require('cors');
+var fileUpload = require('express-fileupload');
+var url = require('url');
+var lodash = require('lodash');
+var fs = require('fs');
+var util = require('util');
+var crypto = require('crypto');
+var chokidar = require('chokidar');
+var buffer = require('buffer');
+var Stream = require('stream');
+var uuid = require('uuid');
+var http = require('http');
+var https = require('https');
+var path = require('path');
+var cluster = require('cluster');
+var socket_io = require('socket.io');
+var os = require('os');
+var events = require('events');
+var ClusterMessages = require('cluster-messages');
+var log4js = require('log4js');
+var pathToRegexp = require('path-to-regexp');
+var moment = require('moment');
+var fqlParser = require('@landra_sistemas/fql-parser');
+var Knex = require('knex');
+var net = require('net');
+var repl = require('repl');
+var yargs = require('yargs/yargs');
+var helpers = require('yargs/helpers');
+
+function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
+
+function _interopNamespace(e) {
+    if (e && e.__esModule) return e;
+    var n = Object.create(null);
+    if (e) {
+        Object.keys(e).forEach(function (k) {
+            if (k !== 'default') {
+                var d = Object.getOwnPropertyDescriptor(e, k);
+                Object.defineProperty(n, k, d.get ? d : {
+                    enumerable: true,
+                    get: function () { return e[k]; }
+                });
+            }
+        });
+    }
+    n["default"] = e;
+    return n;
+}
+
+var helmet__default = /*#__PURE__*/_interopDefaultLegacy(helmet);
+var express__default = /*#__PURE__*/_interopDefaultLegacy(express);
+var compression__default = /*#__PURE__*/_interopDefaultLegacy(compression);
+var cors__default = /*#__PURE__*/_interopDefaultLegacy(cors);
+var fileUpload__default = /*#__PURE__*/_interopDefaultLegacy(fileUpload);
+var url__default = /*#__PURE__*/_interopDefaultLegacy(url);
+var lodash__default = /*#__PURE__*/_interopDefaultLegacy(lodash);
+var fs__default = /*#__PURE__*/_interopDefaultLegacy(fs);
+var util__default = /*#__PURE__*/_interopDefaultLegacy(util);
+var crypto__default = /*#__PURE__*/_interopDefaultLegacy(crypto);
+var chokidar__default = /*#__PURE__*/_interopDefaultLegacy(chokidar);
+var buffer__default = /*#__PURE__*/_interopDefaultLegacy(buffer);
+var Stream__default = /*#__PURE__*/_interopDefaultLegacy(Stream);
+var uuid__namespace = /*#__PURE__*/_interopNamespace(uuid);
+var http__default = /*#__PURE__*/_interopDefaultLegacy(http);
+var https__default = /*#__PURE__*/_interopDefaultLegacy(https);
+var path__default = /*#__PURE__*/_interopDefaultLegacy(path);
+var cluster__default = /*#__PURE__*/_interopDefaultLegacy(cluster);
+var os__default = /*#__PURE__*/_interopDefaultLegacy(os);
+var ClusterMessages__default = /*#__PURE__*/_interopDefaultLegacy(ClusterMessages);
+var log4js__default = /*#__PURE__*/_interopDefaultLegacy(log4js);
+var moment__default = /*#__PURE__*/_interopDefaultLegacy(moment);
+var Knex__default = /*#__PURE__*/_interopDefaultLegacy(Knex);
+var net__default = /*#__PURE__*/_interopDefaultLegacy(net);
+var repl__default = /*#__PURE__*/_interopDefaultLegacy(repl);
+var yargs__default = /*#__PURE__*/_interopDefaultLegacy(yargs);
+
+class Utils {
+  static arrayToLower(mcArray) {
+    let tmp = mcArray.join('~').toLowerCase();
+    return tmp.split('~');
+  }
+  static replaceAll(str, find, replace) {
+    return str.replace(new RegExp(find.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&'), 'g'), replace);
+  }
+
+  /**
+   * Metodo de encript para las contraseñas y demas.
+   * 
+   * @param {*} text 
+   */
+  static encrypt(text) {
+    const algorithm = 'aes-256-cbc';
+    const secret = Buffer.from(process.env.CRYPT_SECRET, 'hex');
+    const iv = Buffer.from(process.env.CRYPT_IV, 'hex');
+    const cipher = crypto__default["default"].createCipheriv(algorithm, secret, iv);
+    let encrypted = cipher.update(text);
+    encrypted = Buffer.concat([encrypted, cipher.final()]);
+    return encrypted.toString('hex');
+  }
+
+  /**
+   * Metodo de decrypt para las contraseñas y demas
+   * @param {*} text 
+   */
+  static decrypt(text) {
+    const algorithm = 'aes-256-cbc';
+    const secret = Buffer.from(process.env.CRYPT_SECRET, 'hex');
+    const iv = Buffer.from(process.env.CRYPT_IV, 'hex');
+    const encryptedText = Buffer.from(text, 'hex');
+    const decipher = crypto__default["default"].createDecipheriv(algorithm, secret, iv);
+    let decrypted = decipher.update(encryptedText);
+    decrypted = Buffer.concat([decrypted, decipher.final()]);
+    return decrypted.toString();
+  }
+
+  /**
+   * 
+   * Utiliza una promise para ejecutar un setTimeout y hacer un falso sleep.
+   * 
+   * @param {*} ms 
+   */
+  static sleep(ms) {
+    let promise_sleep = util__default["default"].promisify(setTimeout);
+    return promise_sleep(ms);
+  }
+
+  /**
+   * Genera dos claves para los metodos crypt y decrypt
+   */
+  static generateKeys() {
+    return {
+      key: crypto__default["default"].randomBytes(32).toString('hex'),
+      iv: crypto__default["default"].randomBytes(16).toString('hex')
+    };
+  }
+
+  /**
+   * "aplana" un objeto jerarquico en una estructura clave-valor.
+   * 
+   * @param {*} ob 
+   * @returns 
+   */
+  static flattenObject(ob) {
+    let toReturn = {};
+    let flatObject;
+    for (let i in ob) {
+      if (!ob.hasOwnProperty(i)) {
+        continue;
+      }
+      //Devolver los arrays tal cual
+      if (ob[i] && Array === ob[i].constructor) {
+        toReturn[i] = ob[i];
+        continue;
+      }
+      if (typeof ob[i] === 'object') {
+        flatObject = Utils.flattenObject(ob[i]);
+        for (let x in flatObject) {
+          if (!flatObject.hasOwnProperty(x)) {
+            continue;
+          }
+          //Exclude arrays from the final result
+          if (flatObject[x] && Array === flatObject.constructor) {
+            continue;
+          }
+          toReturn[i + (!!isNaN(x) ? '.' + x : '')] = flatObject[x];
+        }
+      } else {
+        toReturn[i] = ob[i];
+      }
+    }
+    return toReturn;
+  }
+
+  /**
+   * Invierte un objeto aplanado recuperando su forma original
+   * 
+   * @param {*} data 
+   * @returns 
+   */
+  static unflatten(data) {
+    var result = {};
+    for (var i in data) {
+      var keys = i.split('.');
+      keys.reduce(function (r, e, j) {
+        return r[e] || (r[e] = isNaN(Number(keys[j + 1])) ? keys.length - 1 == j ? data[i] : {} : []);
+      }, result);
+    }
+    return result;
+  }
+
+  /**
+   * 
+   * @returns 
+   */
+  static expressHandler() {
+    return fn => {
+      return function asyncUtilWrap(...args) {
+        const fnReturn = fn(...args);
+        const next = args[args.length - 1];
+        return Promise.resolve(fnReturn).catch(e => {
+          return next(e);
+        });
+      };
+    };
+  }
+}
+
+class I18nLoader {
+  constructor(disableWatchers) {
+    this.watcher = {};
+    this.disableWatchers = disableWatchers;
+  }
+
+  /**
+   *
+   * @param lang
+   * @param callback
+   */
+  async load(custom) {
+    const lang = custom || process.env.DEFAULT_LANG;
+    if (!this.currentData) {
+      this.currentData = {};
+    }
+    if (!this.currentDataFlat) {
+      this.currentDataFlat = {};
+    }
+    const file = process.cwd() + "/i18n/lang_" + lang + ".json";
+    if (!this.disableWatchers) {
+      // Initialize watcher.
+      this.watcher[lang] = chokidar__default["default"].watch(file, {
+        ignored: /(^|[/\\])\../,
+        // ignore dotfiles
+        persistent: true
+      });
+      //Add change watcher
+      this.watcher[lang].on("change", path => this.loadFile(path, lang));
+    }
+
+    //Initialize file load
+    await this.loadFile(file, lang);
+  }
+
+  /**
+   * Carga el archivo de traducciones.
+   *
+   * @param {*} file
+   * @param {*} lang
+   */
+  async loadFile(file, lang) {
+    const readfile = util__default["default"].promisify(fs__default["default"].readFile);
+    try {
+      const data = await readfile(file, "utf8");
+      var parsedData = JSON.parse(data);
+      this.currentDataFlat[lang] = Utils.flattenObject(parsedData);
+      this.currentData[lang] = parsedData;
+    } catch (ex) {
+      if ((ex == null ? void 0 : ex.code) === "ENOENT") {
+        return console.log("Lang file does not exist. Create it on ./i18n/lang_{xx}.json");
+      }
+      console.error(ex);
+    }
+  }
+
+  /**
+   *
+   * @param {*} key
+   */
+  async translate(key, lang) {
+    if (!lang) lang = process.env.DEFAULT_LANG;
+    if (this.currentDataFlat && this.currentDataFlat[lang] && this.currentDataFlat[lang][key]) {
+      return this.currentData[lang][key];
+    }
+    if (!this.currentDataFlat || !this.currentDataFlat[lang]) {
+      await this.load(lang);
+      if (this.currentDataFlat && this.currentDataFlat[lang] && this.currentDataFlat[key]) {
+        return this.currentDataFlat[lang][key];
+      }
+    }
+    return "undefined." + key;
+  }
+}
+
+class JsonResponse {
+  constructor(success, data, message, total) {
+    this.data = data;
+    this.success = success;
+    this.total = total;
+    this.message = message || '';
+  }
+  toJson() {
+    return this;
+  }
+}
+
+function createCommonjsModule(fn) {
+  var module = { exports: {} };
+	return fn(module, module.exports), module.exports;
+}
+
+/* eslint-disable node/no-deprecated-api */
+
+var safeBuffer = createCommonjsModule(function (module, exports) {
+var Buffer = buffer__default["default"].Buffer;
+
+// alternative to using Object.keys for old browsers
+function copyProps (src, dst) {
+  for (var key in src) {
+    dst[key] = src[key];
+  }
+}
+if (Buffer.from && Buffer.alloc && Buffer.allocUnsafe && Buffer.allocUnsafeSlow) {
+  module.exports = buffer__default["default"];
+} else {
+  // Copy properties from require('buffer')
+  copyProps(buffer__default["default"], exports);
+  exports.Buffer = SafeBuffer;
+}
+
+function SafeBuffer (arg, encodingOrOffset, length) {
+  return Buffer(arg, encodingOrOffset, length)
+}
+
+// Copy static methods from Buffer
+copyProps(Buffer, SafeBuffer);
+
+SafeBuffer.from = function (arg, encodingOrOffset, length) {
+  if (typeof arg === 'number') {
+    throw new TypeError('Argument must not be a number')
+  }
+  return Buffer(arg, encodingOrOffset, length)
+};
+
+SafeBuffer.alloc = function (size, fill, encoding) {
+  if (typeof size !== 'number') {
+    throw new TypeError('Argument must be a number')
+  }
+  var buf = Buffer(size);
+  if (fill !== undefined) {
+    if (typeof encoding === 'string') {
+      buf.fill(fill, encoding);
+    } else {
+      buf.fill(fill);
+    }
+  } else {
+    buf.fill(0);
+  }
+  return buf
+};
+
+SafeBuffer.allocUnsafe = function (size) {
+  if (typeof size !== 'number') {
+    throw new TypeError('Argument must be a number')
+  }
+  return Buffer(size)
+};
+
+SafeBuffer.allocUnsafeSlow = function (size) {
+  if (typeof size !== 'number') {
+    throw new TypeError('Argument must be a number')
+  }
+  return buffer__default["default"].SlowBuffer(size)
+};
+});
+
+/*global module, process*/
+
+var Buffer$7 = safeBuffer.Buffer;
+
+
+
+function DataStream(data) {
+  this.buffer = null;
+  this.writable = true;
+  this.readable = true;
+
+  // No input
+  if (!data) {
+    this.buffer = Buffer$7.alloc(0);
+    return this;
+  }
+
+  // Stream
+  if (typeof data.pipe === 'function') {
+    this.buffer = Buffer$7.alloc(0);
+    data.pipe(this);
+    return this;
+  }
+
+  // Buffer or String
+  // or Object (assumedly a passworded key)
+  if (data.length || typeof data === 'object') {
+    this.buffer = data;
+    this.writable = false;
+    process.nextTick(function () {
+      this.emit('end', data);
+      this.readable = false;
+      this.emit('close');
+    }.bind(this));
+    return this;
+  }
+
+  throw new TypeError('Unexpected data type ('+ typeof data + ')');
+}
+util__default["default"].inherits(DataStream, Stream__default["default"]);
+
+DataStream.prototype.write = function write(data) {
+  this.buffer = Buffer$7.concat([this.buffer, Buffer$7.from(data)]);
+  this.emit('data', data);
+};
+
+DataStream.prototype.end = function end(data) {
+  if (data)
+    this.write(data);
+  this.emit('end', data);
+  this.emit('close');
+  this.writable = false;
+  this.readable = false;
+};
+
+var dataStream = DataStream;
+
+/*jshint node:true */
+var Buffer$6 = buffer__default["default"].Buffer; // browserify
+var SlowBuffer = buffer__default["default"].SlowBuffer;
+
+var bufferEqualConstantTime = bufferEq;
+
+function bufferEq(a, b) {
+
+  // shortcutting on type is necessary for correctness
+  if (!Buffer$6.isBuffer(a) || !Buffer$6.isBuffer(b)) {
+    return false;
+  }
+
+  // buffer sizes should be well-known information, so despite this
+  // shortcutting, it doesn't leak any information about the *contents* of the
+  // buffers.
+  if (a.length !== b.length) {
+    return false;
+  }
+
+  var c = 0;
+  for (var i = 0; i < a.length; i++) {
+    /*jshint bitwise:false */
+    c |= a[i] ^ b[i]; // XOR
+  }
+  return c === 0;
+}
+
+bufferEq.install = function() {
+  Buffer$6.prototype.equal = SlowBuffer.prototype.equal = function equal(that) {
+    return bufferEq(this, that);
+  };
+};
+
+var origBufEqual = Buffer$6.prototype.equal;
+var origSlowBufEqual = SlowBuffer.prototype.equal;
+bufferEq.restore = function() {
+  Buffer$6.prototype.equal = origBufEqual;
+  SlowBuffer.prototype.equal = origSlowBufEqual;
+};
+
+function getParamSize(keySize) {
+	var result = ((keySize / 8) | 0) + (keySize % 8 === 0 ? 0 : 1);
+	return result;
+}
+
+var paramBytesForAlg = {
+	ES256: getParamSize(256),
+	ES384: getParamSize(384),
+	ES512: getParamSize(521)
+};
+
+function getParamBytesForAlg(alg) {
+	var paramBytes = paramBytesForAlg[alg];
+	if (paramBytes) {
+		return paramBytes;
+	}
+
+	throw new Error('Unknown algorithm "' + alg + '"');
+}
+
+var paramBytesForAlg_1 = getParamBytesForAlg;
+
+var Buffer$5 = safeBuffer.Buffer;
+
+
+
+var MAX_OCTET = 0x80,
+	CLASS_UNIVERSAL = 0,
+	PRIMITIVE_BIT = 0x20,
+	TAG_SEQ = 0x10,
+	TAG_INT = 0x02,
+	ENCODED_TAG_SEQ = (TAG_SEQ | PRIMITIVE_BIT) | (CLASS_UNIVERSAL << 6),
+	ENCODED_TAG_INT = TAG_INT | (CLASS_UNIVERSAL << 6);
+
+function base64Url(base64) {
+	return base64
+		.replace(/=/g, '')
+		.replace(/\+/g, '-')
+		.replace(/\//g, '_');
+}
+
+function signatureAsBuffer(signature) {
+	if (Buffer$5.isBuffer(signature)) {
+		return signature;
+	} else if ('string' === typeof signature) {
+		return Buffer$5.from(signature, 'base64');
+	}
+
+	throw new TypeError('ECDSA signature must be a Base64 string or a Buffer');
+}
+
+function derToJose(signature, alg) {
+	signature = signatureAsBuffer(signature);
+	var paramBytes = paramBytesForAlg_1(alg);
+
+	// the DER encoded param should at most be the param size, plus a padding
+	// zero, since due to being a signed integer
+	var maxEncodedParamLength = paramBytes + 1;
+
+	var inputLength = signature.length;
+
+	var offset = 0;
+	if (signature[offset++] !== ENCODED_TAG_SEQ) {
+		throw new Error('Could not find expected "seq"');
+	}
+
+	var seqLength = signature[offset++];
+	if (seqLength === (MAX_OCTET | 1)) {
+		seqLength = signature[offset++];
+	}
+
+	if (inputLength - offset < seqLength) {
+		throw new Error('"seq" specified length of "' + seqLength + '", only "' + (inputLength - offset) + '" remaining');
+	}
+
+	if (signature[offset++] !== ENCODED_TAG_INT) {
+		throw new Error('Could not find expected "int" for "r"');
+	}
+
+	var rLength = signature[offset++];
+
+	if (inputLength - offset - 2 < rLength) {
+		throw new Error('"r" specified length of "' + rLength + '", only "' + (inputLength - offset - 2) + '" available');
+	}
+
+	if (maxEncodedParamLength < rLength) {
+		throw new Error('"r" specified length of "' + rLength + '", max of "' + maxEncodedParamLength + '" is acceptable');
+	}
+
+	var rOffset = offset;
+	offset += rLength;
+
+	if (signature[offset++] !== ENCODED_TAG_INT) {
+		throw new Error('Could not find expected "int" for "s"');
+	}
+
+	var sLength = signature[offset++];
+
+	if (inputLength - offset !== sLength) {
+		throw new Error('"s" specified length of "' + sLength + '", expected "' + (inputLength - offset) + '"');
+	}
+
+	if (maxEncodedParamLength < sLength) {
+		throw new Error('"s" specified length of "' + sLength + '", max of "' + maxEncodedParamLength + '" is acceptable');
+	}
+
+	var sOffset = offset;
+	offset += sLength;
+
+	if (offset !== inputLength) {
+		throw new Error('Expected to consume entire buffer, but "' + (inputLength - offset) + '" bytes remain');
+	}
+
+	var rPadding = paramBytes - rLength,
+		sPadding = paramBytes - sLength;
+
+	var dst = Buffer$5.allocUnsafe(rPadding + rLength + sPadding + sLength);
+
+	for (offset = 0; offset < rPadding; ++offset) {
+		dst[offset] = 0;
+	}
+	signature.copy(dst, offset, rOffset + Math.max(-rPadding, 0), rOffset + rLength);
+
+	offset = paramBytes;
+
+	for (var o = offset; offset < o + sPadding; ++offset) {
+		dst[offset] = 0;
+	}
+	signature.copy(dst, offset, sOffset + Math.max(-sPadding, 0), sOffset + sLength);
+
+	dst = dst.toString('base64');
+	dst = base64Url(dst);
+
+	return dst;
+}
+
+function countPadding(buf, start, stop) {
+	var padding = 0;
+	while (start + padding < stop && buf[start + padding] === 0) {
+		++padding;
+	}
+
+	var needsSign = buf[start + padding] >= MAX_OCTET;
+	if (needsSign) {
+		--padding;
+	}
+
+	return padding;
+}
+
+function joseToDer(signature, alg) {
+	signature = signatureAsBuffer(signature);
+	var paramBytes = paramBytesForAlg_1(alg);
+
+	var signatureBytes = signature.length;
+	if (signatureBytes !== paramBytes * 2) {
+		throw new TypeError('"' + alg + '" signatures must be "' + paramBytes * 2 + '" bytes, saw "' + signatureBytes + '"');
+	}
+
+	var rPadding = countPadding(signature, 0, paramBytes);
+	var sPadding = countPadding(signature, paramBytes, signature.length);
+	var rLength = paramBytes - rPadding;
+	var sLength = paramBytes - sPadding;
+
+	var rsBytes = 1 + 1 + rLength + 1 + 1 + sLength;
+
+	var shortLength = rsBytes < MAX_OCTET;
+
+	var dst = Buffer$5.allocUnsafe((shortLength ? 2 : 3) + rsBytes);
+
+	var offset = 0;
+	dst[offset++] = ENCODED_TAG_SEQ;
+	if (shortLength) {
+		// Bit 8 has value "0"
+		// bits 7-1 give the length.
+		dst[offset++] = rsBytes;
+	} else {
+		// Bit 8 of first octet has value "1"
+		// bits 7-1 give the number of additional length octets.
+		dst[offset++] = MAX_OCTET	| 1;
+		// length, base 256
+		dst[offset++] = rsBytes & 0xff;
+	}
+	dst[offset++] = ENCODED_TAG_INT;
+	dst[offset++] = rLength;
+	if (rPadding < 0) {
+		dst[offset++] = 0;
+		offset += signature.copy(dst, offset, 0, paramBytes);
+	} else {
+		offset += signature.copy(dst, offset, rPadding, paramBytes);
+	}
+	dst[offset++] = ENCODED_TAG_INT;
+	dst[offset++] = sLength;
+	if (sPadding < 0) {
+		dst[offset++] = 0;
+		signature.copy(dst, offset, paramBytes);
+	} else {
+		signature.copy(dst, offset, paramBytes + sPadding);
+	}
+
+	return dst;
+}
+
+var ecdsaSigFormatter = {
+	derToJose: derToJose,
+	joseToDer: joseToDer
+};
+
+var Buffer$4 = safeBuffer.Buffer;
+
+
+
+
+var MSG_INVALID_ALGORITHM = '"%s" is not a valid algorithm.\n  Supported algorithms are:\n  "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "PS256", "PS384", "PS512", "ES256", "ES384", "ES512" and "none".';
+var MSG_INVALID_SECRET = 'secret must be a string or buffer';
+var MSG_INVALID_VERIFIER_KEY = 'key must be a string or a buffer';
+var MSG_INVALID_SIGNER_KEY = 'key must be a string, a buffer or an object';
+
+var supportsKeyObjects = typeof crypto__default["default"].createPublicKey === 'function';
+if (supportsKeyObjects) {
+  MSG_INVALID_VERIFIER_KEY += ' or a KeyObject';
+  MSG_INVALID_SECRET += 'or a KeyObject';
+}
+
+function checkIsPublicKey(key) {
+  if (Buffer$4.isBuffer(key)) {
+    return;
+  }
+
+  if (typeof key === 'string') {
+    return;
+  }
+
+  if (!supportsKeyObjects) {
+    throw typeError(MSG_INVALID_VERIFIER_KEY);
+  }
+
+  if (typeof key !== 'object') {
+    throw typeError(MSG_INVALID_VERIFIER_KEY);
+  }
+
+  if (typeof key.type !== 'string') {
+    throw typeError(MSG_INVALID_VERIFIER_KEY);
+  }
+
+  if (typeof key.asymmetricKeyType !== 'string') {
+    throw typeError(MSG_INVALID_VERIFIER_KEY);
+  }
+
+  if (typeof key.export !== 'function') {
+    throw typeError(MSG_INVALID_VERIFIER_KEY);
+  }
+}
+function checkIsPrivateKey(key) {
+  if (Buffer$4.isBuffer(key)) {
+    return;
+  }
+
+  if (typeof key === 'string') {
+    return;
+  }
+
+  if (typeof key === 'object') {
+    return;
+  }
+
+  throw typeError(MSG_INVALID_SIGNER_KEY);
+}
+function checkIsSecretKey(key) {
+  if (Buffer$4.isBuffer(key)) {
+    return;
+  }
+
+  if (typeof key === 'string') {
+    return key;
+  }
+
+  if (!supportsKeyObjects) {
+    throw typeError(MSG_INVALID_SECRET);
+  }
+
+  if (typeof key !== 'object') {
+    throw typeError(MSG_INVALID_SECRET);
+  }
+
+  if (key.type !== 'secret') {
+    throw typeError(MSG_INVALID_SECRET);
+  }
+
+  if (typeof key.export !== 'function') {
+    throw typeError(MSG_INVALID_SECRET);
+  }
+}
+
+function fromBase64(base64) {
+  return base64
+    .replace(/=/g, '')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_');
+}
+
+function toBase64(base64url) {
+  base64url = base64url.toString();
+
+  var padding = 4 - base64url.length % 4;
+  if (padding !== 4) {
+    for (var i = 0; i < padding; ++i) {
+      base64url += '=';
+    }
+  }
+
+  return base64url
+    .replace(/\-/g, '+')
+    .replace(/_/g, '/');
+}
+
+function typeError(template) {
+  var args = [].slice.call(arguments, 1);
+  var errMsg = util__default["default"].format.bind(util__default["default"], template).apply(null, args);
+  return new TypeError(errMsg);
+}
+
+function bufferOrString(obj) {
+  return Buffer$4.isBuffer(obj) || typeof obj === 'string';
+}
+
+function normalizeInput(thing) {
+  if (!bufferOrString(thing))
+    thing = JSON.stringify(thing);
+  return thing;
+}
+
+function createHmacSigner(bits) {
+  return function sign(thing, secret) {
+    checkIsSecretKey(secret);
+    thing = normalizeInput(thing);
+    var hmac = crypto__default["default"].createHmac('sha' + bits, secret);
+    var sig = (hmac.update(thing), hmac.digest('base64'));
+    return fromBase64(sig);
+  }
+}
+
+function createHmacVerifier(bits) {
+  return function verify(thing, signature, secret) {
+    var computedSig = createHmacSigner(bits)(thing, secret);
+    return bufferEqualConstantTime(Buffer$4.from(signature), Buffer$4.from(computedSig));
+  }
+}
+
+function createKeySigner(bits) {
+ return function sign(thing, privateKey) {
+    checkIsPrivateKey(privateKey);
+    thing = normalizeInput(thing);
+    // Even though we are specifying "RSA" here, this works with ECDSA
+    // keys as well.
+    var signer = crypto__default["default"].createSign('RSA-SHA' + bits);
+    var sig = (signer.update(thing), signer.sign(privateKey, 'base64'));
+    return fromBase64(sig);
+  }
+}
+
+function createKeyVerifier(bits) {
+  return function verify(thing, signature, publicKey) {
+    checkIsPublicKey(publicKey);
+    thing = normalizeInput(thing);
+    signature = toBase64(signature);
+    var verifier = crypto__default["default"].createVerify('RSA-SHA' + bits);
+    verifier.update(thing);
+    return verifier.verify(publicKey, signature, 'base64');
+  }
+}
+
+function createPSSKeySigner(bits) {
+  return function sign(thing, privateKey) {
+    checkIsPrivateKey(privateKey);
+    thing = normalizeInput(thing);
+    var signer = crypto__default["default"].createSign('RSA-SHA' + bits);
+    var sig = (signer.update(thing), signer.sign({
+      key: privateKey,
+      padding: crypto__default["default"].constants.RSA_PKCS1_PSS_PADDING,
+      saltLength: crypto__default["default"].constants.RSA_PSS_SALTLEN_DIGEST
+    }, 'base64'));
+    return fromBase64(sig);
+  }
+}
+
+function createPSSKeyVerifier(bits) {
+  return function verify(thing, signature, publicKey) {
+    checkIsPublicKey(publicKey);
+    thing = normalizeInput(thing);
+    signature = toBase64(signature);
+    var verifier = crypto__default["default"].createVerify('RSA-SHA' + bits);
+    verifier.update(thing);
+    return verifier.verify({
+      key: publicKey,
+      padding: crypto__default["default"].constants.RSA_PKCS1_PSS_PADDING,
+      saltLength: crypto__default["default"].constants.RSA_PSS_SALTLEN_DIGEST
+    }, signature, 'base64');
+  }
+}
+
+function createECDSASigner(bits) {
+  var inner = createKeySigner(bits);
+  return function sign() {
+    var signature = inner.apply(null, arguments);
+    signature = ecdsaSigFormatter.derToJose(signature, 'ES' + bits);
+    return signature;
+  };
+}
+
+function createECDSAVerifer(bits) {
+  var inner = createKeyVerifier(bits);
+  return function verify(thing, signature, publicKey) {
+    signature = ecdsaSigFormatter.joseToDer(signature, 'ES' + bits).toString('base64');
+    var result = inner(thing, signature, publicKey);
+    return result;
+  };
+}
+
+function createNoneSigner() {
+  return function sign() {
+    return '';
+  }
+}
+
+function createNoneVerifier() {
+  return function verify(thing, signature) {
+    return signature === '';
+  }
+}
+
+var jwa = function jwa(algorithm) {
+  var signerFactories = {
+    hs: createHmacSigner,
+    rs: createKeySigner,
+    ps: createPSSKeySigner,
+    es: createECDSASigner,
+    none: createNoneSigner,
+  };
+  var verifierFactories = {
+    hs: createHmacVerifier,
+    rs: createKeyVerifier,
+    ps: createPSSKeyVerifier,
+    es: createECDSAVerifer,
+    none: createNoneVerifier,
+  };
+  var match = algorithm.match(/^(RS|PS|ES|HS)(256|384|512)$|^(none)$/i);
+  if (!match)
+    throw typeError(MSG_INVALID_ALGORITHM, algorithm);
+  var algo = (match[1] || match[3]).toLowerCase();
+  var bits = match[2];
+
+  return {
+    sign: signerFactories[algo](bits),
+    verify: verifierFactories[algo](bits),
+  }
+};
+
+/*global module*/
+
+var Buffer$3 = buffer__default["default"].Buffer;
+
+var tostring = function toString(obj) {
+  if (typeof obj === 'string')
+    return obj;
+  if (typeof obj === 'number' || Buffer$3.isBuffer(obj))
+    return obj.toString();
+  return JSON.stringify(obj);
+};
+
+/*global module*/
+
+var Buffer$2 = safeBuffer.Buffer;
+
+
+
+
+
+
+function base64url(string, encoding) {
+  return Buffer$2
+    .from(string, encoding)
+    .toString('base64')
+    .replace(/=/g, '')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_');
+}
+
+function jwsSecuredInput(header, payload, encoding) {
+  encoding = encoding || 'utf8';
+  var encodedHeader = base64url(tostring(header), 'binary');
+  var encodedPayload = base64url(tostring(payload), encoding);
+  return util__default["default"].format('%s.%s', encodedHeader, encodedPayload);
+}
+
+function jwsSign(opts) {
+  var header = opts.header;
+  var payload = opts.payload;
+  var secretOrKey = opts.secret || opts.privateKey;
+  var encoding = opts.encoding;
+  var algo = jwa(header.alg);
+  var securedInput = jwsSecuredInput(header, payload, encoding);
+  var signature = algo.sign(securedInput, secretOrKey);
+  return util__default["default"].format('%s.%s', securedInput, signature);
+}
+
+function SignStream(opts) {
+  var secret = opts.secret||opts.privateKey||opts.key;
+  var secretStream = new dataStream(secret);
+  this.readable = true;
+  this.header = opts.header;
+  this.encoding = opts.encoding;
+  this.secret = this.privateKey = this.key = secretStream;
+  this.payload = new dataStream(opts.payload);
+  this.secret.once('close', function () {
+    if (!this.payload.writable && this.readable)
+      this.sign();
+  }.bind(this));
+
+  this.payload.once('close', function () {
+    if (!this.secret.writable && this.readable)
+      this.sign();
+  }.bind(this));
+}
+util__default["default"].inherits(SignStream, Stream__default["default"]);
+
+SignStream.prototype.sign = function sign() {
+  try {
+    var signature = jwsSign({
+      header: this.header,
+      payload: this.payload.buffer,
+      secret: this.secret.buffer,
+      encoding: this.encoding
+    });
+    this.emit('done', signature);
+    this.emit('data', signature);
+    this.emit('end');
+    this.readable = false;
+    return signature;
+  } catch (e) {
+    this.readable = false;
+    this.emit('error', e);
+    this.emit('close');
+  }
+};
+
+SignStream.sign = jwsSign;
+
+var signStream = SignStream;
+
+/*global module*/
+
+var Buffer$1 = safeBuffer.Buffer;
+
+
+
+
+
+var JWS_REGEX = /^[a-zA-Z0-9\-_]+?\.[a-zA-Z0-9\-_]+?\.([a-zA-Z0-9\-_]+)?$/;
+
+function isObject$3(thing) {
+  return Object.prototype.toString.call(thing) === '[object Object]';
+}
+
+function safeJsonParse(thing) {
+  if (isObject$3(thing))
+    return thing;
+  try { return JSON.parse(thing); }
+  catch (e) { return undefined; }
+}
+
+function headerFromJWS(jwsSig) {
+  var encodedHeader = jwsSig.split('.', 1)[0];
+  return safeJsonParse(Buffer$1.from(encodedHeader, 'base64').toString('binary'));
+}
+
+function securedInputFromJWS(jwsSig) {
+  return jwsSig.split('.', 2).join('.');
+}
+
+function signatureFromJWS(jwsSig) {
+  return jwsSig.split('.')[2];
+}
+
+function payloadFromJWS(jwsSig, encoding) {
+  encoding = encoding || 'utf8';
+  var payload = jwsSig.split('.')[1];
+  return Buffer$1.from(payload, 'base64').toString(encoding);
+}
+
+function isValidJws(string) {
+  return JWS_REGEX.test(string) && !!headerFromJWS(string);
+}
+
+function jwsVerify(jwsSig, algorithm, secretOrKey) {
+  if (!algorithm) {
+    var err = new Error("Missing algorithm parameter for jws.verify");
+    err.code = "MISSING_ALGORITHM";
+    throw err;
+  }
+  jwsSig = tostring(jwsSig);
+  var signature = signatureFromJWS(jwsSig);
+  var securedInput = securedInputFromJWS(jwsSig);
+  var algo = jwa(algorithm);
+  return algo.verify(securedInput, signature, secretOrKey);
+}
+
+function jwsDecode(jwsSig, opts) {
+  opts = opts || {};
+  jwsSig = tostring(jwsSig);
+
+  if (!isValidJws(jwsSig))
+    return null;
+
+  var header = headerFromJWS(jwsSig);
+
+  if (!header)
+    return null;
+
+  var payload = payloadFromJWS(jwsSig);
+  if (header.typ === 'JWT' || opts.json)
+    payload = JSON.parse(payload, opts.encoding);
+
+  return {
+    header: header,
+    payload: payload,
+    signature: signatureFromJWS(jwsSig)
+  };
+}
+
+function VerifyStream(opts) {
+  opts = opts || {};
+  var secretOrKey = opts.secret||opts.publicKey||opts.key;
+  var secretStream = new dataStream(secretOrKey);
+  this.readable = true;
+  this.algorithm = opts.algorithm;
+  this.encoding = opts.encoding;
+  this.secret = this.publicKey = this.key = secretStream;
+  this.signature = new dataStream(opts.signature);
+  this.secret.once('close', function () {
+    if (!this.signature.writable && this.readable)
+      this.verify();
+  }.bind(this));
+
+  this.signature.once('close', function () {
+    if (!this.secret.writable && this.readable)
+      this.verify();
+  }.bind(this));
+}
+util__default["default"].inherits(VerifyStream, Stream__default["default"]);
+VerifyStream.prototype.verify = function verify() {
+  try {
+    var valid = jwsVerify(this.signature.buffer, this.algorithm, this.key.buffer);
+    var obj = jwsDecode(this.signature.buffer, this.encoding);
+    this.emit('done', valid, obj);
+    this.emit('data', valid);
+    this.emit('end');
+    this.readable = false;
+    return valid;
+  } catch (e) {
+    this.readable = false;
+    this.emit('error', e);
+    this.emit('close');
+  }
+};
+
+VerifyStream.decode = jwsDecode;
+VerifyStream.isValid = isValidJws;
+VerifyStream.verify = jwsVerify;
+
+var verifyStream = VerifyStream;
+
+/*global exports*/
+
+var ALGORITHMS = [
+  'HS256', 'HS384', 'HS512',
+  'RS256', 'RS384', 'RS512',
+  'PS256', 'PS384', 'PS512',
+  'ES256', 'ES384', 'ES512'
+];
+
+var ALGORITHMS_1 = ALGORITHMS;
+var sign$1 = signStream.sign;
+var verify$1 = verifyStream.verify;
+var decode$1 = verifyStream.decode;
+var isValid = verifyStream.isValid;
+var createSign = function createSign(opts) {
+  return new signStream(opts);
+};
+var createVerify = function createVerify(opts) {
+  return new verifyStream(opts);
+};
+
+var jws = {
+	ALGORITHMS: ALGORITHMS_1,
+	sign: sign$1,
+	verify: verify$1,
+	decode: decode$1,
+	isValid: isValid,
+	createSign: createSign,
+	createVerify: createVerify
+};
+
+var decode = function (jwt, options) {
+  options = options || {};
+  var decoded = jws.decode(jwt, options);
+  if (!decoded) { return null; }
+  var payload = decoded.payload;
+
+  //try parse the payload
+  if(typeof payload === 'string') {
+    try {
+      var obj = JSON.parse(payload);
+      if(obj !== null && typeof obj === 'object') {
+        payload = obj;
+      }
+    } catch (e) { }
+  }
+
+  //return header if `complete` option is enabled.  header includes claims
+  //such as `kid` and `alg` used to select the key within a JWKS needed to
+  //verify the signature
+  if (options.complete === true) {
+    return {
+      header: decoded.header,
+      payload: payload,
+      signature: decoded.signature
+    };
+  }
+  return payload;
+};
+
+var JsonWebTokenError = function (message, error) {
+  Error.call(this, message);
+  if(Error.captureStackTrace) {
+    Error.captureStackTrace(this, this.constructor);
+  }
+  this.name = 'JsonWebTokenError';
+  this.message = message;
+  if (error) this.inner = error;
+};
+
+JsonWebTokenError.prototype = Object.create(Error.prototype);
+JsonWebTokenError.prototype.constructor = JsonWebTokenError;
+
+var JsonWebTokenError_1 = JsonWebTokenError;
+
+var NotBeforeError = function (message, date) {
+  JsonWebTokenError_1.call(this, message);
+  this.name = 'NotBeforeError';
+  this.date = date;
+};
+
+NotBeforeError.prototype = Object.create(JsonWebTokenError_1.prototype);
+
+NotBeforeError.prototype.constructor = NotBeforeError;
+
+var NotBeforeError_1 = NotBeforeError;
+
+var TokenExpiredError = function (message, expiredAt) {
+  JsonWebTokenError_1.call(this, message);
+  this.name = 'TokenExpiredError';
+  this.expiredAt = expiredAt;
+};
+
+TokenExpiredError.prototype = Object.create(JsonWebTokenError_1.prototype);
+
+TokenExpiredError.prototype.constructor = TokenExpiredError;
+
+var TokenExpiredError_1 = TokenExpiredError;
+
+/**
+ * Helpers.
+ */
+var s = 1000;
+var m = s * 60;
+var h = m * 60;
+var d = h * 24;
+var w = d * 7;
+var y = d * 365.25;
+
+/**
+ * Parse or format the given `val`.
+ *
+ * Options:
+ *
+ *  - `long` verbose formatting [false]
+ *
+ * @param {String|Number} val
+ * @param {Object} [options]
+ * @throws {Error} throw an error if val is not a non-empty string or a number
+ * @return {String|Number}
+ * @api public
+ */
+
+var ms = function (val, options) {
+  options = options || {};
+  var type = typeof val;
+  if (type === 'string' && val.length > 0) {
+    return parse(val);
+  } else if (type === 'number' && isFinite(val)) {
+    return options.long ? fmtLong(val) : fmtShort(val);
+  }
+  throw new Error(
+    'val is not a non-empty string or a valid number. val=' +
+      JSON.stringify(val)
+  );
+};
+
+/**
+ * Parse the given `str` and return milliseconds.
+ *
+ * @param {String} str
+ * @return {Number}
+ * @api private
+ */
+
+function parse(str) {
+  str = String(str);
+  if (str.length > 100) {
+    return;
+  }
+  var match = /^(-?(?:\d+)?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|years?|yrs?|y)?$/i.exec(
+    str
+  );
+  if (!match) {
+    return;
+  }
+  var n = parseFloat(match[1]);
+  var type = (match[2] || 'ms').toLowerCase();
+  switch (type) {
+    case 'years':
+    case 'year':
+    case 'yrs':
+    case 'yr':
+    case 'y':
+      return n * y;
+    case 'weeks':
+    case 'week':
+    case 'w':
+      return n * w;
+    case 'days':
+    case 'day':
+    case 'd':
+      return n * d;
+    case 'hours':
+    case 'hour':
+    case 'hrs':
+    case 'hr':
+    case 'h':
+      return n * h;
+    case 'minutes':
+    case 'minute':
+    case 'mins':
+    case 'min':
+    case 'm':
+      return n * m;
+    case 'seconds':
+    case 'second':
+    case 'secs':
+    case 'sec':
+    case 's':
+      return n * s;
+    case 'milliseconds':
+    case 'millisecond':
+    case 'msecs':
+    case 'msec':
+    case 'ms':
+      return n;
+    default:
+      return undefined;
+  }
+}
+
+/**
+ * Short format for `ms`.
+ *
+ * @param {Number} ms
+ * @return {String}
+ * @api private
+ */
+
+function fmtShort(ms) {
+  var msAbs = Math.abs(ms);
+  if (msAbs >= d) {
+    return Math.round(ms / d) + 'd';
+  }
+  if (msAbs >= h) {
+    return Math.round(ms / h) + 'h';
+  }
+  if (msAbs >= m) {
+    return Math.round(ms / m) + 'm';
+  }
+  if (msAbs >= s) {
+    return Math.round(ms / s) + 's';
+  }
+  return ms + 'ms';
+}
+
+/**
+ * Long format for `ms`.
+ *
+ * @param {Number} ms
+ * @return {String}
+ * @api private
+ */
+
+function fmtLong(ms) {
+  var msAbs = Math.abs(ms);
+  if (msAbs >= d) {
+    return plural(ms, msAbs, d, 'day');
+  }
+  if (msAbs >= h) {
+    return plural(ms, msAbs, h, 'hour');
+  }
+  if (msAbs >= m) {
+    return plural(ms, msAbs, m, 'minute');
+  }
+  if (msAbs >= s) {
+    return plural(ms, msAbs, s, 'second');
+  }
+  return ms + ' ms';
+}
+
+/**
+ * Pluralization helper.
+ */
+
+function plural(ms, msAbs, n, name) {
+  var isPlural = msAbs >= n * 1.5;
+  return Math.round(ms / n) + ' ' + name + (isPlural ? 's' : '');
+}
+
+var timespan = function (time, iat) {
+  var timestamp = iat || Math.floor(Date.now() / 1000);
+
+  if (typeof time === 'string') {
+    var milliseconds = ms(time);
+    if (typeof milliseconds === 'undefined') {
+      return;
+    }
+    return Math.floor(timestamp + milliseconds / 1000);
+  } else if (typeof time === 'number') {
+    return timestamp + time;
+  } else {
+    return;
+  }
+
+};
+
+var semver = createCommonjsModule(function (module, exports) {
+exports = module.exports = SemVer;
+
+var debug;
+/* istanbul ignore next */
+if (typeof process === 'object' &&
+    process.env &&
+    process.env.NODE_DEBUG &&
+    /\bsemver\b/i.test(process.env.NODE_DEBUG)) {
+  debug = function () {
+    var args = Array.prototype.slice.call(arguments, 0);
+    args.unshift('SEMVER');
+    console.log.apply(console, args);
+  };
+} else {
+  debug = function () {};
+}
+
+// Note: this is the semver.org version of the spec that it implements
+// Not necessarily the package version of this code.
+exports.SEMVER_SPEC_VERSION = '2.0.0';
+
+var MAX_LENGTH = 256;
+var MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER ||
+  /* istanbul ignore next */ 9007199254740991;
+
+// Max safe segment length for coercion.
+var MAX_SAFE_COMPONENT_LENGTH = 16;
+
+// The actual regexps go on exports.re
+var re = exports.re = [];
+var src = exports.src = [];
+var R = 0;
+
+// The following Regular Expressions can be used for tokenizing,
+// validating, and parsing SemVer version strings.
+
+// ## Numeric Identifier
+// A single `0`, or a non-zero digit followed by zero or more digits.
+
+var NUMERICIDENTIFIER = R++;
+src[NUMERICIDENTIFIER] = '0|[1-9]\\d*';
+var NUMERICIDENTIFIERLOOSE = R++;
+src[NUMERICIDENTIFIERLOOSE] = '[0-9]+';
+
+// ## Non-numeric Identifier
+// Zero or more digits, followed by a letter or hyphen, and then zero or
+// more letters, digits, or hyphens.
+
+var NONNUMERICIDENTIFIER = R++;
+src[NONNUMERICIDENTIFIER] = '\\d*[a-zA-Z-][a-zA-Z0-9-]*';
+
+// ## Main Version
+// Three dot-separated numeric identifiers.
+
+var MAINVERSION = R++;
+src[MAINVERSION] = '(' + src[NUMERICIDENTIFIER] + ')\\.' +
+                   '(' + src[NUMERICIDENTIFIER] + ')\\.' +
+                   '(' + src[NUMERICIDENTIFIER] + ')';
+
+var MAINVERSIONLOOSE = R++;
+src[MAINVERSIONLOOSE] = '(' + src[NUMERICIDENTIFIERLOOSE] + ')\\.' +
+                        '(' + src[NUMERICIDENTIFIERLOOSE] + ')\\.' +
+                        '(' + src[NUMERICIDENTIFIERLOOSE] + ')';
+
+// ## Pre-release Version Identifier
+// A numeric identifier, or a non-numeric identifier.
+
+var PRERELEASEIDENTIFIER = R++;
+src[PRERELEASEIDENTIFIER] = '(?:' + src[NUMERICIDENTIFIER] +
+                            '|' + src[NONNUMERICIDENTIFIER] + ')';
+
+var PRERELEASEIDENTIFIERLOOSE = R++;
+src[PRERELEASEIDENTIFIERLOOSE] = '(?:' + src[NUMERICIDENTIFIERLOOSE] +
+                                 '|' + src[NONNUMERICIDENTIFIER] + ')';
+
+// ## Pre-release Version
+// Hyphen, followed by one or more dot-separated pre-release version
+// identifiers.
+
+var PRERELEASE = R++;
+src[PRERELEASE] = '(?:-(' + src[PRERELEASEIDENTIFIER] +
+                  '(?:\\.' + src[PRERELEASEIDENTIFIER] + ')*))';
+
+var PRERELEASELOOSE = R++;
+src[PRERELEASELOOSE] = '(?:-?(' + src[PRERELEASEIDENTIFIERLOOSE] +
+                       '(?:\\.' + src[PRERELEASEIDENTIFIERLOOSE] + ')*))';
+
+// ## Build Metadata Identifier
+// Any combination of digits, letters, or hyphens.
+
+var BUILDIDENTIFIER = R++;
+src[BUILDIDENTIFIER] = '[0-9A-Za-z-]+';
+
+// ## Build Metadata
+// Plus sign, followed by one or more period-separated build metadata
+// identifiers.
+
+var BUILD = R++;
+src[BUILD] = '(?:\\+(' + src[BUILDIDENTIFIER] +
+             '(?:\\.' + src[BUILDIDENTIFIER] + ')*))';
+
+// ## Full Version String
+// A main version, followed optionally by a pre-release version and
+// build metadata.
+
+// Note that the only major, minor, patch, and pre-release sections of
+// the version string are capturing groups.  The build metadata is not a
+// capturing group, because it should not ever be used in version
+// comparison.
+
+var FULL = R++;
+var FULLPLAIN = 'v?' + src[MAINVERSION] +
+                src[PRERELEASE] + '?' +
+                src[BUILD] + '?';
+
+src[FULL] = '^' + FULLPLAIN + '$';
+
+// like full, but allows v1.2.3 and =1.2.3, which people do sometimes.
+// also, 1.0.0alpha1 (prerelease without the hyphen) which is pretty
+// common in the npm registry.
+var LOOSEPLAIN = '[v=\\s]*' + src[MAINVERSIONLOOSE] +
+                 src[PRERELEASELOOSE] + '?' +
+                 src[BUILD] + '?';
+
+var LOOSE = R++;
+src[LOOSE] = '^' + LOOSEPLAIN + '$';
+
+var GTLT = R++;
+src[GTLT] = '((?:<|>)?=?)';
+
+// Something like "2.*" or "1.2.x".
+// Note that "x.x" is a valid xRange identifer, meaning "any version"
+// Only the first item is strictly required.
+var XRANGEIDENTIFIERLOOSE = R++;
+src[XRANGEIDENTIFIERLOOSE] = src[NUMERICIDENTIFIERLOOSE] + '|x|X|\\*';
+var XRANGEIDENTIFIER = R++;
+src[XRANGEIDENTIFIER] = src[NUMERICIDENTIFIER] + '|x|X|\\*';
+
+var XRANGEPLAIN = R++;
+src[XRANGEPLAIN] = '[v=\\s]*(' + src[XRANGEIDENTIFIER] + ')' +
+                   '(?:\\.(' + src[XRANGEIDENTIFIER] + ')' +
+                   '(?:\\.(' + src[XRANGEIDENTIFIER] + ')' +
+                   '(?:' + src[PRERELEASE] + ')?' +
+                   src[BUILD] + '?' +
+                   ')?)?';
+
+var XRANGEPLAINLOOSE = R++;
+src[XRANGEPLAINLOOSE] = '[v=\\s]*(' + src[XRANGEIDENTIFIERLOOSE] + ')' +
+                        '(?:\\.(' + src[XRANGEIDENTIFIERLOOSE] + ')' +
+                        '(?:\\.(' + src[XRANGEIDENTIFIERLOOSE] + ')' +
+                        '(?:' + src[PRERELEASELOOSE] + ')?' +
+                        src[BUILD] + '?' +
+                        ')?)?';
+
+var XRANGE = R++;
+src[XRANGE] = '^' + src[GTLT] + '\\s*' + src[XRANGEPLAIN] + '$';
+var XRANGELOOSE = R++;
+src[XRANGELOOSE] = '^' + src[GTLT] + '\\s*' + src[XRANGEPLAINLOOSE] + '$';
+
+// Coercion.
+// Extract anything that could conceivably be a part of a valid semver
+var COERCE = R++;
+src[COERCE] = '(?:^|[^\\d])' +
+              '(\\d{1,' + MAX_SAFE_COMPONENT_LENGTH + '})' +
+              '(?:\\.(\\d{1,' + MAX_SAFE_COMPONENT_LENGTH + '}))?' +
+              '(?:\\.(\\d{1,' + MAX_SAFE_COMPONENT_LENGTH + '}))?' +
+              '(?:$|[^\\d])';
+
+// Tilde ranges.
+// Meaning is "reasonably at or greater than"
+var LONETILDE = R++;
+src[LONETILDE] = '(?:~>?)';
+
+var TILDETRIM = R++;
+src[TILDETRIM] = '(\\s*)' + src[LONETILDE] + '\\s+';
+re[TILDETRIM] = new RegExp(src[TILDETRIM], 'g');
+var tildeTrimReplace = '$1~';
+
+var TILDE = R++;
+src[TILDE] = '^' + src[LONETILDE] + src[XRANGEPLAIN] + '$';
+var TILDELOOSE = R++;
+src[TILDELOOSE] = '^' + src[LONETILDE] + src[XRANGEPLAINLOOSE] + '$';
+
+// Caret ranges.
+// Meaning is "at least and backwards compatible with"
+var LONECARET = R++;
+src[LONECARET] = '(?:\\^)';
+
+var CARETTRIM = R++;
+src[CARETTRIM] = '(\\s*)' + src[LONECARET] + '\\s+';
+re[CARETTRIM] = new RegExp(src[CARETTRIM], 'g');
+var caretTrimReplace = '$1^';
+
+var CARET = R++;
+src[CARET] = '^' + src[LONECARET] + src[XRANGEPLAIN] + '$';
+var CARETLOOSE = R++;
+src[CARETLOOSE] = '^' + src[LONECARET] + src[XRANGEPLAINLOOSE] + '$';
+
+// A simple gt/lt/eq thing, or just "" to indicate "any version"
+var COMPARATORLOOSE = R++;
+src[COMPARATORLOOSE] = '^' + src[GTLT] + '\\s*(' + LOOSEPLAIN + ')$|^$';
+var COMPARATOR = R++;
+src[COMPARATOR] = '^' + src[GTLT] + '\\s*(' + FULLPLAIN + ')$|^$';
+
+// An expression to strip any whitespace between the gtlt and the thing
+// it modifies, so that `> 1.2.3` ==> `>1.2.3`
+var COMPARATORTRIM = R++;
+src[COMPARATORTRIM] = '(\\s*)' + src[GTLT] +
+                      '\\s*(' + LOOSEPLAIN + '|' + src[XRANGEPLAIN] + ')';
+
+// this one has to use the /g flag
+re[COMPARATORTRIM] = new RegExp(src[COMPARATORTRIM], 'g');
+var comparatorTrimReplace = '$1$2$3';
+
+// Something like `1.2.3 - 1.2.4`
+// Note that these all use the loose form, because they'll be
+// checked against either the strict or loose comparator form
+// later.
+var HYPHENRANGE = R++;
+src[HYPHENRANGE] = '^\\s*(' + src[XRANGEPLAIN] + ')' +
+                   '\\s+-\\s+' +
+                   '(' + src[XRANGEPLAIN] + ')' +
+                   '\\s*$';
+
+var HYPHENRANGELOOSE = R++;
+src[HYPHENRANGELOOSE] = '^\\s*(' + src[XRANGEPLAINLOOSE] + ')' +
+                        '\\s+-\\s+' +
+                        '(' + src[XRANGEPLAINLOOSE] + ')' +
+                        '\\s*$';
+
+// Star ranges basically just allow anything at all.
+var STAR = R++;
+src[STAR] = '(<|>)?=?\\s*\\*';
+
+// Compile to actual regexp objects.
+// All are flag-free, unless they were created above with a flag.
+for (var i = 0; i < R; i++) {
+  debug(i, src[i]);
+  if (!re[i]) {
+    re[i] = new RegExp(src[i]);
+  }
+}
+
+exports.parse = parse;
+function parse (version, options) {
+  if (!options || typeof options !== 'object') {
+    options = {
+      loose: !!options,
+      includePrerelease: false
+    };
+  }
+
+  if (version instanceof SemVer) {
+    return version
+  }
+
+  if (typeof version !== 'string') {
+    return null
+  }
+
+  if (version.length > MAX_LENGTH) {
+    return null
+  }
+
+  var r = options.loose ? re[LOOSE] : re[FULL];
+  if (!r.test(version)) {
+    return null
+  }
+
+  try {
+    return new SemVer(version, options)
+  } catch (er) {
+    return null
+  }
+}
+
+exports.valid = valid;
+function valid (version, options) {
+  var v = parse(version, options);
+  return v ? v.version : null
+}
+
+exports.clean = clean;
+function clean (version, options) {
+  var s = parse(version.trim().replace(/^[=v]+/, ''), options);
+  return s ? s.version : null
+}
+
+exports.SemVer = SemVer;
+
+function SemVer (version, options) {
+  if (!options || typeof options !== 'object') {
+    options = {
+      loose: !!options,
+      includePrerelease: false
+    };
+  }
+  if (version instanceof SemVer) {
+    if (version.loose === options.loose) {
+      return version
+    } else {
+      version = version.version;
+    }
+  } else if (typeof version !== 'string') {
+    throw new TypeError('Invalid Version: ' + version)
+  }
+
+  if (version.length > MAX_LENGTH) {
+    throw new TypeError('version is longer than ' + MAX_LENGTH + ' characters')
+  }
+
+  if (!(this instanceof SemVer)) {
+    return new SemVer(version, options)
+  }
+
+  debug('SemVer', version, options);
+  this.options = options;
+  this.loose = !!options.loose;
+
+  var m = version.trim().match(options.loose ? re[LOOSE] : re[FULL]);
+
+  if (!m) {
+    throw new TypeError('Invalid Version: ' + version)
+  }
+
+  this.raw = version;
+
+  // these are actually numbers
+  this.major = +m[1];
+  this.minor = +m[2];
+  this.patch = +m[3];
+
+  if (this.major > MAX_SAFE_INTEGER || this.major < 0) {
+    throw new TypeError('Invalid major version')
+  }
+
+  if (this.minor > MAX_SAFE_INTEGER || this.minor < 0) {
+    throw new TypeError('Invalid minor version')
+  }
+
+  if (this.patch > MAX_SAFE_INTEGER || this.patch < 0) {
+    throw new TypeError('Invalid patch version')
+  }
+
+  // numberify any prerelease numeric ids
+  if (!m[4]) {
+    this.prerelease = [];
+  } else {
+    this.prerelease = m[4].split('.').map(function (id) {
+      if (/^[0-9]+$/.test(id)) {
+        var num = +id;
+        if (num >= 0 && num < MAX_SAFE_INTEGER) {
+          return num
+        }
+      }
+      return id
+    });
+  }
+
+  this.build = m[5] ? m[5].split('.') : [];
+  this.format();
+}
+
+SemVer.prototype.format = function () {
+  this.version = this.major + '.' + this.minor + '.' + this.patch;
+  if (this.prerelease.length) {
+    this.version += '-' + this.prerelease.join('.');
+  }
+  return this.version
+};
+
+SemVer.prototype.toString = function () {
+  return this.version
+};
+
+SemVer.prototype.compare = function (other) {
+  debug('SemVer.compare', this.version, this.options, other);
+  if (!(other instanceof SemVer)) {
+    other = new SemVer(other, this.options);
+  }
+
+  return this.compareMain(other) || this.comparePre(other)
+};
+
+SemVer.prototype.compareMain = function (other) {
+  if (!(other instanceof SemVer)) {
+    other = new SemVer(other, this.options);
+  }
+
+  return compareIdentifiers(this.major, other.major) ||
+         compareIdentifiers(this.minor, other.minor) ||
+         compareIdentifiers(this.patch, other.patch)
+};
+
+SemVer.prototype.comparePre = function (other) {
+  if (!(other instanceof SemVer)) {
+    other = new SemVer(other, this.options);
+  }
+
+  // NOT having a prerelease is > having one
+  if (this.prerelease.length && !other.prerelease.length) {
+    return -1
+  } else if (!this.prerelease.length && other.prerelease.length) {
+    return 1
+  } else if (!this.prerelease.length && !other.prerelease.length) {
+    return 0
+  }
+
+  var i = 0;
+  do {
+    var a = this.prerelease[i];
+    var b = other.prerelease[i];
+    debug('prerelease compare', i, a, b);
+    if (a === undefined && b === undefined) {
+      return 0
+    } else if (b === undefined) {
+      return 1
+    } else if (a === undefined) {
+      return -1
+    } else if (a === b) {
+      continue
+    } else {
+      return compareIdentifiers(a, b)
+    }
+  } while (++i)
+};
+
+// preminor will bump the version up to the next minor release, and immediately
+// down to pre-release. premajor and prepatch work the same way.
+SemVer.prototype.inc = function (release, identifier) {
+  switch (release) {
+    case 'premajor':
+      this.prerelease.length = 0;
+      this.patch = 0;
+      this.minor = 0;
+      this.major++;
+      this.inc('pre', identifier);
+      break
+    case 'preminor':
+      this.prerelease.length = 0;
+      this.patch = 0;
+      this.minor++;
+      this.inc('pre', identifier);
+      break
+    case 'prepatch':
+      // If this is already a prerelease, it will bump to the next version
+      // drop any prereleases that might already exist, since they are not
+      // relevant at this point.
+      this.prerelease.length = 0;
+      this.inc('patch', identifier);
+      this.inc('pre', identifier);
+      break
+    // If the input is a non-prerelease version, this acts the same as
+    // prepatch.
+    case 'prerelease':
+      if (this.prerelease.length === 0) {
+        this.inc('patch', identifier);
+      }
+      this.inc('pre', identifier);
+      break
+
+    case 'major':
+      // If this is a pre-major version, bump up to the same major version.
+      // Otherwise increment major.
+      // 1.0.0-5 bumps to 1.0.0
+      // 1.1.0 bumps to 2.0.0
+      if (this.minor !== 0 ||
+          this.patch !== 0 ||
+          this.prerelease.length === 0) {
+        this.major++;
+      }
+      this.minor = 0;
+      this.patch = 0;
+      this.prerelease = [];
+      break
+    case 'minor':
+      // If this is a pre-minor version, bump up to the same minor version.
+      // Otherwise increment minor.
+      // 1.2.0-5 bumps to 1.2.0
+      // 1.2.1 bumps to 1.3.0
+      if (this.patch !== 0 || this.prerelease.length === 0) {
+        this.minor++;
+      }
+      this.patch = 0;
+      this.prerelease = [];
+      break
+    case 'patch':
+      // If this is not a pre-release version, it will increment the patch.
+      // If it is a pre-release it will bump up to the same patch version.
+      // 1.2.0-5 patches to 1.2.0
+      // 1.2.0 patches to 1.2.1
+      if (this.prerelease.length === 0) {
+        this.patch++;
+      }
+      this.prerelease = [];
+      break
+    // This probably shouldn't be used publicly.
+    // 1.0.0 "pre" would become 1.0.0-0 which is the wrong direction.
+    case 'pre':
+      if (this.prerelease.length === 0) {
+        this.prerelease = [0];
+      } else {
+        var i = this.prerelease.length;
+        while (--i >= 0) {
+          if (typeof this.prerelease[i] === 'number') {
+            this.prerelease[i]++;
+            i = -2;
+          }
+        }
+        if (i === -1) {
+          // didn't increment anything
+          this.prerelease.push(0);
+        }
+      }
+      if (identifier) {
+        // 1.2.0-beta.1 bumps to 1.2.0-beta.2,
+        // 1.2.0-beta.fooblz or 1.2.0-beta bumps to 1.2.0-beta.0
+        if (this.prerelease[0] === identifier) {
+          if (isNaN(this.prerelease[1])) {
+            this.prerelease = [identifier, 0];
+          }
+        } else {
+          this.prerelease = [identifier, 0];
+        }
+      }
+      break
+
+    default:
+      throw new Error('invalid increment argument: ' + release)
+  }
+  this.format();
+  this.raw = this.version;
+  return this
+};
+
+exports.inc = inc;
+function inc (version, release, loose, identifier) {
+  if (typeof (loose) === 'string') {
+    identifier = loose;
+    loose = undefined;
+  }
+
+  try {
+    return new SemVer(version, loose).inc(release, identifier).version
+  } catch (er) {
+    return null
+  }
+}
+
+exports.diff = diff;
+function diff (version1, version2) {
+  if (eq(version1, version2)) {
+    return null
+  } else {
+    var v1 = parse(version1);
+    var v2 = parse(version2);
+    var prefix = '';
+    if (v1.prerelease.length || v2.prerelease.length) {
+      prefix = 'pre';
+      var defaultResult = 'prerelease';
+    }
+    for (var key in v1) {
+      if (key === 'major' || key === 'minor' || key === 'patch') {
+        if (v1[key] !== v2[key]) {
+          return prefix + key
+        }
+      }
+    }
+    return defaultResult // may be undefined
+  }
+}
+
+exports.compareIdentifiers = compareIdentifiers;
+
+var numeric = /^[0-9]+$/;
+function compareIdentifiers (a, b) {
+  var anum = numeric.test(a);
+  var bnum = numeric.test(b);
+
+  if (anum && bnum) {
+    a = +a;
+    b = +b;
+  }
+
+  return a === b ? 0
+    : (anum && !bnum) ? -1
+    : (bnum && !anum) ? 1
+    : a < b ? -1
+    : 1
+}
+
+exports.rcompareIdentifiers = rcompareIdentifiers;
+function rcompareIdentifiers (a, b) {
+  return compareIdentifiers(b, a)
+}
+
+exports.major = major;
+function major (a, loose) {
+  return new SemVer(a, loose).major
+}
+
+exports.minor = minor;
+function minor (a, loose) {
+  return new SemVer(a, loose).minor
+}
+
+exports.patch = patch;
+function patch (a, loose) {
+  return new SemVer(a, loose).patch
+}
+
+exports.compare = compare;
+function compare (a, b, loose) {
+  return new SemVer(a, loose).compare(new SemVer(b, loose))
+}
+
+exports.compareLoose = compareLoose;
+function compareLoose (a, b) {
+  return compare(a, b, true)
+}
+
+exports.rcompare = rcompare;
+function rcompare (a, b, loose) {
+  return compare(b, a, loose)
+}
+
+exports.sort = sort;
+function sort (list, loose) {
+  return list.sort(function (a, b) {
+    return exports.compare(a, b, loose)
+  })
+}
+
+exports.rsort = rsort;
+function rsort (list, loose) {
+  return list.sort(function (a, b) {
+    return exports.rcompare(a, b, loose)
+  })
+}
+
+exports.gt = gt;
+function gt (a, b, loose) {
+  return compare(a, b, loose) > 0
+}
+
+exports.lt = lt;
+function lt (a, b, loose) {
+  return compare(a, b, loose) < 0
+}
+
+exports.eq = eq;
+function eq (a, b, loose) {
+  return compare(a, b, loose) === 0
+}
+
+exports.neq = neq;
+function neq (a, b, loose) {
+  return compare(a, b, loose) !== 0
+}
+
+exports.gte = gte;
+function gte (a, b, loose) {
+  return compare(a, b, loose) >= 0
+}
+
+exports.lte = lte;
+function lte (a, b, loose) {
+  return compare(a, b, loose) <= 0
+}
+
+exports.cmp = cmp;
+function cmp (a, op, b, loose) {
+  switch (op) {
+    case '===':
+      if (typeof a === 'object')
+        a = a.version;
+      if (typeof b === 'object')
+        b = b.version;
+      return a === b
+
+    case '!==':
+      if (typeof a === 'object')
+        a = a.version;
+      if (typeof b === 'object')
+        b = b.version;
+      return a !== b
+
+    case '':
+    case '=':
+    case '==':
+      return eq(a, b, loose)
+
+    case '!=':
+      return neq(a, b, loose)
+
+    case '>':
+      return gt(a, b, loose)
+
+    case '>=':
+      return gte(a, b, loose)
+
+    case '<':
+      return lt(a, b, loose)
+
+    case '<=':
+      return lte(a, b, loose)
+
+    default:
+      throw new TypeError('Invalid operator: ' + op)
+  }
+}
+
+exports.Comparator = Comparator;
+function Comparator (comp, options) {
+  if (!options || typeof options !== 'object') {
+    options = {
+      loose: !!options,
+      includePrerelease: false
+    };
+  }
+
+  if (comp instanceof Comparator) {
+    if (comp.loose === !!options.loose) {
+      return comp
+    } else {
+      comp = comp.value;
+    }
+  }
+
+  if (!(this instanceof Comparator)) {
+    return new Comparator(comp, options)
+  }
+
+  debug('comparator', comp, options);
+  this.options = options;
+  this.loose = !!options.loose;
+  this.parse(comp);
+
+  if (this.semver === ANY) {
+    this.value = '';
+  } else {
+    this.value = this.operator + this.semver.version;
+  }
+
+  debug('comp', this);
+}
+
+var ANY = {};
+Comparator.prototype.parse = function (comp) {
+  var r = this.options.loose ? re[COMPARATORLOOSE] : re[COMPARATOR];
+  var m = comp.match(r);
+
+  if (!m) {
+    throw new TypeError('Invalid comparator: ' + comp)
+  }
+
+  this.operator = m[1];
+  if (this.operator === '=') {
+    this.operator = '';
+  }
+
+  // if it literally is just '>' or '' then allow anything.
+  if (!m[2]) {
+    this.semver = ANY;
+  } else {
+    this.semver = new SemVer(m[2], this.options.loose);
+  }
+};
+
+Comparator.prototype.toString = function () {
+  return this.value
+};
+
+Comparator.prototype.test = function (version) {
+  debug('Comparator.test', version, this.options.loose);
+
+  if (this.semver === ANY) {
+    return true
+  }
+
+  if (typeof version === 'string') {
+    version = new SemVer(version, this.options);
+  }
+
+  return cmp(version, this.operator, this.semver, this.options)
+};
+
+Comparator.prototype.intersects = function (comp, options) {
+  if (!(comp instanceof Comparator)) {
+    throw new TypeError('a Comparator is required')
+  }
+
+  if (!options || typeof options !== 'object') {
+    options = {
+      loose: !!options,
+      includePrerelease: false
+    };
+  }
+
+  var rangeTmp;
+
+  if (this.operator === '') {
+    rangeTmp = new Range(comp.value, options);
+    return satisfies(this.value, rangeTmp, options)
+  } else if (comp.operator === '') {
+    rangeTmp = new Range(this.value, options);
+    return satisfies(comp.semver, rangeTmp, options)
+  }
+
+  var sameDirectionIncreasing =
+    (this.operator === '>=' || this.operator === '>') &&
+    (comp.operator === '>=' || comp.operator === '>');
+  var sameDirectionDecreasing =
+    (this.operator === '<=' || this.operator === '<') &&
+    (comp.operator === '<=' || comp.operator === '<');
+  var sameSemVer = this.semver.version === comp.semver.version;
+  var differentDirectionsInclusive =
+    (this.operator === '>=' || this.operator === '<=') &&
+    (comp.operator === '>=' || comp.operator === '<=');
+  var oppositeDirectionsLessThan =
+    cmp(this.semver, '<', comp.semver, options) &&
+    ((this.operator === '>=' || this.operator === '>') &&
+    (comp.operator === '<=' || comp.operator === '<'));
+  var oppositeDirectionsGreaterThan =
+    cmp(this.semver, '>', comp.semver, options) &&
+    ((this.operator === '<=' || this.operator === '<') &&
+    (comp.operator === '>=' || comp.operator === '>'));
+
+  return sameDirectionIncreasing || sameDirectionDecreasing ||
+    (sameSemVer && differentDirectionsInclusive) ||
+    oppositeDirectionsLessThan || oppositeDirectionsGreaterThan
+};
+
+exports.Range = Range;
+function Range (range, options) {
+  if (!options || typeof options !== 'object') {
+    options = {
+      loose: !!options,
+      includePrerelease: false
+    };
+  }
+
+  if (range instanceof Range) {
+    if (range.loose === !!options.loose &&
+        range.includePrerelease === !!options.includePrerelease) {
+      return range
+    } else {
+      return new Range(range.raw, options)
+    }
+  }
+
+  if (range instanceof Comparator) {
+    return new Range(range.value, options)
+  }
+
+  if (!(this instanceof Range)) {
+    return new Range(range, options)
+  }
+
+  this.options = options;
+  this.loose = !!options.loose;
+  this.includePrerelease = !!options.includePrerelease;
+
+  // First, split based on boolean or ||
+  this.raw = range;
+  this.set = range.split(/\s*\|\|\s*/).map(function (range) {
+    return this.parseRange(range.trim())
+  }, this).filter(function (c) {
+    // throw out any that are not relevant for whatever reason
+    return c.length
+  });
+
+  if (!this.set.length) {
+    throw new TypeError('Invalid SemVer Range: ' + range)
+  }
+
+  this.format();
+}
+
+Range.prototype.format = function () {
+  this.range = this.set.map(function (comps) {
+    return comps.join(' ').trim()
+  }).join('||').trim();
+  return this.range
+};
+
+Range.prototype.toString = function () {
+  return this.range
+};
+
+Range.prototype.parseRange = function (range) {
+  var loose = this.options.loose;
+  range = range.trim();
+  // `1.2.3 - 1.2.4` => `>=1.2.3 <=1.2.4`
+  var hr = loose ? re[HYPHENRANGELOOSE] : re[HYPHENRANGE];
+  range = range.replace(hr, hyphenReplace);
+  debug('hyphen replace', range);
+  // `> 1.2.3 < 1.2.5` => `>1.2.3 <1.2.5`
+  range = range.replace(re[COMPARATORTRIM], comparatorTrimReplace);
+  debug('comparator trim', range, re[COMPARATORTRIM]);
+
+  // `~ 1.2.3` => `~1.2.3`
+  range = range.replace(re[TILDETRIM], tildeTrimReplace);
+
+  // `^ 1.2.3` => `^1.2.3`
+  range = range.replace(re[CARETTRIM], caretTrimReplace);
+
+  // normalize spaces
+  range = range.split(/\s+/).join(' ');
+
+  // At this point, the range is completely trimmed and
+  // ready to be split into comparators.
+
+  var compRe = loose ? re[COMPARATORLOOSE] : re[COMPARATOR];
+  var set = range.split(' ').map(function (comp) {
+    return parseComparator(comp, this.options)
+  }, this).join(' ').split(/\s+/);
+  if (this.options.loose) {
+    // in loose mode, throw out any that are not valid comparators
+    set = set.filter(function (comp) {
+      return !!comp.match(compRe)
+    });
+  }
+  set = set.map(function (comp) {
+    return new Comparator(comp, this.options)
+  }, this);
+
+  return set
+};
+
+Range.prototype.intersects = function (range, options) {
+  if (!(range instanceof Range)) {
+    throw new TypeError('a Range is required')
+  }
+
+  return this.set.some(function (thisComparators) {
+    return thisComparators.every(function (thisComparator) {
+      return range.set.some(function (rangeComparators) {
+        return rangeComparators.every(function (rangeComparator) {
+          return thisComparator.intersects(rangeComparator, options)
+        })
+      })
+    })
+  })
+};
+
+// Mostly just for testing and legacy API reasons
+exports.toComparators = toComparators;
+function toComparators (range, options) {
+  return new Range(range, options).set.map(function (comp) {
+    return comp.map(function (c) {
+      return c.value
+    }).join(' ').trim().split(' ')
+  })
+}
+
+// comprised of xranges, tildes, stars, and gtlt's at this point.
+// already replaced the hyphen ranges
+// turn into a set of JUST comparators.
+function parseComparator (comp, options) {
+  debug('comp', comp, options);
+  comp = replaceCarets(comp, options);
+  debug('caret', comp);
+  comp = replaceTildes(comp, options);
+  debug('tildes', comp);
+  comp = replaceXRanges(comp, options);
+  debug('xrange', comp);
+  comp = replaceStars(comp, options);
+  debug('stars', comp);
+  return comp
+}
+
+function isX (id) {
+  return !id || id.toLowerCase() === 'x' || id === '*'
+}
+
+// ~, ~> --> * (any, kinda silly)
+// ~2, ~2.x, ~2.x.x, ~>2, ~>2.x ~>2.x.x --> >=2.0.0 <3.0.0
+// ~2.0, ~2.0.x, ~>2.0, ~>2.0.x --> >=2.0.0 <2.1.0
+// ~1.2, ~1.2.x, ~>1.2, ~>1.2.x --> >=1.2.0 <1.3.0
+// ~1.2.3, ~>1.2.3 --> >=1.2.3 <1.3.0
+// ~1.2.0, ~>1.2.0 --> >=1.2.0 <1.3.0
+function replaceTildes (comp, options) {
+  return comp.trim().split(/\s+/).map(function (comp) {
+    return replaceTilde(comp, options)
+  }).join(' ')
+}
+
+function replaceTilde (comp, options) {
+  var r = options.loose ? re[TILDELOOSE] : re[TILDE];
+  return comp.replace(r, function (_, M, m, p, pr) {
+    debug('tilde', comp, _, M, m, p, pr);
+    var ret;
+
+    if (isX(M)) {
+      ret = '';
+    } else if (isX(m)) {
+      ret = '>=' + M + '.0.0 <' + (+M + 1) + '.0.0';
+    } else if (isX(p)) {
+      // ~1.2 == >=1.2.0 <1.3.0
+      ret = '>=' + M + '.' + m + '.0 <' + M + '.' + (+m + 1) + '.0';
+    } else if (pr) {
+      debug('replaceTilde pr', pr);
+      ret = '>=' + M + '.' + m + '.' + p + '-' + pr +
+            ' <' + M + '.' + (+m + 1) + '.0';
+    } else {
+      // ~1.2.3 == >=1.2.3 <1.3.0
+      ret = '>=' + M + '.' + m + '.' + p +
+            ' <' + M + '.' + (+m + 1) + '.0';
+    }
+
+    debug('tilde return', ret);
+    return ret
+  })
+}
+
+// ^ --> * (any, kinda silly)
+// ^2, ^2.x, ^2.x.x --> >=2.0.0 <3.0.0
+// ^2.0, ^2.0.x --> >=2.0.0 <3.0.0
+// ^1.2, ^1.2.x --> >=1.2.0 <2.0.0
+// ^1.2.3 --> >=1.2.3 <2.0.0
+// ^1.2.0 --> >=1.2.0 <2.0.0
+function replaceCarets (comp, options) {
+  return comp.trim().split(/\s+/).map(function (comp) {
+    return replaceCaret(comp, options)
+  }).join(' ')
+}
+
+function replaceCaret (comp, options) {
+  debug('caret', comp, options);
+  var r = options.loose ? re[CARETLOOSE] : re[CARET];
+  return comp.replace(r, function (_, M, m, p, pr) {
+    debug('caret', comp, _, M, m, p, pr);
+    var ret;
+
+    if (isX(M)) {
+      ret = '';
+    } else if (isX(m)) {
+      ret = '>=' + M + '.0.0 <' + (+M + 1) + '.0.0';
+    } else if (isX(p)) {
+      if (M === '0') {
+        ret = '>=' + M + '.' + m + '.0 <' + M + '.' + (+m + 1) + '.0';
+      } else {
+        ret = '>=' + M + '.' + m + '.0 <' + (+M + 1) + '.0.0';
+      }
+    } else if (pr) {
+      debug('replaceCaret pr', pr);
+      if (M === '0') {
+        if (m === '0') {
+          ret = '>=' + M + '.' + m + '.' + p + '-' + pr +
+                ' <' + M + '.' + m + '.' + (+p + 1);
+        } else {
+          ret = '>=' + M + '.' + m + '.' + p + '-' + pr +
+                ' <' + M + '.' + (+m + 1) + '.0';
+        }
+      } else {
+        ret = '>=' + M + '.' + m + '.' + p + '-' + pr +
+              ' <' + (+M + 1) + '.0.0';
+      }
+    } else {
+      debug('no pr');
+      if (M === '0') {
+        if (m === '0') {
+          ret = '>=' + M + '.' + m + '.' + p +
+                ' <' + M + '.' + m + '.' + (+p + 1);
+        } else {
+          ret = '>=' + M + '.' + m + '.' + p +
+                ' <' + M + '.' + (+m + 1) + '.0';
+        }
+      } else {
+        ret = '>=' + M + '.' + m + '.' + p +
+              ' <' + (+M + 1) + '.0.0';
+      }
+    }
+
+    debug('caret return', ret);
+    return ret
+  })
+}
+
+function replaceXRanges (comp, options) {
+  debug('replaceXRanges', comp, options);
+  return comp.split(/\s+/).map(function (comp) {
+    return replaceXRange(comp, options)
+  }).join(' ')
+}
+
+function replaceXRange (comp, options) {
+  comp = comp.trim();
+  var r = options.loose ? re[XRANGELOOSE] : re[XRANGE];
+  return comp.replace(r, function (ret, gtlt, M, m, p, pr) {
+    debug('xRange', comp, ret, gtlt, M, m, p, pr);
+    var xM = isX(M);
+    var xm = xM || isX(m);
+    var xp = xm || isX(p);
+    var anyX = xp;
+
+    if (gtlt === '=' && anyX) {
+      gtlt = '';
+    }
+
+    if (xM) {
+      if (gtlt === '>' || gtlt === '<') {
+        // nothing is allowed
+        ret = '<0.0.0';
+      } else {
+        // nothing is forbidden
+        ret = '*';
+      }
+    } else if (gtlt && anyX) {
+      // we know patch is an x, because we have any x at all.
+      // replace X with 0
+      if (xm) {
+        m = 0;
+      }
+      p = 0;
+
+      if (gtlt === '>') {
+        // >1 => >=2.0.0
+        // >1.2 => >=1.3.0
+        // >1.2.3 => >= 1.2.4
+        gtlt = '>=';
+        if (xm) {
+          M = +M + 1;
+          m = 0;
+          p = 0;
+        } else {
+          m = +m + 1;
+          p = 0;
+        }
+      } else if (gtlt === '<=') {
+        // <=0.7.x is actually <0.8.0, since any 0.7.x should
+        // pass.  Similarly, <=7.x is actually <8.0.0, etc.
+        gtlt = '<';
+        if (xm) {
+          M = +M + 1;
+        } else {
+          m = +m + 1;
+        }
+      }
+
+      ret = gtlt + M + '.' + m + '.' + p;
+    } else if (xm) {
+      ret = '>=' + M + '.0.0 <' + (+M + 1) + '.0.0';
+    } else if (xp) {
+      ret = '>=' + M + '.' + m + '.0 <' + M + '.' + (+m + 1) + '.0';
+    }
+
+    debug('xRange return', ret);
+
+    return ret
+  })
+}
+
+// Because * is AND-ed with everything else in the comparator,
+// and '' means "any version", just remove the *s entirely.
+function replaceStars (comp, options) {
+  debug('replaceStars', comp, options);
+  // Looseness is ignored here.  star is always as loose as it gets!
+  return comp.trim().replace(re[STAR], '')
+}
+
+// This function is passed to string.replace(re[HYPHENRANGE])
+// M, m, patch, prerelease, build
+// 1.2 - 3.4.5 => >=1.2.0 <=3.4.5
+// 1.2.3 - 3.4 => >=1.2.0 <3.5.0 Any 3.4.x will do
+// 1.2 - 3.4 => >=1.2.0 <3.5.0
+function hyphenReplace ($0,
+  from, fM, fm, fp, fpr, fb,
+  to, tM, tm, tp, tpr, tb) {
+  if (isX(fM)) {
+    from = '';
+  } else if (isX(fm)) {
+    from = '>=' + fM + '.0.0';
+  } else if (isX(fp)) {
+    from = '>=' + fM + '.' + fm + '.0';
+  } else {
+    from = '>=' + from;
+  }
+
+  if (isX(tM)) {
+    to = '';
+  } else if (isX(tm)) {
+    to = '<' + (+tM + 1) + '.0.0';
+  } else if (isX(tp)) {
+    to = '<' + tM + '.' + (+tm + 1) + '.0';
+  } else if (tpr) {
+    to = '<=' + tM + '.' + tm + '.' + tp + '-' + tpr;
+  } else {
+    to = '<=' + to;
+  }
+
+  return (from + ' ' + to).trim()
+}
+
+// if ANY of the sets match ALL of its comparators, then pass
+Range.prototype.test = function (version) {
+  if (!version) {
+    return false
+  }
+
+  if (typeof version === 'string') {
+    version = new SemVer(version, this.options);
+  }
+
+  for (var i = 0; i < this.set.length; i++) {
+    if (testSet(this.set[i], version, this.options)) {
+      return true
+    }
+  }
+  return false
+};
+
+function testSet (set, version, options) {
+  for (var i = 0; i < set.length; i++) {
+    if (!set[i].test(version)) {
+      return false
+    }
+  }
+
+  if (version.prerelease.length && !options.includePrerelease) {
+    // Find the set of versions that are allowed to have prereleases
+    // For example, ^1.2.3-pr.1 desugars to >=1.2.3-pr.1 <2.0.0
+    // That should allow `1.2.3-pr.2` to pass.
+    // However, `1.2.4-alpha.notready` should NOT be allowed,
+    // even though it's within the range set by the comparators.
+    for (i = 0; i < set.length; i++) {
+      debug(set[i].semver);
+      if (set[i].semver === ANY) {
+        continue
+      }
+
+      if (set[i].semver.prerelease.length > 0) {
+        var allowed = set[i].semver;
+        if (allowed.major === version.major &&
+            allowed.minor === version.minor &&
+            allowed.patch === version.patch) {
+          return true
+        }
+      }
+    }
+
+    // Version has a -pre, but it's not one of the ones we like.
+    return false
+  }
+
+  return true
+}
+
+exports.satisfies = satisfies;
+function satisfies (version, range, options) {
+  try {
+    range = new Range(range, options);
+  } catch (er) {
+    return false
+  }
+  return range.test(version)
+}
+
+exports.maxSatisfying = maxSatisfying;
+function maxSatisfying (versions, range, options) {
+  var max = null;
+  var maxSV = null;
+  try {
+    var rangeObj = new Range(range, options);
+  } catch (er) {
+    return null
+  }
+  versions.forEach(function (v) {
+    if (rangeObj.test(v)) {
+      // satisfies(v, range, options)
+      if (!max || maxSV.compare(v) === -1) {
+        // compare(max, v, true)
+        max = v;
+        maxSV = new SemVer(max, options);
+      }
+    }
+  });
+  return max
+}
+
+exports.minSatisfying = minSatisfying;
+function minSatisfying (versions, range, options) {
+  var min = null;
+  var minSV = null;
+  try {
+    var rangeObj = new Range(range, options);
+  } catch (er) {
+    return null
+  }
+  versions.forEach(function (v) {
+    if (rangeObj.test(v)) {
+      // satisfies(v, range, options)
+      if (!min || minSV.compare(v) === 1) {
+        // compare(min, v, true)
+        min = v;
+        minSV = new SemVer(min, options);
+      }
+    }
+  });
+  return min
+}
+
+exports.minVersion = minVersion;
+function minVersion (range, loose) {
+  range = new Range(range, loose);
+
+  var minver = new SemVer('0.0.0');
+  if (range.test(minver)) {
+    return minver
+  }
+
+  minver = new SemVer('0.0.0-0');
+  if (range.test(minver)) {
+    return minver
+  }
+
+  minver = null;
+  for (var i = 0; i < range.set.length; ++i) {
+    var comparators = range.set[i];
+
+    comparators.forEach(function (comparator) {
+      // Clone to avoid manipulating the comparator's semver object.
+      var compver = new SemVer(comparator.semver.version);
+      switch (comparator.operator) {
+        case '>':
+          if (compver.prerelease.length === 0) {
+            compver.patch++;
+          } else {
+            compver.prerelease.push(0);
+          }
+          compver.raw = compver.format();
+          /* fallthrough */
+        case '':
+        case '>=':
+          if (!minver || gt(minver, compver)) {
+            minver = compver;
+          }
+          break
+        case '<':
+        case '<=':
+          /* Ignore maximum versions */
+          break
+        /* istanbul ignore next */
+        default:
+          throw new Error('Unexpected operation: ' + comparator.operator)
+      }
+    });
+  }
+
+  if (minver && range.test(minver)) {
+    return minver
+  }
+
+  return null
+}
+
+exports.validRange = validRange;
+function validRange (range, options) {
+  try {
+    // Return '*' instead of '' so that truthiness works.
+    // This will throw if it's invalid anyway
+    return new Range(range, options).range || '*'
+  } catch (er) {
+    return null
+  }
+}
+
+// Determine if version is less than all the versions possible in the range
+exports.ltr = ltr;
+function ltr (version, range, options) {
+  return outside(version, range, '<', options)
+}
+
+// Determine if version is greater than all the versions possible in the range.
+exports.gtr = gtr;
+function gtr (version, range, options) {
+  return outside(version, range, '>', options)
+}
+
+exports.outside = outside;
+function outside (version, range, hilo, options) {
+  version = new SemVer(version, options);
+  range = new Range(range, options);
+
+  var gtfn, ltefn, ltfn, comp, ecomp;
+  switch (hilo) {
+    case '>':
+      gtfn = gt;
+      ltefn = lte;
+      ltfn = lt;
+      comp = '>';
+      ecomp = '>=';
+      break
+    case '<':
+      gtfn = lt;
+      ltefn = gte;
+      ltfn = gt;
+      comp = '<';
+      ecomp = '<=';
+      break
+    default:
+      throw new TypeError('Must provide a hilo val of "<" or ">"')
+  }
+
+  // If it satisifes the range it is not outside
+  if (satisfies(version, range, options)) {
+    return false
+  }
+
+  // From now on, variable terms are as if we're in "gtr" mode.
+  // but note that everything is flipped for the "ltr" function.
+
+  for (var i = 0; i < range.set.length; ++i) {
+    var comparators = range.set[i];
+
+    var high = null;
+    var low = null;
+
+    comparators.forEach(function (comparator) {
+      if (comparator.semver === ANY) {
+        comparator = new Comparator('>=0.0.0');
+      }
+      high = high || comparator;
+      low = low || comparator;
+      if (gtfn(comparator.semver, high.semver, options)) {
+        high = comparator;
+      } else if (ltfn(comparator.semver, low.semver, options)) {
+        low = comparator;
+      }
+    });
+
+    // If the edge version comparator has a operator then our version
+    // isn't outside it
+    if (high.operator === comp || high.operator === ecomp) {
+      return false
+    }
+
+    // If the lowest version comparator has an operator and our version
+    // is less than it then it isn't higher than the range
+    if ((!low.operator || low.operator === comp) &&
+        ltefn(version, low.semver)) {
+      return false
+    } else if (low.operator === ecomp && ltfn(version, low.semver)) {
+      return false
+    }
+  }
+  return true
+}
+
+exports.prerelease = prerelease;
+function prerelease (version, options) {
+  var parsed = parse(version, options);
+  return (parsed && parsed.prerelease.length) ? parsed.prerelease : null
+}
+
+exports.intersects = intersects;
+function intersects (r1, r2, options) {
+  r1 = new Range(r1, options);
+  r2 = new Range(r2, options);
+  return r1.intersects(r2)
+}
+
+exports.coerce = coerce;
+function coerce (version) {
+  if (version instanceof SemVer) {
+    return version
+  }
+
+  if (typeof version !== 'string') {
+    return null
+  }
+
+  var match = version.match(re[COERCE]);
+
+  if (match == null) {
+    return null
+  }
+
+  return parse(match[1] +
+    '.' + (match[2] || '0') +
+    '.' + (match[3] || '0'))
+}
+});
+
+var psSupported = semver.satisfies(process.version, '^6.12.0 || >=8.0.0');
+
+var PUB_KEY_ALGS = ['RS256', 'RS384', 'RS512', 'ES256', 'ES384', 'ES512'];
+var RSA_KEY_ALGS = ['RS256', 'RS384', 'RS512'];
+var HS_ALGS = ['HS256', 'HS384', 'HS512'];
+
+if (psSupported) {
+  PUB_KEY_ALGS.splice(3, 0, 'PS256', 'PS384', 'PS512');
+  RSA_KEY_ALGS.splice(3, 0, 'PS256', 'PS384', 'PS512');
+}
+
+var verify = function (jwtString, secretOrPublicKey, options, callback) {
+  if ((typeof options === 'function') && !callback) {
+    callback = options;
+    options = {};
+  }
+
+  if (!options) {
+    options = {};
+  }
+
+  //clone this object since we are going to mutate it.
+  options = Object.assign({}, options);
+
+  var done;
+
+  if (callback) {
+    done = callback;
+  } else {
+    done = function(err, data) {
+      if (err) throw err;
+      return data;
+    };
+  }
+
+  if (options.clockTimestamp && typeof options.clockTimestamp !== 'number') {
+    return done(new JsonWebTokenError_1('clockTimestamp must be a number'));
+  }
+
+  if (options.nonce !== undefined && (typeof options.nonce !== 'string' || options.nonce.trim() === '')) {
+    return done(new JsonWebTokenError_1('nonce must be a non-empty string'));
+  }
+
+  var clockTimestamp = options.clockTimestamp || Math.floor(Date.now() / 1000);
+
+  if (!jwtString){
+    return done(new JsonWebTokenError_1('jwt must be provided'));
+  }
+
+  if (typeof jwtString !== 'string') {
+    return done(new JsonWebTokenError_1('jwt must be a string'));
+  }
+
+  var parts = jwtString.split('.');
+
+  if (parts.length !== 3){
+    return done(new JsonWebTokenError_1('jwt malformed'));
+  }
+
+  var decodedToken;
+
+  try {
+    decodedToken = decode(jwtString, { complete: true });
+  } catch(err) {
+    return done(err);
+  }
+
+  if (!decodedToken) {
+    return done(new JsonWebTokenError_1('invalid token'));
+  }
+
+  var header = decodedToken.header;
+  var getSecret;
+
+  if(typeof secretOrPublicKey === 'function') {
+    if(!callback) {
+      return done(new JsonWebTokenError_1('verify must be called asynchronous if secret or public key is provided as a callback'));
+    }
+
+    getSecret = secretOrPublicKey;
+  }
+  else {
+    getSecret = function(header, secretCallback) {
+      return secretCallback(null, secretOrPublicKey);
+    };
+  }
+
+  return getSecret(header, function(err, secretOrPublicKey) {
+    if(err) {
+      return done(new JsonWebTokenError_1('error in secret or public key callback: ' + err.message));
+    }
+
+    var hasSignature = parts[2].trim() !== '';
+
+    if (!hasSignature && secretOrPublicKey){
+      return done(new JsonWebTokenError_1('jwt signature is required'));
+    }
+
+    if (hasSignature && !secretOrPublicKey) {
+      return done(new JsonWebTokenError_1('secret or public key must be provided'));
+    }
+
+    if (!hasSignature && !options.algorithms) {
+      options.algorithms = ['none'];
+    }
+
+    if (!options.algorithms) {
+      options.algorithms = ~secretOrPublicKey.toString().indexOf('BEGIN CERTIFICATE') ||
+        ~secretOrPublicKey.toString().indexOf('BEGIN PUBLIC KEY') ? PUB_KEY_ALGS :
+        ~secretOrPublicKey.toString().indexOf('BEGIN RSA PUBLIC KEY') ? RSA_KEY_ALGS : HS_ALGS;
+
+    }
+
+    if (!~options.algorithms.indexOf(decodedToken.header.alg)) {
+      return done(new JsonWebTokenError_1('invalid algorithm'));
+    }
+
+    var valid;
+
+    try {
+      valid = jws.verify(jwtString, decodedToken.header.alg, secretOrPublicKey);
+    } catch (e) {
+      return done(e);
+    }
+
+    if (!valid) {
+      return done(new JsonWebTokenError_1('invalid signature'));
+    }
+
+    var payload = decodedToken.payload;
+
+    if (typeof payload.nbf !== 'undefined' && !options.ignoreNotBefore) {
+      if (typeof payload.nbf !== 'number') {
+        return done(new JsonWebTokenError_1('invalid nbf value'));
+      }
+      if (payload.nbf > clockTimestamp + (options.clockTolerance || 0)) {
+        return done(new NotBeforeError_1('jwt not active', new Date(payload.nbf * 1000)));
+      }
+    }
+
+    if (typeof payload.exp !== 'undefined' && !options.ignoreExpiration) {
+      if (typeof payload.exp !== 'number') {
+        return done(new JsonWebTokenError_1('invalid exp value'));
+      }
+      if (clockTimestamp >= payload.exp + (options.clockTolerance || 0)) {
+        return done(new TokenExpiredError_1('jwt expired', new Date(payload.exp * 1000)));
+      }
+    }
+
+    if (options.audience) {
+      var audiences = Array.isArray(options.audience) ? options.audience : [options.audience];
+      var target = Array.isArray(payload.aud) ? payload.aud : [payload.aud];
+
+      var match = target.some(function (targetAudience) {
+        return audiences.some(function (audience) {
+          return audience instanceof RegExp ? audience.test(targetAudience) : audience === targetAudience;
+        });
+      });
+
+      if (!match) {
+        return done(new JsonWebTokenError_1('jwt audience invalid. expected: ' + audiences.join(' or ')));
+      }
+    }
+
+    if (options.issuer) {
+      var invalid_issuer =
+              (typeof options.issuer === 'string' && payload.iss !== options.issuer) ||
+              (Array.isArray(options.issuer) && options.issuer.indexOf(payload.iss) === -1);
+
+      if (invalid_issuer) {
+        return done(new JsonWebTokenError_1('jwt issuer invalid. expected: ' + options.issuer));
+      }
+    }
+
+    if (options.subject) {
+      if (payload.sub !== options.subject) {
+        return done(new JsonWebTokenError_1('jwt subject invalid. expected: ' + options.subject));
+      }
+    }
+
+    if (options.jwtid) {
+      if (payload.jti !== options.jwtid) {
+        return done(new JsonWebTokenError_1('jwt jwtid invalid. expected: ' + options.jwtid));
+      }
+    }
+
+    if (options.nonce) {
+      if (payload.nonce !== options.nonce) {
+        return done(new JsonWebTokenError_1('jwt nonce invalid. expected: ' + options.nonce));
+      }
+    }
+
+    if (options.maxAge) {
+      if (typeof payload.iat !== 'number') {
+        return done(new JsonWebTokenError_1('iat required when maxAge is specified'));
+      }
+
+      var maxAgeTimestamp = timespan(options.maxAge, payload.iat);
+      if (typeof maxAgeTimestamp === 'undefined') {
+        return done(new JsonWebTokenError_1('"maxAge" should be a number of seconds or string representing a timespan eg: "1d", "20h", 60'));
+      }
+      if (clockTimestamp >= maxAgeTimestamp + (options.clockTolerance || 0)) {
+        return done(new TokenExpiredError_1('maxAge exceeded', new Date(maxAgeTimestamp * 1000)));
+      }
+    }
+
+    if (options.complete === true) {
+      var signature = decodedToken.signature;
+
+      return done(null, {
+        header: header,
+        payload: payload,
+        signature: signature
+      });
+    }
+
+    return done(null, payload);
+  });
+};
+
+/**
+ * lodash (Custom Build) <https://lodash.com/>
+ * Build: `lodash modularize exports="npm" -o ./`
+ * Copyright jQuery Foundation and other contributors <https://jquery.org/>
+ * Released under MIT license <https://lodash.com/license>
+ * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
+ * Copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ */
+/** Used as references for various `Number` constants. */
+var INFINITY$2 = 1 / 0,
+    MAX_SAFE_INTEGER = 9007199254740991,
+    MAX_INTEGER$2 = 1.7976931348623157e+308,
+    NAN$2 = 0 / 0;
+
+/** `Object#toString` result references. */
+var argsTag = '[object Arguments]',
+    funcTag = '[object Function]',
+    genTag = '[object GeneratorFunction]',
+    stringTag$1 = '[object String]',
+    symbolTag$2 = '[object Symbol]';
+
+/** Used to match leading and trailing whitespace. */
+var reTrim$2 = /^\s+|\s+$/g;
+
+/** Used to detect bad signed hexadecimal string values. */
+var reIsBadHex$2 = /^[-+]0x[0-9a-f]+$/i;
+
+/** Used to detect binary string values. */
+var reIsBinary$2 = /^0b[01]+$/i;
+
+/** Used to detect octal string values. */
+var reIsOctal$2 = /^0o[0-7]+$/i;
+
+/** Used to detect unsigned integer values. */
+var reIsUint = /^(?:0|[1-9]\d*)$/;
+
+/** Built-in method references without a dependency on `root`. */
+var freeParseInt$2 = parseInt;
+
+/**
+ * A specialized version of `_.map` for arrays without support for iteratee
+ * shorthands.
+ *
+ * @private
+ * @param {Array} [array] The array to iterate over.
+ * @param {Function} iteratee The function invoked per iteration.
+ * @returns {Array} Returns the new mapped array.
+ */
+function arrayMap(array, iteratee) {
+  var index = -1,
+      length = array ? array.length : 0,
+      result = Array(length);
+
+  while (++index < length) {
+    result[index] = iteratee(array[index], index, array);
+  }
+  return result;
+}
+
+/**
+ * The base implementation of `_.findIndex` and `_.findLastIndex` without
+ * support for iteratee shorthands.
+ *
+ * @private
+ * @param {Array} array The array to inspect.
+ * @param {Function} predicate The function invoked per iteration.
+ * @param {number} fromIndex The index to search from.
+ * @param {boolean} [fromRight] Specify iterating from right to left.
+ * @returns {number} Returns the index of the matched value, else `-1`.
+ */
+function baseFindIndex(array, predicate, fromIndex, fromRight) {
+  var length = array.length,
+      index = fromIndex + (fromRight ? 1 : -1);
+
+  while ((fromRight ? index-- : ++index < length)) {
+    if (predicate(array[index], index, array)) {
+      return index;
+    }
+  }
+  return -1;
+}
+
+/**
+ * The base implementation of `_.indexOf` without `fromIndex` bounds checks.
+ *
+ * @private
+ * @param {Array} array The array to inspect.
+ * @param {*} value The value to search for.
+ * @param {number} fromIndex The index to search from.
+ * @returns {number} Returns the index of the matched value, else `-1`.
+ */
+function baseIndexOf(array, value, fromIndex) {
+  if (value !== value) {
+    return baseFindIndex(array, baseIsNaN, fromIndex);
+  }
+  var index = fromIndex - 1,
+      length = array.length;
+
+  while (++index < length) {
+    if (array[index] === value) {
+      return index;
+    }
+  }
+  return -1;
+}
+
+/**
+ * The base implementation of `_.isNaN` without support for number objects.
+ *
+ * @private
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is `NaN`, else `false`.
+ */
+function baseIsNaN(value) {
+  return value !== value;
+}
+
+/**
+ * The base implementation of `_.times` without support for iteratee shorthands
+ * or max array length checks.
+ *
+ * @private
+ * @param {number} n The number of times to invoke `iteratee`.
+ * @param {Function} iteratee The function invoked per iteration.
+ * @returns {Array} Returns the array of results.
+ */
+function baseTimes(n, iteratee) {
+  var index = -1,
+      result = Array(n);
+
+  while (++index < n) {
+    result[index] = iteratee(index);
+  }
+  return result;
+}
+
+/**
+ * The base implementation of `_.values` and `_.valuesIn` which creates an
+ * array of `object` property values corresponding to the property names
+ * of `props`.
+ *
+ * @private
+ * @param {Object} object The object to query.
+ * @param {Array} props The property names to get values for.
+ * @returns {Object} Returns the array of property values.
+ */
+function baseValues(object, props) {
+  return arrayMap(props, function(key) {
+    return object[key];
+  });
+}
+
+/**
+ * Creates a unary function that invokes `func` with its argument transformed.
+ *
+ * @private
+ * @param {Function} func The function to wrap.
+ * @param {Function} transform The argument transform.
+ * @returns {Function} Returns the new function.
+ */
+function overArg$1(func, transform) {
+  return function(arg) {
+    return func(transform(arg));
+  };
+}
+
+/** Used for built-in method references. */
+var objectProto$6 = Object.prototype;
+
+/** Used to check objects for own properties. */
+var hasOwnProperty$1 = objectProto$6.hasOwnProperty;
+
+/**
+ * Used to resolve the
+ * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
+ * of values.
+ */
+var objectToString$6 = objectProto$6.toString;
+
+/** Built-in value references. */
+var propertyIsEnumerable = objectProto$6.propertyIsEnumerable;
+
+/* Built-in method references for those with the same name as other `lodash` methods. */
+var nativeKeys = overArg$1(Object.keys, Object),
+    nativeMax = Math.max;
+
+/**
+ * Creates an array of the enumerable property names of the array-like `value`.
+ *
+ * @private
+ * @param {*} value The value to query.
+ * @param {boolean} inherited Specify returning inherited property names.
+ * @returns {Array} Returns the array of property names.
+ */
+function arrayLikeKeys(value, inherited) {
+  // Safari 8.1 makes `arguments.callee` enumerable in strict mode.
+  // Safari 9 makes `arguments.length` enumerable in strict mode.
+  var result = (isArray$1(value) || isArguments(value))
+    ? baseTimes(value.length, String)
+    : [];
+
+  var length = result.length,
+      skipIndexes = !!length;
+
+  for (var key in value) {
+    if ((inherited || hasOwnProperty$1.call(value, key)) &&
+        !(skipIndexes && (key == 'length' || isIndex(key, length)))) {
+      result.push(key);
+    }
+  }
+  return result;
+}
+
+/**
+ * The base implementation of `_.keys` which doesn't treat sparse arrays as dense.
+ *
+ * @private
+ * @param {Object} object The object to query.
+ * @returns {Array} Returns the array of property names.
+ */
+function baseKeys(object) {
+  if (!isPrototype(object)) {
+    return nativeKeys(object);
+  }
+  var result = [];
+  for (var key in Object(object)) {
+    if (hasOwnProperty$1.call(object, key) && key != 'constructor') {
+      result.push(key);
+    }
+  }
+  return result;
+}
+
+/**
+ * Checks if `value` is a valid array-like index.
+ *
+ * @private
+ * @param {*} value The value to check.
+ * @param {number} [length=MAX_SAFE_INTEGER] The upper bounds of a valid index.
+ * @returns {boolean} Returns `true` if `value` is a valid index, else `false`.
+ */
+function isIndex(value, length) {
+  length = length == null ? MAX_SAFE_INTEGER : length;
+  return !!length &&
+    (typeof value == 'number' || reIsUint.test(value)) &&
+    (value > -1 && value % 1 == 0 && value < length);
+}
+
+/**
+ * Checks if `value` is likely a prototype object.
+ *
+ * @private
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a prototype, else `false`.
+ */
+function isPrototype(value) {
+  var Ctor = value && value.constructor,
+      proto = (typeof Ctor == 'function' && Ctor.prototype) || objectProto$6;
+
+  return value === proto;
+}
+
+/**
+ * Checks if `value` is in `collection`. If `collection` is a string, it's
+ * checked for a substring of `value`, otherwise
+ * [`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)
+ * is used for equality comparisons. If `fromIndex` is negative, it's used as
+ * the offset from the end of `collection`.
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Collection
+ * @param {Array|Object|string} collection The collection to inspect.
+ * @param {*} value The value to search for.
+ * @param {number} [fromIndex=0] The index to search from.
+ * @param- {Object} [guard] Enables use as an iteratee for methods like `_.reduce`.
+ * @returns {boolean} Returns `true` if `value` is found, else `false`.
+ * @example
+ *
+ * _.includes([1, 2, 3], 1);
+ * // => true
+ *
+ * _.includes([1, 2, 3], 1, 2);
+ * // => false
+ *
+ * _.includes({ 'a': 1, 'b': 2 }, 1);
+ * // => true
+ *
+ * _.includes('abcd', 'bc');
+ * // => true
+ */
+function includes(collection, value, fromIndex, guard) {
+  collection = isArrayLike(collection) ? collection : values(collection);
+  fromIndex = (fromIndex && !guard) ? toInteger$2(fromIndex) : 0;
+
+  var length = collection.length;
+  if (fromIndex < 0) {
+    fromIndex = nativeMax(length + fromIndex, 0);
+  }
+  return isString$1(collection)
+    ? (fromIndex <= length && collection.indexOf(value, fromIndex) > -1)
+    : (!!length && baseIndexOf(collection, value, fromIndex) > -1);
+}
+
+/**
+ * Checks if `value` is likely an `arguments` object.
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is an `arguments` object,
+ *  else `false`.
+ * @example
+ *
+ * _.isArguments(function() { return arguments; }());
+ * // => true
+ *
+ * _.isArguments([1, 2, 3]);
+ * // => false
+ */
+function isArguments(value) {
+  // Safari 8.1 makes `arguments.callee` enumerable in strict mode.
+  return isArrayLikeObject(value) && hasOwnProperty$1.call(value, 'callee') &&
+    (!propertyIsEnumerable.call(value, 'callee') || objectToString$6.call(value) == argsTag);
+}
+
+/**
+ * Checks if `value` is classified as an `Array` object.
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is an array, else `false`.
+ * @example
+ *
+ * _.isArray([1, 2, 3]);
+ * // => true
+ *
+ * _.isArray(document.body.children);
+ * // => false
+ *
+ * _.isArray('abc');
+ * // => false
+ *
+ * _.isArray(_.noop);
+ * // => false
+ */
+var isArray$1 = Array.isArray;
+
+/**
+ * Checks if `value` is array-like. A value is considered array-like if it's
+ * not a function and has a `value.length` that's an integer greater than or
+ * equal to `0` and less than or equal to `Number.MAX_SAFE_INTEGER`.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is array-like, else `false`.
+ * @example
+ *
+ * _.isArrayLike([1, 2, 3]);
+ * // => true
+ *
+ * _.isArrayLike(document.body.children);
+ * // => true
+ *
+ * _.isArrayLike('abc');
+ * // => true
+ *
+ * _.isArrayLike(_.noop);
+ * // => false
+ */
+function isArrayLike(value) {
+  return value != null && isLength(value.length) && !isFunction(value);
+}
+
+/**
+ * This method is like `_.isArrayLike` except that it also checks if `value`
+ * is an object.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is an array-like object,
+ *  else `false`.
+ * @example
+ *
+ * _.isArrayLikeObject([1, 2, 3]);
+ * // => true
+ *
+ * _.isArrayLikeObject(document.body.children);
+ * // => true
+ *
+ * _.isArrayLikeObject('abc');
+ * // => false
+ *
+ * _.isArrayLikeObject(_.noop);
+ * // => false
+ */
+function isArrayLikeObject(value) {
+  return isObjectLike$6(value) && isArrayLike(value);
+}
+
+/**
+ * Checks if `value` is classified as a `Function` object.
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a function, else `false`.
+ * @example
+ *
+ * _.isFunction(_);
+ * // => true
+ *
+ * _.isFunction(/abc/);
+ * // => false
+ */
+function isFunction(value) {
+  // The use of `Object#toString` avoids issues with the `typeof` operator
+  // in Safari 8-9 which returns 'object' for typed array and other constructors.
+  var tag = isObject$2(value) ? objectToString$6.call(value) : '';
+  return tag == funcTag || tag == genTag;
+}
+
+/**
+ * Checks if `value` is a valid array-like length.
+ *
+ * **Note:** This method is loosely based on
+ * [`ToLength`](http://ecma-international.org/ecma-262/7.0/#sec-tolength).
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a valid length, else `false`.
+ * @example
+ *
+ * _.isLength(3);
+ * // => true
+ *
+ * _.isLength(Number.MIN_VALUE);
+ * // => false
+ *
+ * _.isLength(Infinity);
+ * // => false
+ *
+ * _.isLength('3');
+ * // => false
+ */
+function isLength(value) {
+  return typeof value == 'number' &&
+    value > -1 && value % 1 == 0 && value <= MAX_SAFE_INTEGER;
+}
+
+/**
+ * Checks if `value` is the
+ * [language type](http://www.ecma-international.org/ecma-262/7.0/#sec-ecmascript-language-types)
+ * of `Object`. (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is an object, else `false`.
+ * @example
+ *
+ * _.isObject({});
+ * // => true
+ *
+ * _.isObject([1, 2, 3]);
+ * // => true
+ *
+ * _.isObject(_.noop);
+ * // => true
+ *
+ * _.isObject(null);
+ * // => false
+ */
+function isObject$2(value) {
+  var type = typeof value;
+  return !!value && (type == 'object' || type == 'function');
+}
+
+/**
+ * Checks if `value` is object-like. A value is object-like if it's not `null`
+ * and has a `typeof` result of "object".
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
+ * @example
+ *
+ * _.isObjectLike({});
+ * // => true
+ *
+ * _.isObjectLike([1, 2, 3]);
+ * // => true
+ *
+ * _.isObjectLike(_.noop);
+ * // => false
+ *
+ * _.isObjectLike(null);
+ * // => false
+ */
+function isObjectLike$6(value) {
+  return !!value && typeof value == 'object';
+}
+
+/**
+ * Checks if `value` is classified as a `String` primitive or object.
+ *
+ * @static
+ * @since 0.1.0
+ * @memberOf _
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a string, else `false`.
+ * @example
+ *
+ * _.isString('abc');
+ * // => true
+ *
+ * _.isString(1);
+ * // => false
+ */
+function isString$1(value) {
+  return typeof value == 'string' ||
+    (!isArray$1(value) && isObjectLike$6(value) && objectToString$6.call(value) == stringTag$1);
+}
+
+/**
+ * Checks if `value` is classified as a `Symbol` primitive or object.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a symbol, else `false`.
+ * @example
+ *
+ * _.isSymbol(Symbol.iterator);
+ * // => true
+ *
+ * _.isSymbol('abc');
+ * // => false
+ */
+function isSymbol$2(value) {
+  return typeof value == 'symbol' ||
+    (isObjectLike$6(value) && objectToString$6.call(value) == symbolTag$2);
+}
+
+/**
+ * Converts `value` to a finite number.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.12.0
+ * @category Lang
+ * @param {*} value The value to convert.
+ * @returns {number} Returns the converted number.
+ * @example
+ *
+ * _.toFinite(3.2);
+ * // => 3.2
+ *
+ * _.toFinite(Number.MIN_VALUE);
+ * // => 5e-324
+ *
+ * _.toFinite(Infinity);
+ * // => 1.7976931348623157e+308
+ *
+ * _.toFinite('3.2');
+ * // => 3.2
+ */
+function toFinite$2(value) {
+  if (!value) {
+    return value === 0 ? value : 0;
+  }
+  value = toNumber$2(value);
+  if (value === INFINITY$2 || value === -INFINITY$2) {
+    var sign = (value < 0 ? -1 : 1);
+    return sign * MAX_INTEGER$2;
+  }
+  return value === value ? value : 0;
+}
+
+/**
+ * Converts `value` to an integer.
+ *
+ * **Note:** This method is loosely based on
+ * [`ToInteger`](http://www.ecma-international.org/ecma-262/7.0/#sec-tointeger).
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to convert.
+ * @returns {number} Returns the converted integer.
+ * @example
+ *
+ * _.toInteger(3.2);
+ * // => 3
+ *
+ * _.toInteger(Number.MIN_VALUE);
+ * // => 0
+ *
+ * _.toInteger(Infinity);
+ * // => 1.7976931348623157e+308
+ *
+ * _.toInteger('3.2');
+ * // => 3
+ */
+function toInteger$2(value) {
+  var result = toFinite$2(value),
+      remainder = result % 1;
+
+  return result === result ? (remainder ? result - remainder : result) : 0;
+}
+
+/**
+ * Converts `value` to a number.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to process.
+ * @returns {number} Returns the number.
+ * @example
+ *
+ * _.toNumber(3.2);
+ * // => 3.2
+ *
+ * _.toNumber(Number.MIN_VALUE);
+ * // => 5e-324
+ *
+ * _.toNumber(Infinity);
+ * // => Infinity
+ *
+ * _.toNumber('3.2');
+ * // => 3.2
+ */
+function toNumber$2(value) {
+  if (typeof value == 'number') {
+    return value;
+  }
+  if (isSymbol$2(value)) {
+    return NAN$2;
+  }
+  if (isObject$2(value)) {
+    var other = typeof value.valueOf == 'function' ? value.valueOf() : value;
+    value = isObject$2(other) ? (other + '') : other;
+  }
+  if (typeof value != 'string') {
+    return value === 0 ? value : +value;
+  }
+  value = value.replace(reTrim$2, '');
+  var isBinary = reIsBinary$2.test(value);
+  return (isBinary || reIsOctal$2.test(value))
+    ? freeParseInt$2(value.slice(2), isBinary ? 2 : 8)
+    : (reIsBadHex$2.test(value) ? NAN$2 : +value);
+}
+
+/**
+ * Creates an array of the own enumerable property names of `object`.
+ *
+ * **Note:** Non-object values are coerced to objects. See the
+ * [ES spec](http://ecma-international.org/ecma-262/7.0/#sec-object.keys)
+ * for more details.
+ *
+ * @static
+ * @since 0.1.0
+ * @memberOf _
+ * @category Object
+ * @param {Object} object The object to query.
+ * @returns {Array} Returns the array of property names.
+ * @example
+ *
+ * function Foo() {
+ *   this.a = 1;
+ *   this.b = 2;
+ * }
+ *
+ * Foo.prototype.c = 3;
+ *
+ * _.keys(new Foo);
+ * // => ['a', 'b'] (iteration order is not guaranteed)
+ *
+ * _.keys('hi');
+ * // => ['0', '1']
+ */
+function keys(object) {
+  return isArrayLike(object) ? arrayLikeKeys(object) : baseKeys(object);
+}
+
+/**
+ * Creates an array of the own enumerable string keyed property values of `object`.
+ *
+ * **Note:** Non-object values are coerced to objects.
+ *
+ * @static
+ * @since 0.1.0
+ * @memberOf _
+ * @category Object
+ * @param {Object} object The object to query.
+ * @returns {Array} Returns the array of property values.
+ * @example
+ *
+ * function Foo() {
+ *   this.a = 1;
+ *   this.b = 2;
+ * }
+ *
+ * Foo.prototype.c = 3;
+ *
+ * _.values(new Foo);
+ * // => [1, 2] (iteration order is not guaranteed)
+ *
+ * _.values('hi');
+ * // => ['h', 'i']
+ */
+function values(object) {
+  return object ? baseValues(object, keys(object)) : [];
+}
+
+var lodash_includes = includes;
+
+/**
+ * lodash 3.0.3 (Custom Build) <https://lodash.com/>
+ * Build: `lodash modularize exports="npm" -o ./`
+ * Copyright 2012-2016 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2016 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <https://lodash.com/license>
+ */
+/** `Object#toString` result references. */
+var boolTag = '[object Boolean]';
+
+/** Used for built-in method references. */
+var objectProto$5 = Object.prototype;
+
+/**
+ * Used to resolve the [`toStringTag`](http://ecma-international.org/ecma-262/6.0/#sec-object.prototype.tostring)
+ * of values.
+ */
+var objectToString$5 = objectProto$5.toString;
+
+/**
+ * Checks if `value` is classified as a boolean primitive or object.
+ *
+ * @static
+ * @memberOf _
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
+ * @example
+ *
+ * _.isBoolean(false);
+ * // => true
+ *
+ * _.isBoolean(null);
+ * // => false
+ */
+function isBoolean(value) {
+  return value === true || value === false ||
+    (isObjectLike$5(value) && objectToString$5.call(value) == boolTag);
+}
+
+/**
+ * Checks if `value` is object-like. A value is object-like if it's not `null`
+ * and has a `typeof` result of "object".
+ *
+ * @static
+ * @memberOf _
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
+ * @example
+ *
+ * _.isObjectLike({});
+ * // => true
+ *
+ * _.isObjectLike([1, 2, 3]);
+ * // => true
+ *
+ * _.isObjectLike(_.noop);
+ * // => false
+ *
+ * _.isObjectLike(null);
+ * // => false
+ */
+function isObjectLike$5(value) {
+  return !!value && typeof value == 'object';
+}
+
+var lodash_isboolean = isBoolean;
+
+/**
+ * lodash (Custom Build) <https://lodash.com/>
+ * Build: `lodash modularize exports="npm" -o ./`
+ * Copyright jQuery Foundation and other contributors <https://jquery.org/>
+ * Released under MIT license <https://lodash.com/license>
+ * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
+ * Copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ */
+/** Used as references for various `Number` constants. */
+var INFINITY$1 = 1 / 0,
+    MAX_INTEGER$1 = 1.7976931348623157e+308,
+    NAN$1 = 0 / 0;
+
+/** `Object#toString` result references. */
+var symbolTag$1 = '[object Symbol]';
+
+/** Used to match leading and trailing whitespace. */
+var reTrim$1 = /^\s+|\s+$/g;
+
+/** Used to detect bad signed hexadecimal string values. */
+var reIsBadHex$1 = /^[-+]0x[0-9a-f]+$/i;
+
+/** Used to detect binary string values. */
+var reIsBinary$1 = /^0b[01]+$/i;
+
+/** Used to detect octal string values. */
+var reIsOctal$1 = /^0o[0-7]+$/i;
+
+/** Built-in method references without a dependency on `root`. */
+var freeParseInt$1 = parseInt;
+
+/** Used for built-in method references. */
+var objectProto$4 = Object.prototype;
+
+/**
+ * Used to resolve the
+ * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
+ * of values.
+ */
+var objectToString$4 = objectProto$4.toString;
+
+/**
+ * Checks if `value` is an integer.
+ *
+ * **Note:** This method is based on
+ * [`Number.isInteger`](https://mdn.io/Number/isInteger).
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is an integer, else `false`.
+ * @example
+ *
+ * _.isInteger(3);
+ * // => true
+ *
+ * _.isInteger(Number.MIN_VALUE);
+ * // => false
+ *
+ * _.isInteger(Infinity);
+ * // => false
+ *
+ * _.isInteger('3');
+ * // => false
+ */
+function isInteger(value) {
+  return typeof value == 'number' && value == toInteger$1(value);
+}
+
+/**
+ * Checks if `value` is the
+ * [language type](http://www.ecma-international.org/ecma-262/7.0/#sec-ecmascript-language-types)
+ * of `Object`. (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is an object, else `false`.
+ * @example
+ *
+ * _.isObject({});
+ * // => true
+ *
+ * _.isObject([1, 2, 3]);
+ * // => true
+ *
+ * _.isObject(_.noop);
+ * // => true
+ *
+ * _.isObject(null);
+ * // => false
+ */
+function isObject$1(value) {
+  var type = typeof value;
+  return !!value && (type == 'object' || type == 'function');
+}
+
+/**
+ * Checks if `value` is object-like. A value is object-like if it's not `null`
+ * and has a `typeof` result of "object".
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
+ * @example
+ *
+ * _.isObjectLike({});
+ * // => true
+ *
+ * _.isObjectLike([1, 2, 3]);
+ * // => true
+ *
+ * _.isObjectLike(_.noop);
+ * // => false
+ *
+ * _.isObjectLike(null);
+ * // => false
+ */
+function isObjectLike$4(value) {
+  return !!value && typeof value == 'object';
+}
+
+/**
+ * Checks if `value` is classified as a `Symbol` primitive or object.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a symbol, else `false`.
+ * @example
+ *
+ * _.isSymbol(Symbol.iterator);
+ * // => true
+ *
+ * _.isSymbol('abc');
+ * // => false
+ */
+function isSymbol$1(value) {
+  return typeof value == 'symbol' ||
+    (isObjectLike$4(value) && objectToString$4.call(value) == symbolTag$1);
+}
+
+/**
+ * Converts `value` to a finite number.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.12.0
+ * @category Lang
+ * @param {*} value The value to convert.
+ * @returns {number} Returns the converted number.
+ * @example
+ *
+ * _.toFinite(3.2);
+ * // => 3.2
+ *
+ * _.toFinite(Number.MIN_VALUE);
+ * // => 5e-324
+ *
+ * _.toFinite(Infinity);
+ * // => 1.7976931348623157e+308
+ *
+ * _.toFinite('3.2');
+ * // => 3.2
+ */
+function toFinite$1(value) {
+  if (!value) {
+    return value === 0 ? value : 0;
+  }
+  value = toNumber$1(value);
+  if (value === INFINITY$1 || value === -INFINITY$1) {
+    var sign = (value < 0 ? -1 : 1);
+    return sign * MAX_INTEGER$1;
+  }
+  return value === value ? value : 0;
+}
+
+/**
+ * Converts `value` to an integer.
+ *
+ * **Note:** This method is loosely based on
+ * [`ToInteger`](http://www.ecma-international.org/ecma-262/7.0/#sec-tointeger).
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to convert.
+ * @returns {number} Returns the converted integer.
+ * @example
+ *
+ * _.toInteger(3.2);
+ * // => 3
+ *
+ * _.toInteger(Number.MIN_VALUE);
+ * // => 0
+ *
+ * _.toInteger(Infinity);
+ * // => 1.7976931348623157e+308
+ *
+ * _.toInteger('3.2');
+ * // => 3
+ */
+function toInteger$1(value) {
+  var result = toFinite$1(value),
+      remainder = result % 1;
+
+  return result === result ? (remainder ? result - remainder : result) : 0;
+}
+
+/**
+ * Converts `value` to a number.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to process.
+ * @returns {number} Returns the number.
+ * @example
+ *
+ * _.toNumber(3.2);
+ * // => 3.2
+ *
+ * _.toNumber(Number.MIN_VALUE);
+ * // => 5e-324
+ *
+ * _.toNumber(Infinity);
+ * // => Infinity
+ *
+ * _.toNumber('3.2');
+ * // => 3.2
+ */
+function toNumber$1(value) {
+  if (typeof value == 'number') {
+    return value;
+  }
+  if (isSymbol$1(value)) {
+    return NAN$1;
+  }
+  if (isObject$1(value)) {
+    var other = typeof value.valueOf == 'function' ? value.valueOf() : value;
+    value = isObject$1(other) ? (other + '') : other;
+  }
+  if (typeof value != 'string') {
+    return value === 0 ? value : +value;
+  }
+  value = value.replace(reTrim$1, '');
+  var isBinary = reIsBinary$1.test(value);
+  return (isBinary || reIsOctal$1.test(value))
+    ? freeParseInt$1(value.slice(2), isBinary ? 2 : 8)
+    : (reIsBadHex$1.test(value) ? NAN$1 : +value);
+}
+
+var lodash_isinteger = isInteger;
+
+/**
+ * lodash 3.0.3 (Custom Build) <https://lodash.com/>
+ * Build: `lodash modularize exports="npm" -o ./`
+ * Copyright 2012-2016 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2016 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <https://lodash.com/license>
+ */
+/** `Object#toString` result references. */
+var numberTag = '[object Number]';
+
+/** Used for built-in method references. */
+var objectProto$3 = Object.prototype;
+
+/**
+ * Used to resolve the [`toStringTag`](http://ecma-international.org/ecma-262/6.0/#sec-object.prototype.tostring)
+ * of values.
+ */
+var objectToString$3 = objectProto$3.toString;
+
+/**
+ * Checks if `value` is object-like. A value is object-like if it's not `null`
+ * and has a `typeof` result of "object".
+ *
+ * @static
+ * @memberOf _
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
+ * @example
+ *
+ * _.isObjectLike({});
+ * // => true
+ *
+ * _.isObjectLike([1, 2, 3]);
+ * // => true
+ *
+ * _.isObjectLike(_.noop);
+ * // => false
+ *
+ * _.isObjectLike(null);
+ * // => false
+ */
+function isObjectLike$3(value) {
+  return !!value && typeof value == 'object';
+}
+
+/**
+ * Checks if `value` is classified as a `Number` primitive or object.
+ *
+ * **Note:** To exclude `Infinity`, `-Infinity`, and `NaN`, which are classified
+ * as numbers, use the `_.isFinite` method.
+ *
+ * @static
+ * @memberOf _
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
+ * @example
+ *
+ * _.isNumber(3);
+ * // => true
+ *
+ * _.isNumber(Number.MIN_VALUE);
+ * // => true
+ *
+ * _.isNumber(Infinity);
+ * // => true
+ *
+ * _.isNumber('3');
+ * // => false
+ */
+function isNumber(value) {
+  return typeof value == 'number' ||
+    (isObjectLike$3(value) && objectToString$3.call(value) == numberTag);
+}
+
+var lodash_isnumber = isNumber;
+
+/**
+ * lodash (Custom Build) <https://lodash.com/>
+ * Build: `lodash modularize exports="npm" -o ./`
+ * Copyright jQuery Foundation and other contributors <https://jquery.org/>
+ * Released under MIT license <https://lodash.com/license>
+ * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
+ * Copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ */
+/** `Object#toString` result references. */
+var objectTag = '[object Object]';
+
+/**
+ * Checks if `value` is a host object in IE < 9.
+ *
+ * @private
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a host object, else `false`.
+ */
+function isHostObject(value) {
+  // Many host objects are `Object` objects that can coerce to strings
+  // despite having improperly defined `toString` methods.
+  var result = false;
+  if (value != null && typeof value.toString != 'function') {
+    try {
+      result = !!(value + '');
+    } catch (e) {}
+  }
+  return result;
+}
+
+/**
+ * Creates a unary function that invokes `func` with its argument transformed.
+ *
+ * @private
+ * @param {Function} func The function to wrap.
+ * @param {Function} transform The argument transform.
+ * @returns {Function} Returns the new function.
+ */
+function overArg(func, transform) {
+  return function(arg) {
+    return func(transform(arg));
+  };
+}
+
+/** Used for built-in method references. */
+var funcProto = Function.prototype,
+    objectProto$2 = Object.prototype;
+
+/** Used to resolve the decompiled source of functions. */
+var funcToString = funcProto.toString;
+
+/** Used to check objects for own properties. */
+var hasOwnProperty = objectProto$2.hasOwnProperty;
+
+/** Used to infer the `Object` constructor. */
+var objectCtorString = funcToString.call(Object);
+
+/**
+ * Used to resolve the
+ * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
+ * of values.
+ */
+var objectToString$2 = objectProto$2.toString;
+
+/** Built-in value references. */
+var getPrototype = overArg(Object.getPrototypeOf, Object);
+
+/**
+ * Checks if `value` is object-like. A value is object-like if it's not `null`
+ * and has a `typeof` result of "object".
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
+ * @example
+ *
+ * _.isObjectLike({});
+ * // => true
+ *
+ * _.isObjectLike([1, 2, 3]);
+ * // => true
+ *
+ * _.isObjectLike(_.noop);
+ * // => false
+ *
+ * _.isObjectLike(null);
+ * // => false
+ */
+function isObjectLike$2(value) {
+  return !!value && typeof value == 'object';
+}
+
+/**
+ * Checks if `value` is a plain object, that is, an object created by the
+ * `Object` constructor or one with a `[[Prototype]]` of `null`.
+ *
+ * @static
+ * @memberOf _
+ * @since 0.8.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a plain object, else `false`.
+ * @example
+ *
+ * function Foo() {
+ *   this.a = 1;
+ * }
+ *
+ * _.isPlainObject(new Foo);
+ * // => false
+ *
+ * _.isPlainObject([1, 2, 3]);
+ * // => false
+ *
+ * _.isPlainObject({ 'x': 0, 'y': 0 });
+ * // => true
+ *
+ * _.isPlainObject(Object.create(null));
+ * // => true
+ */
+function isPlainObject(value) {
+  if (!isObjectLike$2(value) ||
+      objectToString$2.call(value) != objectTag || isHostObject(value)) {
+    return false;
+  }
+  var proto = getPrototype(value);
+  if (proto === null) {
+    return true;
+  }
+  var Ctor = hasOwnProperty.call(proto, 'constructor') && proto.constructor;
+  return (typeof Ctor == 'function' &&
+    Ctor instanceof Ctor && funcToString.call(Ctor) == objectCtorString);
+}
+
+var lodash_isplainobject = isPlainObject;
+
+/**
+ * lodash 4.0.1 (Custom Build) <https://lodash.com/>
+ * Build: `lodash modularize exports="npm" -o ./`
+ * Copyright 2012-2016 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2016 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <https://lodash.com/license>
+ */
+/** `Object#toString` result references. */
+var stringTag = '[object String]';
+
+/** Used for built-in method references. */
+var objectProto$1 = Object.prototype;
+
+/**
+ * Used to resolve the [`toStringTag`](http://ecma-international.org/ecma-262/6.0/#sec-object.prototype.tostring)
+ * of values.
+ */
+var objectToString$1 = objectProto$1.toString;
+
+/**
+ * Checks if `value` is classified as an `Array` object.
+ *
+ * @static
+ * @memberOf _
+ * @type Function
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
+ * @example
+ *
+ * _.isArray([1, 2, 3]);
+ * // => true
+ *
+ * _.isArray(document.body.children);
+ * // => false
+ *
+ * _.isArray('abc');
+ * // => false
+ *
+ * _.isArray(_.noop);
+ * // => false
+ */
+var isArray = Array.isArray;
+
+/**
+ * Checks if `value` is object-like. A value is object-like if it's not `null`
+ * and has a `typeof` result of "object".
+ *
+ * @static
+ * @memberOf _
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
+ * @example
+ *
+ * _.isObjectLike({});
+ * // => true
+ *
+ * _.isObjectLike([1, 2, 3]);
+ * // => true
+ *
+ * _.isObjectLike(_.noop);
+ * // => false
+ *
+ * _.isObjectLike(null);
+ * // => false
+ */
+function isObjectLike$1(value) {
+  return !!value && typeof value == 'object';
+}
+
+/**
+ * Checks if `value` is classified as a `String` primitive or object.
+ *
+ * @static
+ * @memberOf _
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
+ * @example
+ *
+ * _.isString('abc');
+ * // => true
+ *
+ * _.isString(1);
+ * // => false
+ */
+function isString(value) {
+  return typeof value == 'string' ||
+    (!isArray(value) && isObjectLike$1(value) && objectToString$1.call(value) == stringTag);
+}
+
+var lodash_isstring = isString;
+
+/**
+ * lodash (Custom Build) <https://lodash.com/>
+ * Build: `lodash modularize exports="npm" -o ./`
+ * Copyright jQuery Foundation and other contributors <https://jquery.org/>
+ * Released under MIT license <https://lodash.com/license>
+ * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
+ * Copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ */
+/** Used as the `TypeError` message for "Functions" methods. */
+var FUNC_ERROR_TEXT = 'Expected a function';
+
+/** Used as references for various `Number` constants. */
+var INFINITY = 1 / 0,
+    MAX_INTEGER = 1.7976931348623157e+308,
+    NAN = 0 / 0;
+
+/** `Object#toString` result references. */
+var symbolTag = '[object Symbol]';
+
+/** Used to match leading and trailing whitespace. */
+var reTrim = /^\s+|\s+$/g;
+
+/** Used to detect bad signed hexadecimal string values. */
+var reIsBadHex = /^[-+]0x[0-9a-f]+$/i;
+
+/** Used to detect binary string values. */
+var reIsBinary = /^0b[01]+$/i;
+
+/** Used to detect octal string values. */
+var reIsOctal = /^0o[0-7]+$/i;
+
+/** Built-in method references without a dependency on `root`. */
+var freeParseInt = parseInt;
+
+/** Used for built-in method references. */
+var objectProto = Object.prototype;
+
+/**
+ * Used to resolve the
+ * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
+ * of values.
+ */
+var objectToString = objectProto.toString;
+
+/**
+ * Creates a function that invokes `func`, with the `this` binding and arguments
+ * of the created function, while it's called less than `n` times. Subsequent
+ * calls to the created function return the result of the last `func` invocation.
+ *
+ * @static
+ * @memberOf _
+ * @since 3.0.0
+ * @category Function
+ * @param {number} n The number of calls at which `func` is no longer invoked.
+ * @param {Function} func The function to restrict.
+ * @returns {Function} Returns the new restricted function.
+ * @example
+ *
+ * jQuery(element).on('click', _.before(5, addContactToList));
+ * // => Allows adding up to 4 contacts to the list.
+ */
+function before(n, func) {
+  var result;
+  if (typeof func != 'function') {
+    throw new TypeError(FUNC_ERROR_TEXT);
+  }
+  n = toInteger(n);
+  return function() {
+    if (--n > 0) {
+      result = func.apply(this, arguments);
+    }
+    if (n <= 1) {
+      func = undefined;
+    }
+    return result;
+  };
+}
+
+/**
+ * Creates a function that is restricted to invoking `func` once. Repeat calls
+ * to the function return the value of the first invocation. The `func` is
+ * invoked with the `this` binding and arguments of the created function.
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Function
+ * @param {Function} func The function to restrict.
+ * @returns {Function} Returns the new restricted function.
+ * @example
+ *
+ * var initialize = _.once(createApplication);
+ * initialize();
+ * initialize();
+ * // => `createApplication` is invoked once
+ */
+function once(func) {
+  return before(2, func);
+}
+
+/**
+ * Checks if `value` is the
+ * [language type](http://www.ecma-international.org/ecma-262/7.0/#sec-ecmascript-language-types)
+ * of `Object`. (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is an object, else `false`.
+ * @example
+ *
+ * _.isObject({});
+ * // => true
+ *
+ * _.isObject([1, 2, 3]);
+ * // => true
+ *
+ * _.isObject(_.noop);
+ * // => true
+ *
+ * _.isObject(null);
+ * // => false
+ */
+function isObject(value) {
+  var type = typeof value;
+  return !!value && (type == 'object' || type == 'function');
+}
+
+/**
+ * Checks if `value` is object-like. A value is object-like if it's not `null`
+ * and has a `typeof` result of "object".
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
+ * @example
+ *
+ * _.isObjectLike({});
+ * // => true
+ *
+ * _.isObjectLike([1, 2, 3]);
+ * // => true
+ *
+ * _.isObjectLike(_.noop);
+ * // => false
+ *
+ * _.isObjectLike(null);
+ * // => false
+ */
+function isObjectLike(value) {
+  return !!value && typeof value == 'object';
+}
+
+/**
+ * Checks if `value` is classified as a `Symbol` primitive or object.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a symbol, else `false`.
+ * @example
+ *
+ * _.isSymbol(Symbol.iterator);
+ * // => true
+ *
+ * _.isSymbol('abc');
+ * // => false
+ */
+function isSymbol(value) {
+  return typeof value == 'symbol' ||
+    (isObjectLike(value) && objectToString.call(value) == symbolTag);
+}
+
+/**
+ * Converts `value` to a finite number.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.12.0
+ * @category Lang
+ * @param {*} value The value to convert.
+ * @returns {number} Returns the converted number.
+ * @example
+ *
+ * _.toFinite(3.2);
+ * // => 3.2
+ *
+ * _.toFinite(Number.MIN_VALUE);
+ * // => 5e-324
+ *
+ * _.toFinite(Infinity);
+ * // => 1.7976931348623157e+308
+ *
+ * _.toFinite('3.2');
+ * // => 3.2
+ */
+function toFinite(value) {
+  if (!value) {
+    return value === 0 ? value : 0;
+  }
+  value = toNumber(value);
+  if (value === INFINITY || value === -INFINITY) {
+    var sign = (value < 0 ? -1 : 1);
+    return sign * MAX_INTEGER;
+  }
+  return value === value ? value : 0;
+}
+
+/**
+ * Converts `value` to an integer.
+ *
+ * **Note:** This method is loosely based on
+ * [`ToInteger`](http://www.ecma-international.org/ecma-262/7.0/#sec-tointeger).
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to convert.
+ * @returns {number} Returns the converted integer.
+ * @example
+ *
+ * _.toInteger(3.2);
+ * // => 3
+ *
+ * _.toInteger(Number.MIN_VALUE);
+ * // => 0
+ *
+ * _.toInteger(Infinity);
+ * // => 1.7976931348623157e+308
+ *
+ * _.toInteger('3.2');
+ * // => 3
+ */
+function toInteger(value) {
+  var result = toFinite(value),
+      remainder = result % 1;
+
+  return result === result ? (remainder ? result - remainder : result) : 0;
+}
+
+/**
+ * Converts `value` to a number.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to process.
+ * @returns {number} Returns the number.
+ * @example
+ *
+ * _.toNumber(3.2);
+ * // => 3.2
+ *
+ * _.toNumber(Number.MIN_VALUE);
+ * // => 5e-324
+ *
+ * _.toNumber(Infinity);
+ * // => Infinity
+ *
+ * _.toNumber('3.2');
+ * // => 3.2
+ */
+function toNumber(value) {
+  if (typeof value == 'number') {
+    return value;
+  }
+  if (isSymbol(value)) {
+    return NAN;
+  }
+  if (isObject(value)) {
+    var other = typeof value.valueOf == 'function' ? value.valueOf() : value;
+    value = isObject(other) ? (other + '') : other;
+  }
+  if (typeof value != 'string') {
+    return value === 0 ? value : +value;
+  }
+  value = value.replace(reTrim, '');
+  var isBinary = reIsBinary.test(value);
+  return (isBinary || reIsOctal.test(value))
+    ? freeParseInt(value.slice(2), isBinary ? 2 : 8)
+    : (reIsBadHex.test(value) ? NAN : +value);
+}
+
+var lodash_once = once;
+
+var SUPPORTED_ALGS = ['RS256', 'RS384', 'RS512', 'ES256', 'ES384', 'ES512', 'HS256', 'HS384', 'HS512', 'none'];
+if (psSupported) {
+  SUPPORTED_ALGS.splice(3, 0, 'PS256', 'PS384', 'PS512');
+}
+
+var sign_options_schema = {
+  expiresIn: { isValid: function(value) { return lodash_isinteger(value) || (lodash_isstring(value) && value); }, message: '"expiresIn" should be a number of seconds or string representing a timespan' },
+  notBefore: { isValid: function(value) { return lodash_isinteger(value) || (lodash_isstring(value) && value); }, message: '"notBefore" should be a number of seconds or string representing a timespan' },
+  audience: { isValid: function(value) { return lodash_isstring(value) || Array.isArray(value); }, message: '"audience" must be a string or array' },
+  algorithm: { isValid: lodash_includes.bind(null, SUPPORTED_ALGS), message: '"algorithm" must be a valid string enum value' },
+  header: { isValid: lodash_isplainobject, message: '"header" must be an object' },
+  encoding: { isValid: lodash_isstring, message: '"encoding" must be a string' },
+  issuer: { isValid: lodash_isstring, message: '"issuer" must be a string' },
+  subject: { isValid: lodash_isstring, message: '"subject" must be a string' },
+  jwtid: { isValid: lodash_isstring, message: '"jwtid" must be a string' },
+  noTimestamp: { isValid: lodash_isboolean, message: '"noTimestamp" must be a boolean' },
+  keyid: { isValid: lodash_isstring, message: '"keyid" must be a string' },
+  mutatePayload: { isValid: lodash_isboolean, message: '"mutatePayload" must be a boolean' }
+};
+
+var registered_claims_schema = {
+  iat: { isValid: lodash_isnumber, message: '"iat" should be a number of seconds' },
+  exp: { isValid: lodash_isnumber, message: '"exp" should be a number of seconds' },
+  nbf: { isValid: lodash_isnumber, message: '"nbf" should be a number of seconds' }
+};
+
+function validate(schema, allowUnknown, object, parameterName) {
+  if (!lodash_isplainobject(object)) {
+    throw new Error('Expected "' + parameterName + '" to be a plain object.');
+  }
+  Object.keys(object)
+    .forEach(function(key) {
+      var validator = schema[key];
+      if (!validator) {
+        if (!allowUnknown) {
+          throw new Error('"' + key + '" is not allowed in "' + parameterName + '"');
+        }
+        return;
+      }
+      if (!validator.isValid(object[key])) {
+        throw new Error(validator.message);
+      }
+    });
+}
+
+function validateOptions(options) {
+  return validate(sign_options_schema, false, options, 'options');
+}
+
+function validatePayload(payload) {
+  return validate(registered_claims_schema, true, payload, 'payload');
+}
+
+var options_to_payload = {
+  'audience': 'aud',
+  'issuer': 'iss',
+  'subject': 'sub',
+  'jwtid': 'jti'
+};
+
+var options_for_objects = [
+  'expiresIn',
+  'notBefore',
+  'noTimestamp',
+  'audience',
+  'issuer',
+  'subject',
+  'jwtid',
+];
+
+var sign = function (payload, secretOrPrivateKey, options, callback) {
+  if (typeof options === 'function') {
+    callback = options;
+    options = {};
+  } else {
+    options = options || {};
+  }
+
+  var isObjectPayload = typeof payload === 'object' &&
+                        !Buffer.isBuffer(payload);
+
+  var header = Object.assign({
+    alg: options.algorithm || 'HS256',
+    typ: isObjectPayload ? 'JWT' : undefined,
+    kid: options.keyid
+  }, options.header);
+
+  function failure(err) {
+    if (callback) {
+      return callback(err);
+    }
+    throw err;
+  }
+
+  if (!secretOrPrivateKey && options.algorithm !== 'none') {
+    return failure(new Error('secretOrPrivateKey must have a value'));
+  }
+
+  if (typeof payload === 'undefined') {
+    return failure(new Error('payload is required'));
+  } else if (isObjectPayload) {
+    try {
+      validatePayload(payload);
+    }
+    catch (error) {
+      return failure(error);
+    }
+    if (!options.mutatePayload) {
+      payload = Object.assign({},payload);
+    }
+  } else {
+    var invalid_options = options_for_objects.filter(function (opt) {
+      return typeof options[opt] !== 'undefined';
+    });
+
+    if (invalid_options.length > 0) {
+      return failure(new Error('invalid ' + invalid_options.join(',') + ' option for ' + (typeof payload ) + ' payload'));
+    }
+  }
+
+  if (typeof payload.exp !== 'undefined' && typeof options.expiresIn !== 'undefined') {
+    return failure(new Error('Bad "options.expiresIn" option the payload already has an "exp" property.'));
+  }
+
+  if (typeof payload.nbf !== 'undefined' && typeof options.notBefore !== 'undefined') {
+    return failure(new Error('Bad "options.notBefore" option the payload already has an "nbf" property.'));
+  }
+
+  try {
+    validateOptions(options);
+  }
+  catch (error) {
+    return failure(error);
+  }
+
+  var timestamp = payload.iat || Math.floor(Date.now() / 1000);
+
+  if (options.noTimestamp) {
+    delete payload.iat;
+  } else if (isObjectPayload) {
+    payload.iat = timestamp;
+  }
+
+  if (typeof options.notBefore !== 'undefined') {
+    try {
+      payload.nbf = timespan(options.notBefore, timestamp);
+    }
+    catch (err) {
+      return failure(err);
+    }
+    if (typeof payload.nbf === 'undefined') {
+      return failure(new Error('"notBefore" should be a number of seconds or string representing a timespan eg: "1d", "20h", 60'));
+    }
+  }
+
+  if (typeof options.expiresIn !== 'undefined' && typeof payload === 'object') {
+    try {
+      payload.exp = timespan(options.expiresIn, timestamp);
+    }
+    catch (err) {
+      return failure(err);
+    }
+    if (typeof payload.exp === 'undefined') {
+      return failure(new Error('"expiresIn" should be a number of seconds or string representing a timespan eg: "1d", "20h", 60'));
+    }
+  }
+
+  Object.keys(options_to_payload).forEach(function (key) {
+    var claim = options_to_payload[key];
+    if (typeof options[key] !== 'undefined') {
+      if (typeof payload[claim] !== 'undefined') {
+        return failure(new Error('Bad "options.' + key + '" option. The payload already has an "' + claim + '" property.'));
+      }
+      payload[claim] = options[key];
+    }
+  });
+
+  var encoding = options.encoding || 'utf8';
+
+  if (typeof callback === 'function') {
+    callback = callback && lodash_once(callback);
+
+    jws.createSign({
+      header: header,
+      privateKey: secretOrPrivateKey,
+      payload: payload,
+      encoding: encoding
+    }).once('error', callback)
+      .once('done', function (signature) {
+        callback(null, signature);
+      });
+  } else {
+    return jws.sign({header: header, payload: payload, secret: secretOrPrivateKey, encoding: encoding});
+  }
+};
+
+var jsonwebtoken = {
+  decode: decode,
+  verify: verify,
+  sign: sign,
+  JsonWebTokenError: JsonWebTokenError_1,
+  NotBeforeError: NotBeforeError_1,
+  TokenExpiredError: TokenExpiredError_1,
+};
+
+/**
+ * Example to refresh tokens using https://github.com/auth0/node-jsonwebtoken
+ * It was requested to be introduced at as part of the jsonwebtoken library,
+ * since we feel it does not add too much value but it will add code to mantain
+ * we won't include it.
+ *
+ * I create this gist just to help those who want to auto-refresh JWTs.
+ */
+class TokenGenerator {
+  constructor(privateKey, options) {
+    this.privateKey = privateKey;
+    this.options = options;
+  }
+  sign(payload) {
+    const jwtSignOptions = {
+      ...this.options,
+      jwtid: uuid__namespace.v4()
+    };
+    return jsonwebtoken.sign(payload, this.privateKey, jwtSignOptions);
+  }
+  verify(token) {
+    return jsonwebtoken.verify(token, this.privateKey, this.options);
+  }
+  refresh(token) {
+    const payload = jsonwebtoken.verify(token, this.privateKey, this.options);
+    delete payload.sub;
+    delete payload.iss;
+    delete payload.aud;
+    delete payload.iat;
+    delete payload.exp;
+    delete payload.nbf;
+    delete payload.jti; //We are generating a new token, if you are using jwtid during signing, pass it in refreshOptions
+    const jwtSignOptions = {
+      ...this.options,
+      jwtid: uuid__namespace.v4()
+    };
+    // The first signing converted all needed options into claims, they are already in the payload
+    return jsonwebtoken.sign(payload, this.privateKey, jwtSignOptions);
+  }
+}
+
+/**
+ * Clase servidor encargada de configurar las rutas.
+ *
+ * que el codigo se disperse entre diferentes proyectos.
+ */
+class Server {
+  /**
+   *
+   * @param {*} config
+   * @param {*} statics
+   * @param {*} routes
+   */
+  constructor(config, statics, routes) {
+    this.app = express__default["default"]();
+    this.express_config = lodash__default["default"].defaultsDeep(config, {
+      helmet: true,
+      json: true,
+      urlencoded: true,
+      compression: true,
+      cors: {
+        origin: true,
+        credentials: true
+      },
+      fileupload: true,
+      socketio: {
+        transports: ["websocket"]
+      },
+      traceRequests: false
+    });
+    this.statics = statics;
+    this.routes = routes;
+  }
+
+  /**
+   * Inicializa el servidor
+   */
+  async initialize() {
+    this.config(this.express_config);
+    if (this.customizeExpress) {
+      await this.customizeExpress(this.app);
+    }
+    await this.configureRoutes(this.routes);
+    await this.errorHandler();
+  }
+
+  /**
+   * Funcion sobreescribible para personalizar los componentes cargados en Express
+   *
+   * Aqui se pueden poner cosas como:
+   *
+   * this.app.use(cookieParser())... etc
+   */
+  customizeExpress() {}
+
+  /**
+   * Se encarga de realizar la configuración inicial del servidor
+   *
+   */
+  config(config) {
+    if (config && config.helmet) {
+      //Security
+      this.app.use(helmet__default["default"](config && lodash__default["default"].isObject(config.helmet) ? config.helmet : undefined));
+    }
+    if (config && config.json) {
+      //mount json form parser
+      this.app.use(express__default["default"].json());
+    }
+    if (config && config.urlencoded) {
+      //mount query string parser
+      this.app.use(express__default["default"].urlencoded({
+        extended: true
+      }));
+    }
+    if (config && config.compression) {
+      // compress responses
+      this.app.use(compression__default["default"]());
+    }
+    if (config && config.cors) {
+      //Enable cors to allow external references
+      this.app.options("*", cors__default["default"](config && lodash__default["default"].isObject(config.cors) && config.cors));
+      this.app.use(cors__default["default"](config && lodash__default["default"].isObject(config.cors) && config.cors));
+    }
+    if (config && config.fileupload) {
+      // upload middleware
+      this.app.use(fileUpload__default["default"]());
+    }
+    if (this.statics) {
+      //add static paths
+      for (const idx in this.statics) {
+        this.app.use(idx, express__default["default"].static(this.statics[idx]));
+      }
+    }
+
+    //Logging
+    if (config && config.traceRequests === true && process.env.DISABLE_LOGGER != "true") {
+      this.app.use((request, response, next) => {
+        request.requestTime = Date.now();
+        response.on("finish", () => {
+          let pathname = url__default["default"].parse(request.url).pathname;
+          let end = Date.now() - request.requestTime;
+          let user = request && request.session && request.session.user_id || "";
+          console.debug("APIRequest[" + process.pid + "]::. [" + request.method + "] (user:" + user + ")  " + pathname + " |-> took: " + end + " ms");
+          console.debug(JSON.stringify(request.body));
+        });
+        next();
+      });
+    }
+  }
+
+  /**
+   * Crea el cargador automatico de rutas
+   */
+  configureRoutes(routes) {
+    const router = express__default["default"].Router();
+    this.app.use(router);
+
+    //create controllers
+    this.loadRoutes(this.app, routes);
+  }
+
+  /**
+   * Instancia la lista de rutas disponibles
+   * @param apps
+   * @returns {*}
+   */
+  loadRoutes(app, routes) {
+    if (!routes) return;
+    for (const route of routes) {
+      if (!route) {
+        console.warn("Empty route");
+        continue;
+      }
+      let router = route.configure();
+
+      //perform autoconfig for base api crud operations
+      if (route.entity) {
+        router = route.configure(route.entity, {
+          service: route.service,
+          table: route.table
+        });
+      }
+
+      //load shorthand routes
+      if (!lodash__default["default"].isEmpty(route.routes)) {
+        const exAsync = Utils.expressHandler();
+        for (const path in route.routes) {
+          const cfg = route.routes[path];
+          for (const method in cfg) {
+            const handler = cfg[method];
+            if (Array.isArray(handler)) {
+              //Securización (keycloak)
+              router[method](path, handler[0], exAsync(handler[1]));
+            } else {
+              router[method](path, exAsync(handler));
+            }
+          }
+        }
+      }
+      if (router) {
+        app.use(router);
+      }
+    }
+  }
+
+  /**
+   * Errores
+   */
+  errorHandler() {
+    // error handler
+    this.app.use((err, req, res, next) => {
+      let jsRes = new JsonResponse();
+      jsRes.success = false;
+      jsRes.message = err.message; //!FIXME protect error displaying in REST Responses
+      console.error(err);
+      res.status(500).json(jsRes.toJson());
+    });
+  }
+}
+
+/**
+ * Inicializa la escucha del server en modo cluster
+ */
+class ClusterServer extends events.EventEmitter {
+  constructor(app) {
+    super();
+    if (!process.env.PORT) {
+      console.log("Using 3000 as default port. Customize via env PORT.");
+    }
+    this.port = this.normalizePort(process.env.PORT || 3000);
+    this.clustered = process.env.CLUSTERED;
+    this.workers = [];
+    this.app = app;
+    this.executeOnlyMain = () => {};
+  }
+  setServerCls(cls) {
+    this.server = cls;
+  }
+
+  /**
+   * Iniciar el servidor en el puerto y con la configuración seleccionadas.
+   */
+  async start() {
+    if (this.clustered == "true") {
+      this.initClustered();
+    } else {
+      this.configureSocketIO();
+      this.executeOnlyMain();
+      await this.initUnclustered();
+    }
+  }
+
+  /**
+   * Inicializa el servidor de socketio en el puerto siguiente al configurado.
+   *
+   * Se puede desactivar mediante la config socketio: false al realizar el App.init()
+   */
+  configureSocketIO() {
+    if (this.server.express_config && this.server.express_config.socketio) {
+      this.app.io = new socket_io.Server(this.server.express_config && this.server.express_config.socketio);
+      this.app.io.listen(this.port + 1);
+    }
+  }
+
+  /**
+   * Inicializa la clase server encargada del control de las solicitudes en forma multiproceso.
+   *
+   */
+  async initClustered() {
+    //Launch cluster
+    if (cluster__default["default"].isPrimary) {
+      this.configureSocketIO();
+      this.executeOnlyMain();
+      let messages = new ClusterMessages__default["default"]();
+      messages.on("event", (msg, callback) => {
+        if (msg && msg.event) {
+          if (process.env.DEBUG_EVENTS == true) {
+            console.debug(`Received '${msg.event}' from ${msg.props.owner} at Master`);
+          }
+          //Desencadenar en el proceso principal tambien
+          this.app.events.emit(msg.event, msg.props, callback);
+        }
+      });
+
+      //Count the machine's CPUs
+      const cpuCount = os__default["default"].cpus().length;
+
+      //Create a worker for each CPU
+      for (let idx = 0; idx < cpuCount; idx += 1) {
+        this.initWorker();
+      }
+
+      //Listen for dying workers
+      cluster__default["default"].on("exit", worker => {
+        //Replace the dead worker, we're not sentimental
+        console.log("Worker " + worker.id + " died :(");
+        this.initWorker();
+      });
+    } else {
+      await this.initUnclustered();
+      console.log(`Worker ${process.pid} started`);
+    }
+  }
+  /**
+   * Inicia un worker
+   */
+  initWorker() {
+    let worker = cluster__default["default"].fork();
+    console.log(`Running worker ${worker.process.pid}`);
+    this.workers.push(worker);
+  }
+
+  /**
+   * Inicializa la clase server encargada del control de las solicitudes en un unico proceso.
+   *
+   */
+  async initUnclustered() {
+    this.server.port = this.port;
+    //create http server
+    let server = http__default["default"].Server(this.server.app);
+    await this.server.initialize();
+    if (this.server.beforeListen) await this.server.beforeListen();
+    //listen on provided ports
+    server.listen(this.server.port);
+    if (this.server.afterListen) await this.server.afterListen();
+
+    //add error handler
+    server.on("error", err => {
+      this.handleErrors(err, this.server.port);
+    });
+    //start listening on port
+    server.on("listening", () => {
+      console.log("Server Worker running on port: " + this.port + "!");
+      this.emit("listening", this.port);
+    });
+    if (process.env.SSL && process.env.SSL == "true") {
+      if (!process.env.SSL_KEY || !process.env.SSL_CERT || !process.env.SSL_PASS) {
+        console.error("Invalid SSL configuration. SLL_KEY, SSL_CERT and SSL_PASS needed");
+        process.exit(0);
+      }
+      var key = fs__default["default"].readFileSync(path__default["default"].resolve(process.cwd(), process.env.SSL_KEY || "key.pem"));
+      var cert = fs__default["default"].readFileSync(path__default["default"].resolve(process.cwd(), process.env.SSL_CERT || "cert.pem"));
+      var options = {
+        key: key,
+        cert: cert,
+        passphrase: process.env.SSL_PASS
+      };
+      if (!process.env.SSL_PORT) {
+        console.log("Using 3443 as ssl default port. Customize via env SSL_PORT.");
+      }
+      var sslPort = this.normalizePort(process.env.SSL_PORT || 3443);
+      var serverSsl = https__default["default"].createServer(options, this.server.app);
+      serverSsl.listen(sslPort);
+      //add error handler
+      serverSsl.on("error", err => {
+        this.handleErrors(err, sslPort);
+      });
+      //start listening on port
+      serverSsl.on("listening", () => {
+        console.log("Server Worker running on port: " + sslPort + "!");
+        this.emit("listening_ssl", sslPort);
+      });
+    }
+  }
+
+  /**
+   * Controla los posibles errores de formato en el puerto
+   * @param val
+   * @returns {*}
+   */
+  normalizePort(val) {
+    let port = parseInt(val, 10);
+    if (isNaN(port)) {
+      //named pipe
+      return val;
+    }
+    if (port >= 0) {
+      //port number
+      return port;
+    }
+    return false;
+  }
+  /**
+   * Gestiona los errores en el listen del servidor
+   */
+  handleErrors(error, port) {
+    if (error.syscall !== "listen") {
+      throw error;
+    }
+    let bind = typeof port === "string" ? "Pipe " + port : "Port " + port;
+
+    //handle specific listen errors with friendly messages
+    switch (error.code) {
+      case "EACCES":
+        console.error(bind + " requires elevated privileges");
+        process.exit(1);
+        break;
+      case "EADDRINUSE":
+        console.error(bind + " is already in use");
+        process.exit(1);
+        break;
+      default:
+        throw error;
+    }
+  }
+}
+
+/**
+ * Clase encargada de la generacion de eventos.
+ */
+class EventHandler extends events.EventEmitter {
+  constructor(app) {
+    super();
+    this.messages = new ClusterMessages__default["default"]();
+    this.app = app; //Se recibe el singleton App para evitar referencias cruzadas
+
+    if (cluster__default["default"].isWorker) {
+      // Levanto, en los worker, la escucha para recibir los eventos en broadcast de los demas hilos
+      this.messages.on("event", (msg, callback) => {
+        if (msg && msg.event && process.pid !== msg.props.owner) {
+          if (process.env.DEBUG_EVENTS == true) {
+            console.debug(`Receiving broadcast ${msg.event} - ${process.pid}`);
+          }
+          super.emit(msg.event, {
+            ...msg.props
+          }, callback);
+        }
+      });
+    }
+  }
+
+  /**
+   * Sobreescribir el emitter para notificar a los hijos
+   *
+   * @param {*} evt
+   * @param {*} props
+   */
+  emit(evt, props, callback) {
+    //Desencadenar en local
+    super.emit(evt, props, callback);
+    if (evt && props && cluster__default["default"].isWorker && process.pid !== props.owner) {
+      if (process.env.DEBUG_EVENTS == true) {
+        console.debug(`${evt} -> Firing from ${process.pid} to master`);
+      }
+      if (!props) {
+        props = {};
+      }
+      props.owner = process.pid;
+      this.messages.send("event", {
+        event: evt,
+        props: {
+          ...props
+        }
+      }, callback);
+    }
+    if (evt && props && cluster__default["default"].isPrimary && this.app && this.app.server && this.app.server.workers) {
+      if (process.env.DEBUG_EVENTS == true) {
+        console.debug(`${evt} -> Firing from master to workers`);
+      }
+      this.messages.send("event", {
+        event: evt,
+        props: {
+          ...props
+        }
+      }, callback);
+    }
+  }
+}
+
+const {
+  configure,
+  getLogger
+} = log4js__default["default"];
+class Logger {
+  static async configure() {
+    const readfile = util__default["default"].promisify(fs__default["default"].readFile);
+    const json = await readfile(path__default["default"].resolve(process.cwd(), "./log4js.json"), "utf8");
+    configure(JSON.parse(json));
+
+    //Nota para el futuro:
+    // Esto sobreescribe los metodos de console.log
+    // Es necesario que la sitaxis se mantenga tal cual....
+    (() => {
+      const log_logger = getLogger("log");
+      const error_logger = getLogger("error");
+      const debug_logger = getLogger("debug");
+      console.log = function () {
+        let args = Array.prototype.slice.call(arguments);
+        // log.apply(this, args);
+        log_logger.log("info", args[0]);
+      };
+      console.error = function () {
+        let args = Array.prototype.slice.call(arguments);
+        // error.apply(this, args);
+        error_logger.log("error", args[0]);
+      };
+      console.info = function () {
+        let args = Array.prototype.slice.call(arguments);
+        // info.apply(this, args);
+        log_logger.log("info", args[0]);
+      };
+      console.debug = function () {
+        /*if (global.settings.debug.value) {*/
+        let args = Array.prototype.slice.call(arguments);
+        // debug.apply(this, [args[1], args[2]]);
+        debug_logger.log("debug", args[0]);
+      };
+      console.custom = function (logger, level, message) {
+        const custom_logger = getLogger(logger);
+        custom_logger.log(level, message);
+      };
+    })();
+  }
+}
+
+class AuthController {
+  constructor(publicPathsList, AuthHandler) {
+    this.router = express__default["default"].Router();
+    this.publicPathsList = [...publicPathsList, "/login"];
+    this.AuthHandler = AuthHandler;
+  }
+  configure() {
+    const exAsync = Utils.expressHandler();
+    this.router.use(exAsync((...args) => this.check(...args)));
+    this.router.post("/login", exAsync((...args) => this.loginPost(...args)));
+    this.router.post("/logout", exAsync((...args) => this.logout(...args)));
+    return this.router;
+  }
+
+  /**
+   * Controla que los usuarios tengan sesion para acceder a los metodos privados de la API
+   *
+   * @param {*} request
+   * @param {*} response
+   * @param {*} next
+   */
+  async check(request, response, next) {
+    try {
+      //Rutas ublicas
+      for (let path of this.publicPathsList) {
+        const expr = pathToRegexp.pathToRegexp(path);
+        if (expr.exec(url__default["default"].parse(request.url).pathname) !== null) {
+          return next();
+        }
+      }
+      if (await this.AuthHandler.check(request)) {
+        return next();
+      }
+      return response.status(403).json(new JsonResponse(false, null, "Forbidden").toJson());
+    } catch (ex) {
+      console.error(ex);
+      return response.status(403).json(new JsonResponse(false, null, "Forbidden").toJson());
+    }
+  }
+
+  /**
+   * Valida los credenciales de un usuario
+   *
+   * TODO logger console.custom("access", INFO);
+   *
+   * @param {*} request
+   * @param {*} response
+   */
+  async loginPost(request, response) {
+    if (request.body.username) {
+      try {
+        let data = await this.AuthHandler.validate(request, request.body.username, request.body.password);
+        if (data) {
+          return response.status(200).json(new JsonResponse(true, data).toJson());
+        }
+        return response.status(401).json(new JsonResponse(false, null, "Unauthorized - Incorrect credentials").toJson());
+      } catch (ex) {
+        console.error(ex);
+        return response.status(401).json(new JsonResponse(false, null, "Unauthorized - Error, check log").toJson());
+      }
+    }
+    return response.status(401).json(new JsonResponse(false, null, "Unauthorized - Missing parameters").toJson());
+  }
+
+  /**
+   * Cierra la sesion del usuario
+   *
+   * @param {*} request
+   * @param {*} response
+   */
+  async logout(request, response) {
+    if (this.AuthHandler.logout) {
+      //Depende de que el authHandler implementado pueda realizar esta accion
+      try {
+        await this.AuthHandler.logout(request);
+        return response.status(200).json(new JsonResponse(true).toJson());
+      } catch (ex) {
+        console.error(ex);
+        return response.status(500).json(new JsonResponse(false, null, ex).toJson());
+      }
+    }
+    return response.status(200).json(new JsonResponse(true).toJson());
+  }
+}
+
+class IAuthHandler {
+  constructor() {
+    if (!this.check) {
+      throw new Error("AuthHandler must have 'check' vethod");
+    }
+    if (!this.validate) {
+      throw new Error("AuthHandler must have 'validate' vethod");
+    }
+    // logout method is optional
+  }
+}
+
+class JwtAuthHandler extends IAuthHandler {
+  constructor(UserDao) {
+    super();
+    this.tokenGenerator = new TokenGenerator(process.env.JWT_SECRET, {
+      audience: process.env.JWT_AUDIENCE,
+      issuer: process.env.JWT_ISSUER,
+      subject: process.env.JWT_SUBJECT,
+      algorithm: process.env.JWT_ALGORITHM,
+      expiresIn: process.env.JWT_EXPIRES
+    });
+    if (!UserDao) {
+      throw new Error("Need 'UserDao' for user validation. Create 'UserDao' class extending 'IUserDao'");
+    }
+    this.userDao = UserDao;
+  }
+
+  /**
+   * Metodo encargado de realizar la comprobacion para validar si la sesion del usuario es válida
+   * 
+   * @param {*} request 
+   */
+  async check(request) {
+    if (request.headers.authorization) {
+      const token = (request.headers.authorization || '').split(' ')[1] || '';
+      if (!token) {
+        console.error("Token needed");
+        return false;
+      }
+      try {
+        var decoded = this.tokenGenerator.verify(token);
+        const {
+          sub,
+          username,
+          exp
+        } = decoded;
+        if (!sub || !username || moment__default["default"](exp).isAfter(new Date())) {
+          return false;
+        }
+
+        //Si la sesion es valida, lo introducimos en el contexto de la solicitud
+        request.session = {
+          ...request.session,
+          ...decoded
+        };
+        return true;
+      } catch (ex) {
+        console.error(ex);
+        return false;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Método encargado de realizar la validación de un usuario. Utiliza IUserDao como interfaz para la realización de la query a BD.
+   * 
+   * @param {*} username 
+   * @param {*} password 
+   */
+  async validate(request, username, password) {
+    const user = await this.userDao.findByUsername(username);
+    if (user && user.username === username && user.password === Utils.encrypt(password)) {
+      return this.tokenGenerator.sign(lodash__default["default"].omit(user, ['password']));
+    }
+    return false;
+  }
+}
+
+/**
+ * Necesario:
+ *  Instalar -->   express-session y algun session store
+ * 
+ *  Mas info: https://www.npmjs.com/package/express-session
+ * 
+ *  App.customizeExpress = () => {
+       this.app.use(session({
+            secret: 'keyboard cat',
+            resave: false,
+            saveUninitialized: true,
+            cookie: { secure: true }
+        }));
+    }
+ */
+
+class CookieAuthHandler extends IAuthHandler {
+  constructor(UserDao) {
+    super();
+    if (!UserDao) {
+      throw new Error("Need 'UserDao' for user validation. Create 'UserDao' class extending 'IUserDao'");
+    }
+    this.userDao = UserDao;
+  }
+
+  /**
+   * Metodo encargado de realizar la comprobacion para validar si la sesion del usuario es válida
+   *
+   * @param {*} request
+   */
+  async check(request) {
+    if (request.headers.authorization) {
+      //Si se recibe por Auth Basic
+      const token = (request.headers.authorization || "").split(" ")[1] || "";
+      const creds = Buffer.from(token, "base64").toString().split(":");
+      const login = creds[0];
+      const password = creds[1];
+      if (!(await this.validate(request, login, password))) {
+        return false;
+      }
+      return true;
+    }
+    if (request.session && request.session.username) {
+      //Si hay sesion almacenada
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Método encargado de realizar la validación de un usuario. Utiliza IUserDao como interfaz para la realización de la query a BD.
+   *
+   * @param {*} username
+   * @param {*} password
+   */
+  async validate(request, username, password) {
+    const user = await this.userDao.findByUsername(username);
+    if (user && user.username === username && user.password === Utils.encrypt(password)) {
+      request.session = {
+        ...request.session,
+        ...lodash__default["default"].omit(user, ["password"])
+      };
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   *
+   * @param {*} request
+   */
+  logout(request) {
+    return new Promise(resolve => {
+      if (request.session) {
+        request.session.destroy(resolve);
+      }
+    });
+  }
+}
+
+class KnexConnector {
+  init(config) {
+    /**
+     * References the current connection of the app
+     * @type {Knex}
+     * @public
+     */
+    this.connection = Knex__default["default"](config);
+  }
+
+  /**
+   * Configura de forma global los aliases de las columnas para utilizar en FQL.
+   * 
+   * La estructura es 
+   * {
+          "table1": {
+              "alias1": "column1",
+              "alias2": "column2"
+          },
+          "table2": {
+              "alias1": "column1"
+          }
+      }
+   *
+   * @param {*} aliases 
+   */
+  setColumnAliases(aliases) {
+    this.columnAliases = aliases;
+  }
+  test() {
+    return this.connection.raw('select 1+1 as result');
+  }
+}
+var KnexConnector$1 = new KnexConnector();
+
+class KnexFilterParser {
+  /**
+   *
+   * @param {*} builder
+   * @param {*} string
+   * @returns
+   */
+  static parseQueryString(builder, string, tableName) {
+    const options = {
+      allowGlobalSearch: true,
+      caseInsensitive: true
+    };
+    //Agregar los aliases en caso de que se hayan configurado de forma global
+    if (KnexConnector$1.columnAliases && KnexConnector$1.columnAliases[tableName]) {
+      options.aliases = KnexConnector$1.columnAliases[tableName];
+    }
+    //Options
+    if (KnexConnector$1.caseInsensitive !== undefined) {
+      options.caseInsensitive = KnexConnector$1.caseInsensitive;
+    }
+    if (KnexConnector$1.allowGlobalSearch !== undefined) {
+      options.allowGlobalSearch = KnexConnector$1.allowGlobalSearch;
+    }
+    const parser = new fqlParser.FQLParser(options);
+    const data = parser.parse(string);
+    return new fqlParser.KnexParser(tableName).toKnex(builder, data);
+  }
+
+  /**
+   * Convierte un objeto clave valor en un conjunto de filtros.
+   *
+   * - Filtro estandar:
+   *    filters: {
+   *       "column": "value" -> filtro generico exact
+   *    }
+   * - Filtro Objeto:
+   *    filters:{
+   *       "column": {
+   *       "type": "date|between|exists|notexists|greater|greaterEq|less|lessEq|exact|exactI|not|null|notnull|like|likeI"
+   *       "start": "xxx", //inicio de rango para el filtro de date y between
+   *       "end": "xxx", //fin de rango para el filtro date y between
+   *       "value": "xxx" //valor a utilizar para el resto de filtros
+   *     }
+   * }
+   *  - Filtro Lista:
+   *     filters: {
+   *       "column": [1, 2, 3]
+   *     }
+   *    Filtro de tipo IN, todos los elementos que coincidan
+   *
+   * - Definicion de tipos:
+   *    date: filtro de fechas desde y hasta
+   *    between: filtro entre dos valores concretos
+   *    exists: busca si existe la propiedad
+   *    notexists: busca si existe la propiedad
+   *    greater: mayor que
+   *    greaterEq: mayor o igual que
+   *    less: menor que
+   *    lessEq: menor o igual que
+   *    exact: valor exacto
+   *    exactI: valor exacto ignorando mayusculas y minusculas
+   *    not: distinto de
+   *    null: igual a null
+   *    notnull: distinto de null
+   *    like: filtro like
+   *    likeI: filtro like ignorando mayusculas y minusculas
+   */
+  static parseFilters(builder, filter, tableName) {
+    let query = builder;
+    for (let prop in filter) {
+      let elm = filter[prop];
+      if (typeof elm === "object") {
+        switch (elm.type) {
+          case "fql":
+            query = KnexFilterParser.parseQueryString(query, elm.value, tableName);
+            break;
+          case "date":
+          case "between":
+            if (elm.start && elm.end) {
+              query = query.whereBetween(prop, [elm.start, elm.end]);
+            }
+            if (elm.start && !elm.end) {
+              query = query.where(prop, ">=", elm.start);
+            }
+            if (!elm.start && elm.end) {
+              query = query.where(prop, ">=", elm.end);
+            }
+            break;
+          case "dateraw":
+          case "betweenraw":
+            if (elm.start && elm.end) {
+              query = query.whereRaw(`${prop} BETWEEN ? AND ?`, [elm.start, elm.end]);
+            }
+            if (elm.start && !elm.end) {
+              query = query.whereRaw(`${prop} >= ?`, [elm.start]);
+            }
+            if (!elm.start && elm.end) {
+              query = query.whereRaw(`${prop} >= ?`, [elm.end]);
+            }
+            break;
+          case "jsonb":
+            query = query.whereRaw(`${prop} ILIKE ?`, ["%" + elm.value + "%"]);
+            break;
+          case "full-text-psql":
+            query = query.whereRaw(`to_tsvector(${prop}::text) @@ to_tsquery(?)`, [elm.value]);
+            break;
+          case "greater":
+          case "greaterraw":
+            query = query.whereRaw(`${prop} > ?`, [elm.value]);
+            break;
+          case "greaterEq":
+          case "greaterEqraw":
+            query = query.whereRaw(`${prop} >= ?`, [elm.value]);
+            break;
+          case "less":
+          case "lessraw":
+            query = query.whereRaw(`${prop} < ?`, [elm.value]);
+            break;
+          case "lessEq":
+          case "lessEqraw":
+            query = query.whereRaw(`${prop} <= ?`, [elm.value]);
+            break;
+          case "exists":
+            query = query.whereExists(prop);
+            break;
+          case "notexists":
+            query = query.whereNotExists(prop);
+            break;
+          case "exact":
+          case "exactraw":
+            query = query.whereRaw(`${prop} = ?`, [elm.value]);
+            break;
+          case "in":
+            let propComplex = prop;
+            if (propComplex.includes(",")) {
+              propComplex = prop.split(",");
+            }
+            if (!Array.isArray(elm.value) && elm.value != undefined) {
+              query = query.whereIn(propComplex, elm.value.split(","));
+            } else {
+              if (elm.value != undefined) {
+                query = query.whereIn(propComplex, elm.value);
+              }
+            }
+            break;
+          case "inraw":
+            if (!Array.isArray(elm.value) && elm.value != undefined) {
+              query = query.whereRaw(`${prop} IN (?)`, [elm.value.split(",").map(e => `'${e}'`).join(",")]);
+            } else {
+              if (elm.value != undefined) {
+                query = query.whereRaw(`${prop} IN (?)`, [elm.value.map(e => `'${e}'`).join(",")]);
+              }
+            }
+            break;
+          case "not":
+          case "notraw":
+            query = query.whereRaw(`${prop} != ?`, [elm.value]);
+            break;
+          case "like":
+          case "likeraw":
+            let value_likeraw = Utils.replaceAll(elm.value, "*", "%");
+            query = query.whereRaw(` ${prop} LIKE ?`, [value_likeraw]);
+            break;
+          case "notlike":
+          case "notlikeraw":
+            let value_nolikeraw = Utils.replaceAll(elm.value, "*", "%");
+            query = query.whereRaw(` ${prop} NOT LIKE ?`, [value_nolikeraw]);
+            break;
+          case "likeI":
+            let value_rawilike = Utils.replaceAll(elm.value, "*", "%");
+            query = query.whereRaw(` ${prop} ILIKE ?`, [value_rawilike]);
+            break;
+          case "notlikeI":
+            let value_notrawilike = Utils.replaceAll(elm.value, "*", "%");
+            query = query.whereRaw(` ${prop} NOT ILIKE ?`, [value_notrawilike]);
+            break;
+          case "null":
+          case "nullraw":
+            query = query.whereRaw(`${prop} is NULL`);
+            break;
+          case "notnull":
+          case "notnullraw":
+            query = query.whereRaw(`${prop} is not NULL`);
+            break;
+        }
+      } else {
+        //Si el valor no es un objeto se devuelve
+        query = query.where(prop, elm);
+      }
+    }
+
+    // console.log(query.toSQL());
+    return query;
+  }
+
+  /**
+   * Conversion de un objeto {property: XX, direction: ASC|DESC - ascend|descend} a un ORDER BY
+   *
+   * @param {*} sorts
+   */
+  static parseSort(sort) {
+    if (!sort.field || !sort.direction) {
+      return 1;
+    }
+    let direction = "ASC";
+    if (sort.direction === "descend") {
+      direction = "DESC";
+    }
+    return sort.field + " " + direction;
+  }
+}
+
+/**
+ * Crear un dao con los métodos básicos
+ */
+class BaseKnexDao {
+  constructor() {
+    this.tableName = "";
+  }
+  loadAllData(start, limit) {
+    return KnexConnector$1.connection.select("*").from(this.tableName).limit(limit || 10000).offset(start);
+  }
+  async loadFilteredData(filters, start, limit) {
+    let sorts = 1;
+    if (filters.sort) {
+      sorts = KnexFilterParser.parseSort(filters.sort);
+    }
+    return KnexConnector$1.connection.from(this.tableName).where(builder => KnexFilterParser.parseFilters(builder, lodash__default["default"].omit(filters, ["sort", "start", "limit"]), this.tableName)).orderByRaw(sorts).limit(limit).offset(start);
+  }
+  async countFilteredData(filters) {
+    let data = await KnexConnector$1.connection.from(this.tableName).where(builder => KnexFilterParser.parseFilters(builder, lodash__default["default"].omit(filters, ["sort", "start", "limit"]), this.tableName)).count("id", {
+      as: "total"
+    });
+    return data && data[0].total;
+  }
+  async loadById(objectId) {
+    const data = await KnexConnector$1.connection.from(this.tableName).where("id", objectId);
+    if (data && data[0]) {
+      return data[0];
+    }
+    return null;
+  }
+  save(object) {
+    return KnexConnector$1.connection.from(this.tableName).insert(object).returning("*");
+  }
+  update(objectId, newObject) {
+    return KnexConnector$1.connection.from(this.tableName).where("id", objectId).update(newObject).returning("*");
+  }
+  async delete(objectId) {
+    const existing = await this.loadById(objectId);
+    if (!existing) {
+      throw "NotFound";
+    }
+    return KnexConnector$1.connection.from(this.tableName).where("id", objectId).delete();
+  }
+}
+
+class IUserDao extends BaseKnexDao {
+  constructor(tableName) {
+    super(tableName);
+    if (!this.findByUsername) {
+      throw new Error("AuthHandler must have 'findByUsername' method");
+    }
+  }
+}
+
+class BaseController {
+  constructor() {
+    this.router = express__default["default"].Router();
+    this.routes = {};
+    //Example routes shorthand
+    /*
+     {
+        "/": {
+            "get": this.listEntidad.bind(this),
+            "post": this.listEntidad.bind(this)
+        }
+     } 
+     */
+  }
+  configure(entity, config) {
+    if (!entity) {
+      return this.router;
+    }
+    const exAsync = Utils.expressHandler();
+    this.router.get(`/${entity}`, exAsync((...args) => this.listEntidad(...args)));
+    this.router.post(`/${entity}/list`, exAsync((...args) => this.listEntidad(...args)));
+    this.router.get(`/${entity}/:id`, exAsync((...args) => this.getEntidad(...args)));
+    this.router.post(`/${entity}`, exAsync((...args) => this.saveEntidad(...args)));
+    this.router.put(`/${entity}/:id`, exAsync((...args) => this.updateEntidad(...args)));
+    this.router.delete(`/${entity}/:id`, exAsync((...args) => this.deleteEntidad(...args)));
+    this.service = config.service;
+    this.table = config.table;
+    return this.router;
+  }
+
+  /**
+   * Lista entidades en la aplicacion, es posible enviarle parametros de filtrado.
+   *
+   *
+   * @api {post} /:entidad/list Listar entidades
+   * @apiName Listar entidades
+   * @apiGroup Comun
+   * @apiPermission Auth Basic username:pwd
+   * @apiParam {Number} id entidades unique ID.
+   *
+   * @apiSuccess {Boolean} success
+   * @apiSuccess {Object[]} data  dataObject
+   */
+  async listEntidad(request, response, next) {
+    try {
+      let service = new this.service(null, this.table);
+      let filters = request.method === "POST" ? request.body : request.query && request.query.filters ? JSON.parse(request.query.filters) : {};
+      let data = await service.list(filters, filters.start, filters.limit);
+      let jsRes = new JsonResponse(true, data.data, null, data.total);
+      response.json(jsRes.toJson());
+    } catch (e) {
+      next(e);
+    }
+  }
+  /**
+   *Obtiene un elemento concreto mediante su identificador
+   *
+   *
+   * @api {get} /:entidad/:id Obtener entidad
+   * @apiName Obtener entidad
+   * @apiGroup Comun
+   * @apiPermission Auth Basic username:pwd
+   * @apiParam {Number} id entidades unique ID.
+   *
+   * @apiSuccess {Boolean} success
+   * @apiSuccess {Object[]} data  dataObject
+   */
+  async getEntidad(request, response, next) {
+    try {
+      let service = new this.service(null, this.table);
+      let data = await service.loadById(request.params.id);
+      let jsRes = new JsonResponse(true, data);
+      let code = 200;
+      if (data == null) {
+        code = 404;
+        let message = "Element not found";
+        jsRes = new JsonResponse(false, null, message, 0);
+      }
+      response.status(code).json(jsRes.toJson());
+    } catch (e) {
+      console.error(e);
+      let message = "";
+      if (e.code == "22P02") {
+        //PostgreSQL error Code form string_to_UUID
+        message = "Expected uiid";
+      }
+      let jsRes = new JsonResponse(false, null, message, 0);
+      response.status(400).json(jsRes.toJson());
+    }
+  }
+
+  /**
+   * Almacena un elemento en BD
+   *
+   *
+   * @api {post} /:entidad/:id Crear entidad
+   * @apiName Crear entidad
+   * @apiGroup Comun
+   * @apiPermission Auth Basic username:pwd
+   * @apiParam {Number} id entidades unique ID.
+   *
+   * @apiSuccess {Boolean} success
+   * @apiSuccess {Object[]} data  dataObject
+   */
+  async saveEntidad(request, response, next) {
+    try {
+      let service = new this.service(null, this.table);
+      let data = await service.save(request.body);
+      let jsRes = new JsonResponse(true, data && data[0] || {
+        id: request.body.id
+      });
+      response.setHeader("Location", `/entity/${jsRes.data.id}`);
+      response.status(201).json(jsRes.toJson());
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  /**
+   * Almacena un elemento en BD
+   *
+   *
+   * @api {put} /:entidad/:id Actualizar entidad
+   * @apiName Actualizar entidad
+   * @apiGroup Comun
+   * @apiPermission Auth Basic username:pwd
+   * @apiParam {Number} id entidades unique ID.
+   *
+   * @apiSuccess {Boolean} success
+   * @apiSuccess {Object[]} data  dataObject
+   */
+  async updateEntidad(request, response, next) {
+    try {
+      let service = new this.service(null, this.table);
+      let data = await service.update(request.params.id, request.body);
+      let jsRes = new JsonResponse(true, data && data[0] || {
+        id: request.body.id
+      });
+      response.json(jsRes.toJson());
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  /**
+   * Elimina un elemento correspondiente al identificador recibido
+   *
+   *
+   * @api {delete} /:entidad/:id/delete Delete entidad
+   * @apiName Eliminar entidad
+   * @apiGroup Comun
+   * @apiPermission Auth Basic username:pwd
+   * @apiParam {Number} id entidades unique ID.
+   *
+   * @apiSuccess {Boolean} success
+   * @apiSuccess {Object[]} data  dataObject
+   */
+  async deleteEntidad(request, response, next) {
+    try {
+      let service = new this.service(null, this.table);
+      let data = await service.delete(request.params.id);
+      let jsRes = new JsonResponse(true, data);
+      response.status(204).json(jsRes.toJson());
+    } catch (e) {
+      console.error(e);
+      if (e == "NotFound") {
+        let message = "Element not found";
+        let jsRes = new JsonResponse(false, null, message, 0);
+        response.status(404).json(jsRes.toJson());
+      } else {
+        next(e);
+      }
+    }
+  }
+}
+
+class BaseService {
+  constructor(cls, table) {
+    if (cls) {
+      this.dao = new cls();
+    } else {
+      this.dao = new BaseKnexDao(); //El sistema por defecto utiliza knex, si se pasa un dao personalizado se puede sobreescribir este comportamiento
+    }
+    if (table) {
+      this.dao.tableName = table;
+    }
+  }
+  /**
+   * Obtencion de una lista de elementos.
+   *
+   * filters, es opcional. Si no se pasan se devuelve lo que hay ;
+   */
+  async list(filters, start, limit) {
+    //Pagination
+    const st = start || 0;
+    const lm = limit || 1000; //Default limit
+
+    let response = {};
+    response.total = await this.dao.countFilteredData(filters, st, lm);
+    if (filters && Object.keys(filters).length !== 0) {
+      let filteredData = await this.dao.loadFilteredData(filters, st, lm);
+      response.data = filteredData;
+      return response;
+    }
+    response.data = await this.dao.loadAllData(start, limit);
+    return response;
+  }
+
+  /**
+   * Obtencion de un elemento mediante su identificador
+   */
+  loadById(id) {
+    return this.dao.loadById(id);
+  }
+  /**
+   * Metodo de creacion.
+   *
+   * Si el identificador se pasa como undefined se creara un nuevo elemento,
+   * sino se modifica el correspondiente.
+   */
+  save(data) {
+    //Create
+    return this.dao.save(data);
+  }
+  /**
+   * Metodo de creacion.
+   *
+   * Si el identificador se pasa como undefined se creara un nuevo elemento,
+   * sino se modifica el correspondiente.
+   */
+  update(id, data) {
+    if (id) {
+      //Update
+      return this.dao.update(id, data);
+    }
+  }
+  /**
+   * Metodo de eliminado.
+   *
+   * El identificador es obligatorio para poder localizar el elemento a eliminar.
+   */
+  delete(id) {
+    if (id) {
+      return this.dao.delete(id);
+    }
+  }
+}
+
+/**
+ * Extra puede ser un array de objetos con la siguiente estructura:
+ *
+ * {
+ *  "key": "c",
+ *  "alias": "config",
+ *  "describe": "Configuración",
+ *  "fn": function(argv) { },
+ *  "nargs": 0,
+ *  "required": true
+ * }
+ * @param {*} extra
+ * @returns
+ */
+async function Runtime(extra) {
+  const cfg = yargs__default["default"](helpers.hideBin(process.argv)).usage(`Como usar: 
+            node $0 [options] 
+            
+            ** Si no se especifican parámetros el servidor arrancará normalmente. **`).alias("g", "generateKeys").describe("g", "Genera unas claves para la aplicación").alias("c", "encrypt").describe("c", "Codifica el String proporcionado en base a la contraseña de .env").nargs("c", 1).help("h").alias("h", "help");
+  let demand = [];
+  if (extra) {
+    for (const param of extra) {
+      cfg.alias(param.key, param.alias);
+      if (param.describe) {
+        cfg.describe(param.key, param.describe);
+      }
+      if (param.nargs !== 0) {
+        cfg.nargs(param.key, param.nargs);
+      }
+      if (param.boolean) {
+        cfg.boolean(param.key);
+      }
+      if (param.choices) {
+        cfg.choices(param.key, param.choices);
+      }
+      if (param.required) {
+        demand.push(param.key);
+      }
+    }
+  }
+  if (demand.length !== 0) {
+    cfg.demandOption(demand);
+  }
+  const argv = cfg.argv;
+  //Parámetro para no arrancar el servidor y generar las claves JWT
+  if (argv.generateKeys) {
+    console.log("Generando claves para encriptación:");
+    console.log(Utils.generateKeys());
+    return process.exit(1);
+  }
+  if (argv.encrypt) {
+    console.log("Resultado encryptación:");
+    console.log(Utils.encrypt(argv.encrypt));
+    return process.exit(1);
+  }
+  if (extra) {
+    for (const param of extra) {
+      if (argv[param.key]) {
+        await param.fn(argv);
+        return process.exit(1);
+      }
+    }
+  }
+}
+
+const banner = `
+Created With LISCO!
+                                             @@@   
+          @              @@@@           @@@ @@@@   
+         @@@@          @@@@@@@         @@@@@@@@    
+      @@@   @@@@@@@@@@@@    @@@@@@@@     @@@@      
+     @@@                         @@@@@  @@@@       
+    @@@@   @@              @@      @@@@@@@@        
+    @@@   @@@              @@@       @@@@          
+   @@@@       @@@@@@@@@@@             @@@          
+   @@@     @@@@  @@ @@@  @@@           @@@         
+   @@@     @@@  @@@@@@@   @@@         @@@          
+   @@@@    @@@@          @@@         @@@@          
+     @@@@@     @@@@@@@@@         @@@@@             
+       @@@@@@               @@@@@@@@               
+            @@@@@@@@@@@@@@@@  @@@@                 
+            @@@   @@@   @@@@  @@@@                 
+            @@@   @@@   @@@@  @@@@                 
+`;
+const showBanner = () => {
+  if (process.env.DISABLE_BANNER != "true") {
+    console.log(banner);
+  }
+};
+
+class App {
+  constructor() {
+    this.serverClass = Server;
+    this.clusterClass = ClusterServer;
+  }
+
+  /**
+   * Inicializa la runtime de la aplicación para poder recibir parámetros por consola y generar claves.
+   * @returns
+   */
+  runtime(extra) {
+    return Runtime(extra);
+  }
+
+  /**
+   * Initializa las configuraciones para la app
+   *
+   */
+  async init(serverConfig) {
+    showBanner();
+    if (process.env.DISABLE_LOGGER != "true") {
+      await Logger.configure();
+    }
+
+    //Instanciar la clase server
+    const server = new this.serverClass(serverConfig, this.statics, this.routes);
+    if (this.customizeExpress) {
+      server.customizeExpress = this.customizeExpress;
+    }
+    if (this.beforeListen) {
+      server.beforeListen = this.beforeListen;
+    }
+    if (this.afterListen) {
+      server.afterListen = this.afterListen;
+    }
+
+    /**
+     * Gestor de eventos
+     * @type {EventHandler}
+     * @public
+     */
+    this.events = new EventHandler(this);
+
+    /**
+     * Gestor de traducciones
+     * @type {I18nLoader}
+     * @public
+     */
+    this.i18n = new I18nLoader(serverConfig == null ? void 0 : serverConfig.disableI18nWatcher);
+    await this.i18n.load();
+    /**
+     * Servidor actual
+     * @type {ClusterServer}
+     * @public
+     */
+    this.server = new this.clusterClass(this);
+    this.server.setServerCls(server);
+    this.server.executeOnlyMain = () => {
+      if (this.executeOnlyMain) this.executeOnlyMain();
+      if (process.env.REPL_ENABLED == "true") {
+        this.startRepl();
+      }
+    };
+  }
+
+  /**
+   * Ejecuta el servidor con la configuracion de #init()
+   */
+  async start() {
+    if (!this.server) {
+      throw new Error("Call init first");
+    }
+    await this.server.start();
+  }
+
+  /**
+   * Inicia el server replify para poder conectar terminales remotas
+   *
+   *
+   * Para que arranque es necesario especificar REPL_ENABLED en el archivo .env
+   */
+  startRepl() {
+    try {
+      net__default["default"].createServer(socket => {
+        const remote = repl__default["default"].start({
+          prompt: "lisco::remote> ",
+          input: socket,
+          output: socket,
+          terminal: true,
+          useColors: true,
+          preview: false
+        });
+        remote.context.app = this;
+        remote.context.Utils = Utils;
+        remote.context.db = KnexConnector$1.connection;
+        remote.on("exit", socket.end.bind(socket));
+      }).listen(process.env.REPL_PORT || 5001);
+    } catch (e) {
+      console.log("Remote REPL Conn: " + e);
+    }
+    console.log(`Remote REPL started on port ${process.env.REPL_PORT || 5001}`);
+  }
+}
+var App$1 = new App();
+
+exports.App = App$1;
+exports.AuthController = AuthController;
+exports.BaseController = BaseController;
+exports.BaseKnexDao = BaseKnexDao;
+exports.BaseService = BaseService;
+exports.ClusterServer = ClusterServer;
+exports.CookieAuthHandler = CookieAuthHandler;
+exports.EventHandler = EventHandler;
+exports.I18nLoader = I18nLoader;
+exports.IAuthHandler = IAuthHandler;
+exports.IUserDao = IUserDao;
+exports.JsonResponse = JsonResponse;
+exports.JwtAuthHandler = JwtAuthHandler;
+exports.KnexConnector = KnexConnector$1;
+exports.KnexFilterParser = KnexFilterParser;
+exports.Logger = Logger;
+exports.Server = Server;
+exports.TokenGenerator = TokenGenerator;
+exports.Utils = Utils;
 //# sourceMappingURL=lisco.cjs.map
