@@ -69,7 +69,7 @@ export default async function Runtime(extra) {
 
     if (argv.encrypt) {
         console.log("Resultado encryptación:");
-        console.log(Utils.encrypt(argv.encrypt));
+        console.log(Utils.encrypt(String(argv.encrypt)));
         return process.exit(1);
     }
 
