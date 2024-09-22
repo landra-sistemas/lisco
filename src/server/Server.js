@@ -30,6 +30,7 @@ export default class Server {
             fileupload: true,
             socketio: { transports: ["websocket"] },
             traceRequests: false,
+            prefix: undefined,
         });
         this.statics = statics;
         this.routes = routes;
@@ -159,7 +160,9 @@ export default class Server {
                     }
                 }
             }
-            if (router) {
+            if (router && this.express_config?.prefix) {
+                app.use(this.express_config?.prefix, router);
+            } else if (router) {
                 app.use(router);
             }
         }
