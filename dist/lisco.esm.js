@@ -5032,7 +5032,8 @@ class Server {
       socketio: {
         transports: ["websocket"]
       },
-      traceRequests: false
+      traceRequests: false,
+      prefix: undefined
     });
     this.statics = statics;
     this.routes = routes;
@@ -5133,6 +5134,7 @@ class Server {
   loadRoutes(app, routes) {
     if (!routes) return;
     for (const route of routes) {
+      var _this$express_config;
       if (!route) {
         console.warn("Empty route");
         continue;
@@ -5163,7 +5165,10 @@ class Server {
           }
         }
       }
-      if (router) {
+      if (router && (_this$express_config = this.express_config) != null && _this$express_config.prefix) {
+        var _this$express_config2;
+        app.use((_this$express_config2 = this.express_config) == null ? void 0 : _this$express_config2.prefix, router);
+      } else if (router) {
         app.use(router);
       }
     }
@@ -6325,7 +6330,7 @@ async function Runtime(extra) {
   }
   if (argv.encrypt) {
     console.log("Resultado encryptación:");
-    console.log(Utils.encrypt(argv.encrypt));
+    console.log(Utils.encrypt(String(argv.encrypt)));
     return process.exit(1);
   }
   if (extra) {
