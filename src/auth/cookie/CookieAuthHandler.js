@@ -64,9 +64,12 @@ export default class CookieAuthHandler extends IAuthHandler {
         const user = await this.userDao.findByUsername(username);
 
         if (user && user.username === username && user.password === Utils.encrypt(password)) {
-            const userInfo = lodash.omit(user, ["password"]);
+            const userInfo = lodash.omit(user, ["id", "password"]);
             for (let key in userInfo) {
                 request.session[key] = userInfo[key];
+            }
+            if (lodash.has(user, "id")) {
+                request.session.userId = user.id;
             }
 
             return true;
