@@ -582,12 +582,12 @@ Utiliza el `cookie-parser` de express y para configurarlo es necesario:
 1. Instalar:  connect-session-knex y express-session
 2. Cargar la cookie store en express mediante el método `customizeExpress`
 ``` javascript
+import { ConnectSessionKnexStore }  from "connect-session-knex";
+
 //Configurar la gestion de cookies
 App.customizeExpress = (app) => {
-    const KnexSessionStore = knexStore(session);
-
     app.use(session({
-        store: new KnexSessionStore({
+        store: new ConnectSessionKnexStore({
             knex: KnexConnector.connection,
             tablename: 'sessions_knex'
         }),
