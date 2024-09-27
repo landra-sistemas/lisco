@@ -5703,7 +5703,10 @@ class CookieAuthHandler extends IAuthHandler {
   async validate(request, username, password) {
     const user = await this.userDao.findByUsername(username);
     if (user && user.username === username && user.password === Utils.encrypt(password)) {
-      request.session = _extends({}, request.session, lodash.omit(user, ["password"]));
+      const userInfo = lodash.omit(user, ["password"]);
+      for (let key in userInfo) {
+        request.session[key] = userInfo[key];
+      }
       return true;
     }
     return false;
