@@ -577,7 +577,7 @@ Este token almacena toda la información de la entidad usuario devuelta por la c
 
 Este sistema utiliza cookies para la gestión de las sesiones de la aplicación.
 
-Utiliza el `cookie-parser` de express y para configurarlo es necesario:
+Utiliza el `express-session` de express y para configurarlo es necesario:
 
 1. Instalar:  connect-session-knex y express-session
 2. Cargar la cookie store en express mediante el método `customizeExpress`
