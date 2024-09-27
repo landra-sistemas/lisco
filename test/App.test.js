@@ -1,15 +1,14 @@
-import { expect } from 'chai';
-import { App } from '../src';
+import { expect } from "chai";
+import { App } from "../src/index.js";
 
-
-describe('App', async () => {
-    it('#App.init()', () => {
+describe("App", async () => {
+    it("#App.init()", () => {
         try {
-            App.init()
+            App.init();
 
             expect(App.server).not.to.be.null;
         } catch (e) {
-            console.log(e)
+            console.log(e);
         }
-    })
-})
+    });
+});

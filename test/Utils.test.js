@@ -1,6 +1,6 @@
 import { expect } from "chai";
 
-import { Utils } from "../src";
+import { Utils } from "../src/index.js";
 
 describe("Utils", () => {
     it("#arrayToLower()", async () => {
