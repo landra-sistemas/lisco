@@ -38,9 +38,7 @@ export default class ClusterServer extends EventEmitter {
         if (this.clustered == "true") {
             this.initClustered();
         } else {
-            this.configureSocketIO();
             this.executeOnlyMain();
-
             await this.initUnclustered();
         }
     }
@@ -50,10 +48,10 @@ export default class ClusterServer extends EventEmitter {
      *
      * Se puede desactivar mediante la config socketio: false al realizar el App.init()
      */
-    configureSocketIO() {
+    configureSocketIO(server) {
         if (this.server.express_config && this.server.express_config.socketio) {
             this.app.io = new Server(this.server.express_config && this.server.express_config.socketio);
-            this.app.io.listen(this.port + 1);
+            this.app.io.listen(server);
         }
     }
 
@@ -64,8 +62,6 @@ export default class ClusterServer extends EventEmitter {
     async initClustered() {
         //Launch cluster
         if (cluster.isPrimary) {
-            this.configureSocketIO();
-
             this.executeOnlyMain();
 
             let messages = new ClusterMessages();
@@ -118,6 +114,9 @@ export default class ClusterServer extends EventEmitter {
         let server = http.Server(this.server.app);
 
         await this.server.initialize();
+
+        //Configure socketio if applies
+        this.configureSocketIO(server);
 
         if (this.server.beforeListen) await this.server.beforeListen();
         //listen on provided ports
