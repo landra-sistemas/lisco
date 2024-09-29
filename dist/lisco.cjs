@@ -5262,7 +5262,6 @@ class ClusterServer extends events.EventEmitter {
     if (this.clustered == "true") {
       this.initClustered();
     } else {
-      this.configureSocketIO();
       this.executeOnlyMain();
       await this.initUnclustered();
     }
@@ -5273,10 +5272,10 @@ class ClusterServer extends events.EventEmitter {
    *
    * Se puede desactivar mediante la config socketio: false al realizar el App.init()
    */
-  configureSocketIO() {
+  configureSocketIO(server) {
     if (this.server.express_config && this.server.express_config.socketio) {
       this.app.io = new socket_io.Server(this.server.express_config && this.server.express_config.socketio);
-      this.app.io.listen(this.port + 1);
+      this.app.io.listen(server);
     }
   }
 
@@ -5287,7 +5286,6 @@ class ClusterServer extends events.EventEmitter {
   async initClustered() {
     //Launch cluster
     if (cluster__default["default"].isPrimary) {
-      this.configureSocketIO();
       this.executeOnlyMain();
       let messages = new ClusterMessages__default["default"]();
       messages.on("event", (msg, callback) => {
@@ -5337,6 +5335,9 @@ class ClusterServer extends events.EventEmitter {
     //create http server
     let server = http__default["default"].Server(this.server.app);
     await this.server.initialize();
+
+    //Configure socketio if applies
+    this.configureSocketIO(server);
     if (this.server.beforeListen) await this.server.beforeListen();
     //listen on provided ports
     server.listen(this.server.port);
