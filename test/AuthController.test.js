@@ -35,6 +35,7 @@ describe("AuthController", async () => {
         const fakeRequest = {
             headers: { authorization: "" },
             url: "http://asdfasd/test",
+            originalUrl: "/test"
         };
 
         auth.check(fakeRequest, fakeResponse, function () {
