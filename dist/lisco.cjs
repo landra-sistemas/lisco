@@ -6108,6 +6108,7 @@ class BaseController {
     this.router.delete(`/${entity}/:id`, exAsync((...args) => this.deleteEntidad(...args)));
     this.service = config.service;
     this.table = config.table;
+    this.schema = config.schema;
     return this.router;
   }
 
@@ -6188,7 +6189,12 @@ class BaseController {
   async saveEntidad(request, response, next) {
     try {
       let service = new this.service(null, this.table);
-      let data = await service.save(request.body);
+      let requestBody = request == null ? void 0 : request.body;
+      if (this.schema) {
+        var _this$schema;
+        requestBody = await ((_this$schema = this.schema) == null ? void 0 : _this$schema.validate(request == null ? void 0 : request.body));
+      }
+      let data = await service.save(requestBody);
       let jsRes = new JsonResponse(true, data && data[0] || {
         id: request.body.id
       });
@@ -6215,7 +6221,12 @@ class BaseController {
   async updateEntidad(request, response, next) {
     try {
       let service = new this.service(null, this.table);
-      let data = await service.update(request.params.id, request.body);
+      let requestBody = request == null ? void 0 : request.body;
+      if (this.schema) {
+        var _this$schema2;
+        requestBody = await ((_this$schema2 = this.schema) == null ? void 0 : _this$schema2.validate(request == null ? void 0 : request.body));
+      }
+      let data = await service.update(request.params.id, requestBody);
       let jsRes = new JsonResponse(true, data && data[0] || {
         id: request.body.id
       });
