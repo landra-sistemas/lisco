@@ -41,7 +41,8 @@
         "path-to-regexp": "^6.2.2",
         "socket.io": "^4.8.0",
         "uuid": "^9.0.1",
-        "yargs": "^17.7.2"
+        "yargs": "^17.7.2",
+        "yup": "^1.4.0"
     },
     "scripts": {
         "build": "microbundle --target node",

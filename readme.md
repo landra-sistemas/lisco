@@ -19,6 +19,7 @@ Framework nodejs con express y knex para el desarrollo de backends.
   - [Rutas y Controladores](#rutas-y-controladores)
     - [Shorthands](#shorthands)
     - [Autoconfig](#autoconfig)
+    - [Validation](#validation)
   - [Autenticación](#autenticación)
     - [JWT Authentication](#jwt-authentication)
       - [Token](#token)
@@ -397,7 +398,7 @@ Ejemplo
 ``` javascript
 export default class UserController extends BaseController {
     configure() { //Necesario
-        super.configure('user', { service: BaseService, table: 'user' });
+        super.configure('user', { service: BaseService, table: 'user', schema: yupSchema /*See validation*/ });
 
         this.router.get('/session',Utils.expressHandler((...args) => { 
             this.getSession(...args); 
@@ -494,6 +495,7 @@ class HomeController extends BaseController {
     entity = "user";
     service = UserService;
     table = "user";
+    schema: yupSchema /*See validation*/
 
     // Si el linter utilizado no soporta attributos de clase
     // constructor() {
@@ -501,10 +503,30 @@ class HomeController extends BaseController {
     //     this.entity = "user";
     //     this.service = UserService;
     //     this.table = "user";
+    //     this.schema= yupSchema /*See validation*/
     // }
 }
 
 ``` 
+### Validation
+
+Para asegurar la validación de los inputs se define una propiedad general a nivel de basecontroller llamada schema. Esta variable basa su funcionamiento en la librería yup. 
+
+Para crear un esquema de validación se puede hacer de la siguiente forma:
+
+``` js
+
+const userSchema = object(    {
+    name: string().required(),
+    age: number().required().positive().integer(),
+    email: string().email(),
+});
+
+```
+
+Este esquema será utilizado, siempre que se le asigne al BaseController, en los métodos: create y update.
+
+
 
 
 ## Autenticación
