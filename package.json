@@ -21,7 +21,7 @@
     "module": "./dist/lisco.esm.js",
     "unpkg": "./dist/lisco.umd.js",
     "dependencies": {
-        "@landra_sistemas/fql-parser": "^0.1.6",
+        "@landra_sistemas/fql-parser": "^0.1.7",
         "chokidar": "^3.5.3",
         "cluster-messages": "^1.2.1",
         "compression": "^1.7.4",
