@@ -1,8 +1,8 @@
 (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('helmet'), require('express'), require('compression'), require('cors'), require('express-fileupload'), require('url'), require('lodash'), require('fs'), require('util'), require('crypto'), require('chokidar'), require('buffer'), require('stream'), require('uuid'), require('http'), require('https'), require('path'), require('cluster'), require('socket.io'), require('os'), require('events'), require('cluster-messages'), require('log4js'), require('path-to-regexp'), require('moment'), require('@landra_sistemas/fql-parser'), require('knex'), require('net'), require('repl'), require('yargs/yargs'), require('yargs/helpers')) :
-    typeof define === 'function' && define.amd ? define(['exports', 'helmet', 'express', 'compression', 'cors', 'express-fileupload', 'url', 'lodash', 'fs', 'util', 'crypto', 'chokidar', 'buffer', 'stream', 'uuid', 'http', 'https', 'path', 'cluster', 'socket.io', 'os', 'events', 'cluster-messages', 'log4js', 'path-to-regexp', 'moment', '@landra_sistemas/fql-parser', 'knex', 'net', 'repl', 'yargs/yargs', 'yargs/helpers'], factory) :
-    (global = global || self, factory(global.lisco = {}, global.helmet, global.express, global.compression, global.cors, global.expressFileupload, global.url, global.lodash, global.fs, global.util, global.crypto, global.chokidar, global.buffer, global.stream, global.uuid, global.http, global.https, global.path, global.cluster, global.socket_io, global.os, global.events, global.clusterMessages, global.log4Js, global.pathToRegexp, global.moment, global.fqlParser, global.knex, global.net, global.repl, global.yargs, global.helpers));
-})(this, (function (exports, helmet, express, compression, cors, fileUpload, url, lodash, fs, util, crypto, chokidar, buffer, Stream, uuid, http, https, path, cluster, socket_io, os, events, ClusterMessages, log4js, pathToRegexp, moment, fqlParser, Knex, net, repl, yargs, helpers) {
+    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('helmet'), require('express'), require('compression'), require('cors'), require('express-fileupload'), require('url'), require('lodash'), require('fs'), require('util'), require('crypto'), require('chokidar'), require('buffer'), require('stream'), require('uuid'), require('http'), require('https'), require('path'), require('cluster'), require('socket.io'), require('@socket.io/sticky'), require('@socket.io/cluster-adapter'), require('os'), require('events'), require('cluster-messages'), require('log4js'), require('path-to-regexp'), require('moment'), require('@landra_sistemas/fql-parser'), require('knex'), require('net'), require('repl'), require('yargs/yargs'), require('yargs/helpers')) :
+    typeof define === 'function' && define.amd ? define(['exports', 'helmet', 'express', 'compression', 'cors', 'express-fileupload', 'url', 'lodash', 'fs', 'util', 'crypto', 'chokidar', 'buffer', 'stream', 'uuid', 'http', 'https', 'path', 'cluster', 'socket.io', '@socket.io/sticky', '@socket.io/cluster-adapter', 'os', 'events', 'cluster-messages', 'log4js', 'path-to-regexp', 'moment', '@landra_sistemas/fql-parser', 'knex', 'net', 'repl', 'yargs/yargs', 'yargs/helpers'], factory) :
+    (global = global || self, factory(global.lisco = {}, global.helmet, global.express, global.compression, global.cors, global.expressFileupload, global.url, global.lodash, global.fs, global.util, global.crypto, global.chokidar, global.buffer, global.stream, global.uuid, global.http, global.https, global.path, global.cluster, global.socket_io, global.sticky, global.clusterAdapter, global.os, global.events, global.clusterMessages, global.log4Js, global.pathToRegexp, global.moment, global.fqlParser, global.knex, global.net, global.repl, global.yargs, global.helpers));
+})(this, (function (exports, helmet, express, compression, cors, fileUpload, url, lodash, fs, util, crypto, chokidar, buffer, Stream, uuid, http, https, path, cluster, socket_io, sticky, clusterAdapter, os, events, ClusterMessages, log4js, pathToRegexp, moment, fqlParser, Knex, net, repl, yargs, helpers) {
     function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
     function _interopNamespace(e) {
@@ -5037,7 +5037,7 @@
        * @param {*} statics
        * @param {*} routes
        */
-      constructor(config, statics, routes) {
+      constructor(config, statics, routes, ioroutes) {
         this.app = express__default["default"]();
         this.express_config = lodash__default["default"].defaultsDeep(config, {
           helmet: true,
@@ -5057,6 +5057,7 @@
         });
         this.statics = statics;
         this.routes = routes;
+        this.ioroutes = ioroutes;
       }
 
       /**
@@ -5069,6 +5070,7 @@
         }
         await this.configureRoutes(this.routes);
         await this.errorHandler();
+        await this.configureIoEvents(this.ioevents);
       }
 
       /**
@@ -5195,6 +5197,23 @@
       }
 
       /**
+       * Configura los eventos por defecto escuchados por el servidor de socketio desde el proceso main. 
+       * Sirve principalmente en modo cluster para determinar que eventos serán escuchados por todos los sockets.
+       * 
+       * 
+       * @param {*} ioevents 
+       * @returns 
+       */
+      configureIoEvents(ioevents) {
+        const io = this.io;
+        if (!io) return;
+        for (const eventName in ioevents) {
+          const handler = ioevents[eventName];
+          this.io.on(eventName, handler);
+        }
+      }
+
+      /**
        * Errores
        */
       errorHandler() {
@@ -5246,9 +5265,34 @@
        * Se puede desactivar mediante la config socketio: false al realizar el App.init()
        */
       configureSocketIO(server) {
-        if (this.server.express_config && this.server.express_config.socketio) {
-          this.app.io = new socket_io.Server(this.server.express_config && this.server.express_config.socketio);
-          this.app.io.listen(server);
+        var _this$server$express_;
+        if (!((_this$server$express_ = this.server.express_config) != null && _this$server$express_.socketio)) {
+          return;
+        }
+        if (this.clustered !== "true") {
+          this.server.io = new socket_io.Server(this.server.express_config && this.server.express_config.socketio);
+          this.server.io.listen(server);
+          this.app.io = this.server.io;
+          return;
+        }
+        if (this.clustered === "true") {
+          if (cluster__default["default"].isPrimary) {
+            // setup sticky sessions
+            sticky.setupMaster(server, {
+              loadBalancingMethod: "least-connection"
+            });
+            // setup connections between the workers
+            clusterAdapter.setupPrimary();
+            cluster__default["default"].setupPrimary({
+              serialization: "advanced"
+            });
+          } else {
+            this.server.io = new socket_io.Server(this.server.express_config && this.server.express_config.socketio);
+            this.server.io.listen(server);
+            sticky.setupWorker(this.server.io);
+            this.app.io = this.server.io;
+          }
+          return;
         }
       }
 
@@ -5307,10 +5351,10 @@
         this.server.port = this.port;
         //create http server
         let server = http__default["default"].Server(this.server.app);
-        await this.server.initialize();
 
         //Configure socketio if applies
         this.configureSocketIO(server);
+        await this.server.initialize();
         if (this.server.beforeListen) await this.server.beforeListen();
         //listen on provided ports
         server.listen(this.server.port);
@@ -6428,7 +6472,7 @@ Created With LISCO!
         }
 
         //Instanciar la clase server
-        const server = new this.serverClass(serverConfig, this.statics, this.routes);
+        const server = new this.serverClass(serverConfig, this.statics, this.routes, this.ioroutes);
         if (this.customizeExpress) {
           server.customizeExpress = this.customizeExpress;
         }

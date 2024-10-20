@@ -17,6 +17,8 @@ import https from 'https';
 import path from 'path';
 import cluster from 'cluster';
 import { Server as Server$1 } from 'socket.io';
+import { setupMaster, setupWorker } from '@socket.io/sticky';
+import { setupPrimary } from '@socket.io/cluster-adapter';
 import os from 'os';
 import { EventEmitter } from 'events';
 import ClusterMessages from 'cluster-messages';
@@ -5022,7 +5024,7 @@ class Server {
    * @param {*} statics
    * @param {*} routes
    */
-  constructor(config, statics, routes) {
+  constructor(config, statics, routes, ioroutes) {
     this.app = express();
     this.express_config = lodash.defaultsDeep(config, {
       helmet: true,
@@ -5042,6 +5044,7 @@ class Server {
     });
     this.statics = statics;
     this.routes = routes;
+    this.ioroutes = ioroutes;
   }
 
   /**
@@ -5054,6 +5057,7 @@ class Server {
     }
     await this.configureRoutes(this.routes);
     await this.errorHandler();
+    await this.configureIoEvents(this.ioevents);
   }
 
   /**
@@ -5180,6 +5184,23 @@ class Server {
   }
 
   /**
+   * Configura los eventos por defecto escuchados por el servidor de socketio desde el proceso main. 
+   * Sirve principalmente en modo cluster para determinar que eventos serán escuchados por todos los sockets.
+   * 
+   * 
+   * @param {*} ioevents 
+   * @returns 
+   */
+  configureIoEvents(ioevents) {
+    const io = this.io;
+    if (!io) return;
+    for (const eventName in ioevents) {
+      const handler = ioevents[eventName];
+      this.io.on(eventName, handler);
+    }
+  }
+
+  /**
    * Errores
    */
   errorHandler() {
@@ -5231,9 +5252,34 @@ class ClusterServer extends EventEmitter {
    * Se puede desactivar mediante la config socketio: false al realizar el App.init()
    */
   configureSocketIO(server) {
-    if (this.server.express_config && this.server.express_config.socketio) {
-      this.app.io = new Server$1(this.server.express_config && this.server.express_config.socketio);
-      this.app.io.listen(server);
+    var _this$server$express_;
+    if (!((_this$server$express_ = this.server.express_config) != null && _this$server$express_.socketio)) {
+      return;
+    }
+    if (this.clustered !== "true") {
+      this.server.io = new Server$1(this.server.express_config && this.server.express_config.socketio);
+      this.server.io.listen(server);
+      this.app.io = this.server.io;
+      return;
+    }
+    if (this.clustered === "true") {
+      if (cluster.isPrimary) {
+        // setup sticky sessions
+        setupMaster(server, {
+          loadBalancingMethod: "least-connection"
+        });
+        // setup connections between the workers
+        setupPrimary();
+        cluster.setupPrimary({
+          serialization: "advanced"
+        });
+      } else {
+        this.server.io = new Server$1(this.server.express_config && this.server.express_config.socketio);
+        this.server.io.listen(server);
+        setupWorker(this.server.io);
+        this.app.io = this.server.io;
+      }
+      return;
     }
   }
 
@@ -5292,10 +5338,10 @@ class ClusterServer extends EventEmitter {
     this.server.port = this.port;
     //create http server
     let server = http.Server(this.server.app);
-    await this.server.initialize();
 
     //Configure socketio if applies
     this.configureSocketIO(server);
+    await this.server.initialize();
     if (this.server.beforeListen) await this.server.beforeListen();
     //listen on provided ports
     server.listen(this.server.port);
@@ -6404,7 +6450,7 @@ class App {
     }
 
     //Instanciar la clase server
-    const server = new this.serverClass(serverConfig, this.statics, this.routes);
+    const server = new this.serverClass(serverConfig, this.statics, this.routes, this.ioroutes);
     if (this.customizeExpress) {
       server.customizeExpress = this.customizeExpress;
     }
