@@ -22,6 +22,8 @@
     "unpkg": "./dist/lisco.umd.js",
     "dependencies": {
         "@landra_sistemas/fql-parser": "^0.1.7",
+        "@socket.io/cluster-adapter": "^0.2.2",
+        "@socket.io/sticky": "^1.0.4",
         "chokidar": "^3.5.3",
         "cluster-messages": "^1.2.1",
         "compression": "^1.7.4",

@@ -34,6 +34,7 @@ Framework nodejs con express y knex para el desarrollo de backends.
   - [Server Views](#server-views)
   - [Runtime CLI](#runtime-cli)
     - [Opciones adicionales](#opciones-adicionales)
+  - [SocketIO](#socketio)
 
 
 
@@ -1030,3 +1031,18 @@ App.customizeExpress = (app) => {
 En el repositorio existen parámetros adicionales que pueden ser útiles en ciertos casos: https://github.com/thorin8k/express-status-monitor
 
 > Lisco arranca un socketio por defecto en el puerto siguiente al configurado. Si este socketio se desactiva es necesario quitar la linea websocket de la configuración para que el monitor arranque su propio servidor.
+
+
+## SocketIO
+
+WIP 
+``` javascript
+ App.ioevents = {
+        connection: (socket) => {
+            console.log(`⚡: "${socket.id}" user just connected!`);
+            socket.on("disconnect", () => {
+                console.log(`⚡: "${socket.id}" user just disconnected!`);
+            });
+        },
+    };
+```

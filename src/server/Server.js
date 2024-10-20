@@ -19,7 +19,7 @@ export default class Server {
      * @param {*} statics
      * @param {*} routes
      */
-    constructor(config, statics, routes) {
+    constructor(config, statics, routes, ioroutes) {
         this.app = express();
         this.express_config = lodash.defaultsDeep(config, {
             helmet: true,
@@ -34,6 +34,7 @@ export default class Server {
         });
         this.statics = statics;
         this.routes = routes;
+        this.ioroutes = ioroutes;
     }
 
     /**
@@ -46,6 +47,7 @@ export default class Server {
         }
         await this.configureRoutes(this.routes);
         await this.errorHandler();
+        await this.configureIoEvents(this.ioevents);
     }
 
     /**
@@ -165,6 +167,24 @@ export default class Server {
             } else if (router) {
                 app.use(router);
             }
+        }
+    }
+
+    /**
+     * Configura los eventos por defecto escuchados por el servidor de socketio desde el proceso main. 
+     * Sirve principalmente en modo cluster para determinar que eventos serán escuchados por todos los sockets.
+     * 
+     * 
+     * @param {*} ioevents 
+     * @returns 
+     */
+    configureIoEvents(ioevents) {
+        const io = this.io;
+        if (!io) return;
+
+        for (const eventName in ioevents) {
+            const handler = ioevents[eventName];
+            this.io.on(eventName, handler);
         }
     }
 

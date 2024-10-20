@@ -34,7 +34,7 @@ class App {
         }
 
         //Instanciar la clase server
-        const server = new this.serverClass(serverConfig, this.statics, this.routes);
+        const server = new this.serverClass(serverConfig, this.statics, this.routes, this.ioroutes);
         if (this.customizeExpress) {
             server.customizeExpress = this.customizeExpress;
         }
