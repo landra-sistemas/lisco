@@ -6045,6 +6045,9 @@ class KnexFilterParser {
           case "notnullraw":
             query = query.whereRaw(`${prop} is not NULL`);
             break;
+          case "any":
+            query = query.whereRaw(`? = ANY(?)`, [elm.value, prop]);
+            break;
         }
       } else {
         //Si el valor no es un objeto se devuelve
@@ -6453,7 +6456,6 @@ async function Runtime(extra) {
 
 const banner = `
 Created With LISCO!
-                                             @@@   
           @              @@@@           @@@ @@@@   
          @@@@          @@@@@@@         @@@@@@@@    
       @@@   @@@@@@@@@@@@    @@@@@@@@     @@@@      
@@ -6461,16 +6463,16 @@ Created With LISCO!
     @@@@   @@              @@      @@@@@@@@        
     @@@   @@@              @@@       @@@@          
    @@@@       @@@@@@@@@@@             @@@          
-   @@@     @@@@  @@ @@@  @@@           @@@         
-   @@@     @@@  @@@@@@@   @@@         @@@          
-   @@@@    @@@@          @@@         @@@@          
-     @@@@@     @@@@@@@@@         @@@@@             
+   @@@     @@@@  @@ @@@  @@@          @@@         
+    @@@    @@@  @@@@@@@  @@@         @@@          
+     @@@@     @@@@@@@@@            @@@@            
        @@@@@@               @@@@@@@@               
             @@@@@@@@@@@@@@@@  @@@@                 
             @@@   @@@   @@@@  @@@@                 
             @@@   @@@   @@@@  @@@@                 
 `;
 const showBanner = () => {
+  //TODO evitar lanzar el banner en modo cluster en los nodos hijos
   if (process.env.DISABLE_BANNER != "true") {
     console.log(banner);
   }
