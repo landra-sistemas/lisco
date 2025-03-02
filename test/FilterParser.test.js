@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import knex from "knex";
-import { KnexFilterParser } from "../src/db/index.js";
+import { KnexConnector, KnexFilterParser } from "../src/db/index.js";
 
 describe("KnexFilterParser", () => {
     it("#parseFiltersSimple()", async () => {
@@ -85,6 +85,10 @@ describe("KnexFilterParser", () => {
                 type: "less",
                 value: 3,
             },
+            value3:{
+                type: "any",
+                value: "photos",
+            }
         };
         let query = knex("test")
             .from("test")
@@ -96,8 +100,8 @@ describe("KnexFilterParser", () => {
         expect(query).to.have.property("sql");
         expect(query.sql).to.contains("in");
         expect(query.sql).to.contains("<");
-        // expect(query).to.have.property('bindings')
-        // expect(query.bindings).to.deep.eq([1, 2, 3, 3])
+        expect(query).to.have.property('bindings')
+        expect(query.bindings).to.deep.eq([1, 2, 3, 3, 'photos', 'value3'])
     });
 
     it("#parseSort()", async () => {
@@ -112,10 +116,15 @@ describe("KnexFilterParser", () => {
     });
 
     it("#parseQueryString()", async () => {
-        let string = "from:hi@retrace.io,foo@gmail.com to:me subject:vacations date:[1/10/2013 TO 15/04/2014] photos";
+        KnexConnector.setColumnAliases({
+            test: {
+                photos: "ANY(photos)",
+            },
+        });
+        let string = "from:hi@retrace.io,foo@gmail.com to:me subject:vacations date:[1/10/2013 TO 15/04/2014] photos:beach";
         let query = knex("test")
             .from("test")
-            .where((builder) => KnexFilterParser.parseQueryString(builder, string))
+            .where((builder) => KnexFilterParser.parseQueryString(builder, string, "test"))
             .toSQL();
         console.log(query);
 
