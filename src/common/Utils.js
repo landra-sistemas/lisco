@@ -17,14 +17,20 @@ export default class Utils {
      * @param {*} text 
      */
     static encrypt(text) {
-        const algorithm = 'aes-256-cbc';
-        const secret = Buffer.from(process.env.CRYPT_SECRET, 'hex');
-        const iv = Buffer.from(process.env.CRYPT_IV, 'hex');
+        if (!process.env.CRYPT_SECRET) {
+            console.error('Encryption error: CRYPT_SECRET not defined as env variable.');
+            return null;
+        }
+        try {
+            const iv = new crypto.randomBytes(16);
+            const cipher = crypto.createCipheriv('aes-256-gcm', process.env.CRYPT_SECRET, iv);
 
-        const cipher = crypto.createCipheriv(algorithm, secret, iv);
-        let encrypted = cipher.update(text);
-        encrypted = Buffer.concat([encrypted, cipher.final()]);
-        return encrypted.toString('hex');
+            const enc = cipher.update(text, 'utf8');
+            return Buffer.concat([iv, enc]).toString("base64");
+        } catch (error) {
+            console.error(error);
+            return null;
+        }
     }
 
     /**
@@ -32,16 +38,21 @@ export default class Utils {
      * @param {*} text 
      */
     static decrypt(text) {
-        const algorithm = 'aes-256-cbc';
-        const secret = Buffer.from(process.env.CRYPT_SECRET, 'hex');
-        const iv = Buffer.from(process.env.CRYPT_IV, 'hex');
+        if (!process.env.CRYPT_SECRET) {
+            console.error('Encryption error: CRYPT_SECRET not defined as env variable.');
+            return null;
+        }
+        try {
 
-        const encryptedText = Buffer.from(text, 'hex');
-
-        const decipher = crypto.createDecipheriv(algorithm, secret, iv);
-        let decrypted = decipher.update(encryptedText);
-        decrypted = Buffer.concat([decrypted, decipher.final()]);
-        return decrypted.toString();
+            text = Buffer.from(text, "base64");
+            const iv = text.slice(0, 16);
+            text = text.slice(16, text.length);
+            const decipher = crypto.createDecipheriv('aes-256-gcm', process.env.CRYPT_SECRET, iv);
+            return decipher.update(text, null, 'utf8');
+        } catch (error) {
+            console.error(error);
+            return null;
+        }
     }
 
 
