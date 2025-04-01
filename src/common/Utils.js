@@ -17,7 +17,8 @@ export default class Utils {
      * @param {*} text 
      */
     static encrypt(text) {
-        if (!process.env.CRYPT_SECRET) {
+        const secret = process.env.CRYPT_SECRET;
+        if (!secret) {
             console.error('Encryption error: CRYPT_SECRET not defined as env variable.');
             return null;
         }
@@ -38,12 +39,12 @@ export default class Utils {
      * @param {*} text 
      */
     static decrypt(text) {
-        if (!process.env.CRYPT_SECRET) {
+        const secret = process.env.CRYPT_SECRET;
+        if (!secret) {
             console.error('Encryption error: CRYPT_SECRET not defined as env variable.');
             return null;
         }
         try {
-
             text = Buffer.from(text, "base64");
             const iv = text.slice(0, 16);
             text = text.slice(16, text.length);

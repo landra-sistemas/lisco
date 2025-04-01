@@ -4,29 +4,30 @@ import { Utils } from "../src/index.js";
 
 describe("Utils", () => {
     it("#arrayToLower()", async () => {
-        let result = Utils.arrayToLower(["BANANA"]);
+        const result = Utils.arrayToLower(["BANANA"]);
 
         expect(result).to.contain("banana");
     });
 
     it("#replaceAll()", async () => {
-        let result = Utils.replaceAll("foo|boo|poo", "oo", "aaa");
+        const result = Utils.replaceAll("foo|boo|poo", "oo", "aaa");
 
         expect(result).to.eq("faaa|baaa|paaa");
     });
 
     it("#encrypts()", async () => {
-        let result = Utils.encrypt("asdfasdf");
-        expect(result).to.eq("51c4a40ef83b83d21c3ed98e6e661448");
+        const result = Utils.encrypt("asdfasdf");
+        const decrypted = Utils.decrypt(result);
+        expect(decrypted).to.eq('asdfasdf');
     });
 
     it("#decrypt()", async () => {
-        let result = Utils.decrypt("51c4a40ef83b83d21c3ed98e6e661448");
+        const result = Utils.decrypt('Qx2S9CyCpYArI/5NbgT6q/Z3qE0DAFWK');
         expect(result).to.eq("asdfasdf");
     });
 
     it("#generateKeys()", async () => {
-        let result = Utils.generateKeys();
+        const result = Utils.generateKeys();
         console.log(result);
         expect(result).to.be.an("object");
         expect(result).to.have.property("key");
