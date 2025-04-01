@@ -24,7 +24,7 @@ export default class Utils {
         }
         try {
             const iv = new crypto.randomBytes(16);
-            const cipher = crypto.createCipheriv('aes-256-gcm', process.env.CRYPT_SECRET, iv);
+            const cipher = crypto.createCipheriv('aes-256-gcm', Buffer.from(process.env.CRYPT_SECRET, 'hex'), iv);
 
             const enc = cipher.update(text, 'utf8');
             return Buffer.concat([iv, enc]).toString("base64");
@@ -48,7 +48,7 @@ export default class Utils {
             text = Buffer.from(text, "base64");
             const iv = text.slice(0, 16);
             text = text.slice(16, text.length);
-            const decipher = crypto.createDecipheriv('aes-256-gcm', process.env.CRYPT_SECRET, iv);
+            const decipher = crypto.createDecipheriv('aes-256-gcm', Buffer.from(process.env.CRYPT_SECRET, 'hex'), iv);
             return decipher.update(text, null, 'utf8');
         } catch (error) {
             console.error(error);
@@ -74,8 +74,7 @@ export default class Utils {
      */
     static generateKeys() {
         return {
-            key: crypto.randomBytes(32).toString('hex'),
-            iv: crypto.randomBytes(16).toString('hex')
+            key: crypto.randomBytes(32).toString('hex')
         }
     }
 

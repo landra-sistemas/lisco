@@ -22,7 +22,7 @@ describe("Utils", () => {
     });
 
     it("#decrypt()", async () => {
-        const result = Utils.decrypt('Qx2S9CyCpYArI/5NbgT6q/Z3qE0DAFWK');
+        const result = Utils.decrypt('XKhioljx3J29rT50QkbeudX3c+i5zQth');
         expect(result).to.eq("asdfasdf");
     });
 
@@ -31,6 +31,5 @@ describe("Utils", () => {
         console.log(result);
         expect(result).to.be.an("object");
         expect(result).to.have.property("key");
-        expect(result).to.have.property("iv");
     });
 });
