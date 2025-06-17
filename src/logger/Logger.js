@@ -1,15 +1,17 @@
 import log4js from "log4js";
 import path from "path";
-import fs from "fs";
+import { readFile } from "node:fs/promises";
 import util from "util";
 
 const { configure, getLogger } = log4js;
 
 export default class Logger {
     static async configure() {
-        const readfile = util.promisify(fs.readFile);
-
-        const json = await readfile(path.resolve(process.cwd(), "./log4js.json"), "utf8");
+        let fileName = "log4js.json";
+        if (!path.resolve(process.cwd(), fileName)) {
+            fileName = "log4js.config.json";
+        }
+        const json = await readFile(path.resolve(process.cwd(), fileName), "utf8");
 
         configure(JSON.parse(json));
 
