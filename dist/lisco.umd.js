@@ -1,8 +1,8 @@
 (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('helmet'), require('express'), require('compression'), require('cors'), require('express-fileupload'), require('url'), require('lodash'), require('fs'), require('util'), require('crypto'), require('chokidar'), require('buffer'), require('stream'), require('uuid'), require('http'), require('https'), require('path'), require('cluster'), require('socket.io'), require('@socket.io/sticky'), require('@socket.io/cluster-adapter'), require('os'), require('events'), require('cluster-messages'), require('log4js'), require('path-to-regexp'), require('moment'), require('@landra_sistemas/fql-parser'), require('knex'), require('net'), require('repl'), require('yargs/yargs'), require('yargs/helpers')) :
-    typeof define === 'function' && define.amd ? define(['exports', 'helmet', 'express', 'compression', 'cors', 'express-fileupload', 'url', 'lodash', 'fs', 'util', 'crypto', 'chokidar', 'buffer', 'stream', 'uuid', 'http', 'https', 'path', 'cluster', 'socket.io', '@socket.io/sticky', '@socket.io/cluster-adapter', 'os', 'events', 'cluster-messages', 'log4js', 'path-to-regexp', 'moment', '@landra_sistemas/fql-parser', 'knex', 'net', 'repl', 'yargs/yargs', 'yargs/helpers'], factory) :
-    (global = global || self, factory(global.lisco = {}, global.helmet, global.express, global.compression, global.cors, global.expressFileupload, global.url, global.lodash, global.fs, global.util, global.crypto, global.chokidar, global.buffer, global.stream, global.uuid, global.http, global.https, global.path, global.cluster, global.socket_io, global.sticky, global.clusterAdapter, global.os, global.events, global.clusterMessages, global.log4Js, global.pathToRegexp, global.moment, global.fqlParser, global.knex, global.net, global.repl, global.yargs, global.helpers));
-})(this, (function (exports, helmet, express, compression, cors, fileUpload, url, lodash, fs, util, crypto, chokidar, buffer, Stream, uuid, http, https, path, cluster, socket_io, sticky, clusterAdapter, os, events, ClusterMessages, log4js, pathToRegexp, moment, fqlParser, Knex, net, repl, yargs, helpers) {
+    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('helmet'), require('express'), require('compression'), require('cors'), require('express-fileupload'), require('url'), require('lodash'), require('fs'), require('util'), require('crypto'), require('chokidar'), require('buffer'), require('stream'), require('uuid'), require('http'), require('https'), require('path'), require('cluster'), require('socket.io'), require('@socket.io/sticky'), require('@socket.io/cluster-adapter'), require('os'), require('events'), require('cluster-messages'), require('log4js'), require('node:fs/promises'), require('path-to-regexp'), require('moment'), require('@landra_sistemas/fql-parser'), require('knex'), require('net'), require('repl'), require('yargs/yargs'), require('yargs/helpers')) :
+    typeof define === 'function' && define.amd ? define(['exports', 'helmet', 'express', 'compression', 'cors', 'express-fileupload', 'url', 'lodash', 'fs', 'util', 'crypto', 'chokidar', 'buffer', 'stream', 'uuid', 'http', 'https', 'path', 'cluster', 'socket.io', '@socket.io/sticky', '@socket.io/cluster-adapter', 'os', 'events', 'cluster-messages', 'log4js', 'node:fs/promises', 'path-to-regexp', 'moment', '@landra_sistemas/fql-parser', 'knex', 'net', 'repl', 'yargs/yargs', 'yargs/helpers'], factory) :
+    (global = global || self, factory(global.lisco = {}, global.helmet, global.express, global.compression, global.cors, global.expressFileupload, global.url, global.lodash, global.fs, global.util, global.crypto, global.chokidar, global.buffer, global.stream, global.uuid, global.http, global.https, global.path, global.cluster, global.socket_io, global.sticky, global.clusterAdapter, global.os, global.events, global.clusterMessages, global.log4Js, global.promises, global.pathToRegexp, global.moment, global.fqlParser, global.knex, global.net, global.repl, global.yargs, global.helpers));
+})(this, (function (exports, helmet, express, compression, cors, fileUpload, url, lodash, fs, util, crypto, chokidar, buffer, Stream, uuid, http, https, path, cluster, socket_io, sticky, clusterAdapter, os, events, ClusterMessages, log4js, promises, pathToRegexp, moment, fqlParser, Knex, net, repl, yargs, helpers) {
     function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
     function _interopNamespace(e) {
@@ -5509,8 +5509,11 @@
     } = log4js__default["default"];
     class Logger {
       static async configure() {
-        const readfile = util__default["default"].promisify(fs__default["default"].readFile);
-        const json = await readfile(path__default["default"].resolve(process.cwd(), "./log4js.json"), "utf8");
+        let fileName = "log4js.json";
+        if (!path__default["default"].resolve(process.cwd(), fileName)) {
+          fileName = "log4js.config.json";
+        }
+        const json = await promises.readFile(path__default["default"].resolve(process.cwd(), fileName), "utf8");
         configure(JSON.parse(json));
 
         //Nota para el futuro:

@@ -23,6 +23,7 @@ import os from 'os';
 import { EventEmitter } from 'events';
 import ClusterMessages from 'cluster-messages';
 import log4js from 'log4js';
+import { readFile } from 'node:fs/promises';
 import { pathToRegexp } from 'path-to-regexp';
 import moment from 'moment';
 import { FQLParser, KnexParser } from '@landra_sistemas/fql-parser';
@@ -5491,8 +5492,11 @@ const {
 } = log4js;
 class Logger {
   static async configure() {
-    const readfile = util.promisify(fs.readFile);
-    const json = await readfile(path.resolve(process.cwd(), "./log4js.json"), "utf8");
+    let fileName = "log4js.json";
+    if (!path.resolve(process.cwd(), fileName)) {
+      fileName = "log4js.config.json";
+    }
+    const json = await readFile(path.resolve(process.cwd(), fileName), "utf8");
     configure(JSON.parse(json));
 
     //Nota para el futuro:

@@ -23,6 +23,7 @@ var os = require('os');
 var events = require('events');
 var ClusterMessages = require('cluster-messages');
 var log4js = require('log4js');
+var promises = require('node:fs/promises');
 var pathToRegexp = require('path-to-regexp');
 var moment = require('moment');
 var fqlParser = require('@landra_sistemas/fql-parser');
@@ -5538,8 +5539,11 @@ const {
 } = log4js__default["default"];
 class Logger {
   static async configure() {
-    const readfile = util__default["default"].promisify(fs__default["default"].readFile);
-    const json = await readfile(path__default["default"].resolve(process.cwd(), "./log4js.json"), "utf8");
+    let fileName = "log4js.json";
+    if (!path__default["default"].resolve(process.cwd(), fileName)) {
+      fileName = "log4js.config.json";
+    }
+    const json = await promises.readFile(path__default["default"].resolve(process.cwd(), fileName), "utf8");
     configure(JSON.parse(json));
 
     //Nota para el futuro:
