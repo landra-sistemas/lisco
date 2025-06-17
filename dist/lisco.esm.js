@@ -23,7 +23,7 @@ import os from 'os';
 import { EventEmitter } from 'events';
 import ClusterMessages from 'cluster-messages';
 import log4js from 'log4js';
-import { readFile } from 'node:fs/promises';
+import { readFile, stat } from 'node:fs/promises';
 import { pathToRegexp } from 'path-to-regexp';
 import moment from 'moment';
 import { FQLParser, KnexParser } from '@landra_sistemas/fql-parser';
@@ -5490,10 +5490,13 @@ const {
   configure,
   getLogger
 } = log4js;
+const exists = async f => await stat(f).then(() => true).catch(() => false);
 class Logger {
   static async configure() {
     let fileName = "log4js.json";
-    if (!path.resolve(process.cwd(), fileName)) {
+
+    // Si no existe el archivo log4js.json, se busca log4js.config.json
+    if (!(await exists(path.resolve(process.cwd(), fileName)))) {
       fileName = "log4js.config.json";
     }
     const json = await readFile(path.resolve(process.cwd(), fileName), "utf8");

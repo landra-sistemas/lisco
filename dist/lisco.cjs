@@ -5537,10 +5537,13 @@ const {
   configure,
   getLogger
 } = log4js__default["default"];
+const exists = async f => await promises.stat(f).then(() => true).catch(() => false);
 class Logger {
   static async configure() {
     let fileName = "log4js.json";
-    if (!path__default["default"].resolve(process.cwd(), fileName)) {
+
+    // Si no existe el archivo log4js.json, se busca log4js.config.json
+    if (!(await exists(path__default["default"].resolve(process.cwd(), fileName)))) {
       fileName = "log4js.config.json";
     }
     const json = await promises.readFile(path__default["default"].resolve(process.cwd(), fileName), "utf8");
