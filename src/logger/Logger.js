@@ -1,16 +1,23 @@
 import log4js from "log4js";
 import path from "path";
-import { readFile } from "node:fs/promises";
-import util from "util";
+import { readFile, stat } from "node:fs/promises";
 
 const { configure, getLogger } = log4js;
+
+const exists = async (f) =>
+    await stat(f)
+        .then(() => true)
+        .catch(() => false);
 
 export default class Logger {
     static async configure() {
         let fileName = "log4js.json";
-        if (!path.resolve(process.cwd(), fileName)) {
+
+        // Si no existe el archivo log4js.json, se busca log4js.config.json
+        if (!(await exists(path.resolve(process.cwd(), fileName)))) {
             fileName = "log4js.config.json";
         }
+
         const json = await readFile(path.resolve(process.cwd(), fileName), "utf8");
 
         configure(JSON.parse(json));
