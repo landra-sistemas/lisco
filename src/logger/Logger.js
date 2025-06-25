@@ -37,12 +37,12 @@ export default class Logger {
             console.error = function () {
                 let args = Array.prototype.slice.call(arguments);
                 // error.apply(this, args);
-                log_logger.info(...args);
+                error_logger.error(...args);
             };
             console.info = function () {
                 let args = Array.prototype.slice.call(arguments);
                 // info.apply(this, args);
-                error_logger.error(...args);
+                log_logger.info(...args);
             };
             console.debug = function () {
                 /*if (global.settings.debug.value) {*/
