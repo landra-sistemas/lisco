@@ -51,8 +51,8 @@ export default class Logger {
                 debug_logger.debug(...args);
             };
 
-            console.custom = function (loggerName, level, message) {
-                const custom_logger = getLogger(loggerName);
+            console.custom = function (logger, level, message) {
+                const custom_logger = getLogger(logger);
                 if (typeof custom_logger[level] === "function") {
                     custom_logger[level](message);
                 } else {
