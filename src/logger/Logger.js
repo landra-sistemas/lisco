@@ -32,28 +32,32 @@ export default class Logger {
             console.log = function () {
                 let args = Array.prototype.slice.call(arguments);
                 // log.apply(this, args);
-                log_logger.log("info", args[0]);
+                log_logger.info(...args);
             };
             console.error = function () {
                 let args = Array.prototype.slice.call(arguments);
                 // error.apply(this, args);
-                error_logger.log("error", args[0]);
+                error_logger.error(...args);
             };
             console.info = function () {
                 let args = Array.prototype.slice.call(arguments);
                 // info.apply(this, args);
-                log_logger.log("info", args[0]);
+                log_logger.info(...args);
             };
             console.debug = function () {
                 /*if (global.settings.debug.value) {*/
                 let args = Array.prototype.slice.call(arguments);
                 // debug.apply(this, [args[1], args[2]]);
-                debug_logger.log("debug", args[0]);
+                debug_logger.debug(...args);
             };
 
             console.custom = function (logger, level, message) {
                 const custom_logger = getLogger(logger);
-                custom_logger.log(level, message);
+                if (typeof custom_logger[level] === "function") {
+                    custom_logger[level](message);
+                } else {
+                    custom_logger.info(message);
+                }
             };
         })();
     }
