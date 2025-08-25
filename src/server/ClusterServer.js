@@ -4,6 +4,8 @@ import fs from "fs";
 import path from "path";
 import cluster from "cluster";
 import { Server } from "socket.io";
+import { setupMaster, setupWorker } from "@socket.io/sticky";
+import { createAdapter, setupPrimary } from "@socket.io/cluster-adapter";
 import os from "os";
 import { EventEmitter } from "events";
 
@@ -38,9 +40,7 @@ export default class ClusterServer extends EventEmitter {
         if (this.clustered == "true") {
             this.initClustered();
         } else {
-            this.configureSocketIO();
             this.executeOnlyMain();
-
             await this.initUnclustered();
         }
     }
@@ -50,10 +50,36 @@ export default class ClusterServer extends EventEmitter {
      *
      * Se puede desactivar mediante la config socketio: false al realizar el App.init()
      */
-    configureSocketIO() {
-        if (this.server.express_config && this.server.express_config.socketio) {
-            this.app.io = new Server(this.server.express_config && this.server.express_config.socketio);
-            this.app.io.listen(this.port + 1);
+    configureSocketIO(server) {
+        if (!this.server.express_config?.socketio) {
+            return;
+        }
+
+        if (this.clustered !== "true") {
+            this.server.io = new Server(this.server.express_config && this.server.express_config.socketio);
+            this.server.io.listen(server);
+            this.app.io = this.server.io;
+            return;
+        }
+
+        if (this.clustered === "true") {
+            if (cluster.isPrimary) {
+                // setup sticky sessions
+                setupMaster(server, {
+                    loadBalancingMethod: "least-connection",
+                });
+                // setup connections between the workers
+                setupPrimary();
+                cluster.setupPrimary({
+                    serialization: "advanced",
+                });
+            } else {
+                this.server.io = new Server(this.server.express_config && this.server.express_config.socketio);
+                this.server.io.listen(server);
+                setupWorker(this.server.io);
+                this.app.io = this.server.io;
+            }
+            return;
         }
     }
 
@@ -64,8 +90,6 @@ export default class ClusterServer extends EventEmitter {
     async initClustered() {
         //Launch cluster
         if (cluster.isPrimary) {
-            this.configureSocketIO();
-
             this.executeOnlyMain();
 
             let messages = new ClusterMessages();
@@ -116,6 +140,9 @@ export default class ClusterServer extends EventEmitter {
         this.server.port = this.port;
         //create http server
         let server = http.Server(this.server.app);
+
+        //Configure socketio if applies
+        this.configureSocketIO(server);
 
         await this.server.initialize();
 

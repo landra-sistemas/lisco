@@ -1,24 +1,21 @@
-import { expect } from 'chai';
-import cluster from 'cluster';
-import { EventHandler, App } from '../src';
+import { expect } from "chai";
+import cluster from "cluster";
+import { EventHandler, App } from "../src/index.js";
 
-
-describe('EventHandler', () => {
-
-    it('#simple()', async () => {
-
+describe("EventHandler", () => {
+    it("#simple()", async () => {
         let events = new EventHandler();
 
         var testString;
 
-        events.on('test', function test({ str }) {
+        events.on("test", function test({ str }) {
             testString = str;
         });
 
-        events.emit('test', { str: 'asdf' })
+        events.emit("test", { str: "asdf" });
         expect(testString).not.to.be.undefined;
-        expect(testString).to.eq('asdf');
-    })
+        expect(testString).to.eq("asdf");
+    });
 
     //TODO review clustered event usecases
     // it('#clustered()', async () => {
@@ -54,11 +51,9 @@ describe('EventHandler', () => {
 
     // it('#clusterWorker()', async () => {
 
-
     //     cluster.isMaster = false;
     //     cluster.isWorker = true;
 
-        
     //     await App.init();
     //     App.server.start();
     //     let events = new EventHandler();
@@ -81,7 +76,4 @@ describe('EventHandler', () => {
     //     expect(testString).not.to.be.undefined;
     //     expect(testString).to.eq('asdf');
     // });
-
-
-
-})
+});

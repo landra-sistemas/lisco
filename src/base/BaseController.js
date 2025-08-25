@@ -49,6 +49,7 @@ export class BaseController {
 
         this.service = config.service;
         this.table = config.table;
+        this.schema = config.schema;
 
         return this.router;
     }
@@ -133,8 +134,12 @@ export class BaseController {
     async saveEntidad(request, response, next) {
         try {
             let service = new this.service(null, this.table);
+            let requestBody = request?.body;
+            if (this.schema) {
+                requestBody = await this.schema?.validate(request?.body);
+            }
 
-            let data = await service.save(request.body);
+            let data = await service.save(requestBody);
             let jsRes = new JsonResponse(true, (data && data[0]) || { id: request.body.id });
 
             response.setHeader("Location", `/entity/${jsRes.data.id}`);
@@ -160,8 +165,12 @@ export class BaseController {
     async updateEntidad(request, response, next) {
         try {
             let service = new this.service(null, this.table);
+            let requestBody = request?.body;
+            if (this.schema) {
+                requestBody = await this.schema?.validate(request?.body);
+            }
 
-            let data = await service.update(request.params.id, request.body);
+            let data = await service.update(request.params.id, requestBody);
             let jsRes = new JsonResponse(true, (data && data[0]) || { id: request.body.id });
 
             response.json(jsRes.toJson());

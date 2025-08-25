@@ -1,15 +1,24 @@
 import log4js from "log4js";
 import path from "path";
-import fs from "fs";
-import util from "util";
+import { readFile, stat } from "node:fs/promises";
 
 const { configure, getLogger } = log4js;
 
+const exists = async (f) =>
+    await stat(f)
+        .then(() => true)
+        .catch(() => false);
+
 export default class Logger {
     static async configure() {
-        const readfile = util.promisify(fs.readFile);
+        let fileName = "log4js.json";
 
-        const json = await readfile(path.resolve(process.cwd(), "./log4js.json"), "utf8");
+        // Si no existe el archivo log4js.json, se busca log4js.config.json
+        if (!(await exists(path.resolve(process.cwd(), fileName)))) {
+            fileName = "log4js.config.json";
+        }
+
+        const json = await readFile(path.resolve(process.cwd(), fileName), "utf8");
 
         configure(JSON.parse(json));
 
@@ -23,28 +32,32 @@ export default class Logger {
             console.log = function () {
                 let args = Array.prototype.slice.call(arguments);
                 // log.apply(this, args);
-                log_logger.log("info", args[0]);
+                log_logger.info(...args);
             };
             console.error = function () {
                 let args = Array.prototype.slice.call(arguments);
                 // error.apply(this, args);
-                error_logger.log("error", args[0]);
+                error_logger.error(...args);
             };
             console.info = function () {
                 let args = Array.prototype.slice.call(arguments);
                 // info.apply(this, args);
-                log_logger.log("info", args[0]);
+                log_logger.info(...args);
             };
             console.debug = function () {
                 /*if (global.settings.debug.value) {*/
                 let args = Array.prototype.slice.call(arguments);
                 // debug.apply(this, [args[1], args[2]]);
-                debug_logger.log("debug", args[0]);
+                debug_logger.debug(...args);
             };
 
             console.custom = function (logger, level, message) {
                 const custom_logger = getLogger(logger);
-                custom_logger.log(level, message);
+                if (typeof custom_logger[level] === "function") {
+                    custom_logger[level](message);
+                } else {
+                    custom_logger.info(message);
+                }
             };
         })();
     }
