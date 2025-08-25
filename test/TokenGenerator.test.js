@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { TokenGenerator } from "../src";
+import { TokenGenerator } from "../src/index.js";
 
 describe("TokenGenerator", () => {
     it("#sign()", async () => {

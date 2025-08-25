@@ -8,6 +8,36 @@
 Framework nodejs con express y knex para el desarrollo de backends.
 
 
+- [Lisco Framework](#lisco-framework)
+  - [Quick Setup](#quick-setup)
+  - [Arranque del proyecto](#arranque-del-proyecto)
+  - [VSCode development](#vscode-development)
+  - [Configuración de BD y migraciones](#configuración-de-bd-y-migraciones)
+    - [Ejecutando migraciones al inicio](#ejecutando-migraciones-al-inicio)
+    - [Mas info KNEX](#mas-info-knex)
+- [Descripción de Componentes](#descripción-de-componentes)
+  - [Rutas y Controladores](#rutas-y-controladores)
+    - [Shorthands](#shorthands)
+    - [Autoconfig](#autoconfig)
+    - [Validation](#validation)
+  - [Autenticación](#autenticación)
+    - [JWT Authentication](#jwt-authentication)
+      - [Token](#token)
+    - [Cookie Authentication](#cookie-authentication)
+      - [Cookie](#cookie)
+    - [Autenticación Keycloak](#autenticación-keycloak)
+      - [Uso](#uso)
+  - [Logger](#logger)
+  - [Traducciones](#traducciones)
+  - [Eventos](#eventos)
+  - [Filtros](#filtros)
+  - [Server Views](#server-views)
+  - [Runtime CLI](#runtime-cli)
+    - [Opciones adicionales](#opciones-adicionales)
+  - [SocketIO](#socketio)
+
+
+
 ## Quick Setup
 Inicializar un proyecto en blanco
 
@@ -228,7 +258,6 @@ Para hacer que al ejecutar una aplicación los mensajes de log del `consoleApend
 ## Configuración de BD y migraciones
 
 
-
 Crear un knexfile con los datos de conexión a BD.
 
 ``` shell
@@ -304,6 +333,22 @@ import {KnexConnector} from '@landra_sistemas/lisco';
 > `connection` es una instancia de knex con lo que dispone de todos los métodos `.from`, `.where`, etc. definidos por su API.
 
 
+### Ejecutando migraciones al inicio
+
+Una vez configurada la conexión con la base de datos, justo después de cargarla (`init`) se puede indicar al sistema que ejecute las migraciones mediante el siguiente comando:
+
+```js
+    [...] //Antes del App.init()
+    try {
+        await KnexConnector.connection.migrate.latest();
+    } catch (e) {
+        console.log("Error running migrations:",e);
+    }
+    [...]
+
+    //
+```
+
 ### Mas info KNEX
 [http://knexjs.org/#Installation](http://knexjs.org/#Installation)
 
@@ -354,7 +399,7 @@ Ejemplo
 ``` javascript
 export default class UserController extends BaseController {
     configure() { //Necesario
-        super.configure('user', { service: BaseService, table: 'user' });
+        super.configure('user', { service: BaseService, table: 'user', schema: yupSchema /*See validation*/ });
 
         this.router.get('/session',Utils.expressHandler((...args) => { 
             this.getSession(...args); 
@@ -451,6 +496,7 @@ class HomeController extends BaseController {
     entity = "user";
     service = UserService;
     table = "user";
+    schema: yupSchema /*See validation*/
 
     // Si el linter utilizado no soporta attributos de clase
     // constructor() {
@@ -458,10 +504,30 @@ class HomeController extends BaseController {
     //     this.entity = "user";
     //     this.service = UserService;
     //     this.table = "user";
+    //     this.schema= yupSchema /*See validation*/
     // }
 }
 
 ``` 
+### Validation
+
+Para asegurar la validación de los inputs se define una propiedad general a nivel de basecontroller llamada schema. Esta variable basa su funcionamiento en la librería yup. 
+
+Para crear un esquema de validación se puede hacer de la siguiente forma:
+
+``` js
+
+const userSchema = object(    {
+    name: string().required(),
+    age: number().required().positive().integer(),
+    email: string().email(),
+});
+
+```
+
+Este esquema será utilizado, siempre que se le asigne al BaseController, en los métodos: create y update.
+
+
 
 
 ## Autenticación
@@ -534,17 +600,17 @@ Este token almacena toda la información de la entidad usuario devuelta por la c
 
 Este sistema utiliza cookies para la gestión de las sesiones de la aplicación.
 
-Utiliza el `cookie-parser` de express y para configurarlo es necesario:
+Utiliza el `express-session` de express y para configurarlo es necesario:
 
 1. Instalar:  connect-session-knex y express-session
 2. Cargar la cookie store en express mediante el método `customizeExpress`
 ``` javascript
+import { ConnectSessionKnexStore }  from "connect-session-knex";
+
 //Configurar la gestion de cookies
 App.customizeExpress = (app) => {
-    const KnexSessionStore = knexStore(session);
-
     app.use(session({
-        store: new KnexSessionStore({
+        store: new ConnectSessionKnexStore({
             knex: KnexConnector.connection,
             tablename: 'sessions_knex'
         }),
@@ -781,7 +847,7 @@ La clase `KnexFilterParser`  convierte un objeto clave valor en un conjunto de f
 > Todos los filtros excepto exists, notexists, fql y full-text-psql tienen una opción 'raw' (dateraw, betweenraw) que permite personalizar mediante sintaxis sql la columna. Esto suele ser util para, en Postgres, ejecutar consultas sobre columnas de tipo Json (`column->>'test'`)
  
 
- ## Views
+ ## Server Views
 
  La utilización de `express` permite el uso de cualquier sistema de renderizado del lado de servidor soportado por el. Mas info aqui https://expressjs.com/en/resources/template-engines.html y aqui https://expressjs.com/en/guide/using-template-engines.html
 
@@ -897,7 +963,7 @@ App.routes = [
 
 
 
-## Runtime
+## Runtime CLI
 
 Lisco proporciona una serie de parámetros de consola útiles para la generación de claves. Esta runtime **no está activada por defecto** pero puede activarse mediante:
 ``` javascript
@@ -934,10 +1000,10 @@ La este método puede recibir como parámetro una lista de elementos adicionales
     }   
 ]
 ```	
-
 > Para poder utilizar funciones asíncronas, será necesario utilizar await al inicializar la runtime (`await App.runtime(extra);`)
 
-## Monitoring
+
+## Server Monitoring
 
 Se ha adaptado la librería: https://github.com/RafalWilinski/express-status-monitor. Al utilizar CDN's limita bastante el deploy del proyecto, pero esta adaptación la hace perfecta para incluir a modo de monitorización https://github.com/thorin8k/express-status-monitor.
 
@@ -965,3 +1031,18 @@ App.customizeExpress = (app) => {
 En el repositorio existen parámetros adicionales que pueden ser útiles en ciertos casos: https://github.com/thorin8k/express-status-monitor
 
 > Lisco arranca un socketio por defecto en el puerto siguiente al configurado. Si este socketio se desactiva es necesario quitar la linea websocket de la configuración para que el monitor arranque su propio servidor.
+
+
+## SocketIO
+
+WIP 
+``` javascript
+ App.ioevents = {
+        connection: (socket) => {
+            console.log(`⚡: "${socket.id}" user just connected!`);
+            socket.on("disconnect", () => {
+                console.log(`⚡: "${socket.id}" user just disconnected!`);
+            });
+        },
+    };
+```

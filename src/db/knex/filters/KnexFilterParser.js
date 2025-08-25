@@ -196,6 +196,9 @@ export default class KnexFilterParser {
                     case "notnullraw":
                         query = query.whereRaw(`${prop} is not NULL`);
                         break;
+                    case "any":
+                        query = query.whereRaw(`? = ANY(?)`, [elm.value, prop]);
+                        break;
                 }
             } else {
                 //Si el valor no es un objeto se devuelve

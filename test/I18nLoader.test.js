@@ -1,55 +1,43 @@
-import { expect } from 'chai';
-import { I18nLoader } from '../src';
+import { expect } from "chai";
+import { I18nLoader } from "../src/index.js";
 
-
-describe('I18nLoader', () => {
-
-    it('#load()', async () => {
-
+describe("I18nLoader", () => {
+    it("#load()", async () => {
         let i18n = new I18nLoader();
         await i18n.load();
 
         expect(i18n).not.to.be.undefined;
         expect(i18n.currentData).not.to.be.undefined;
-        expect(i18n.currentData).to.be.an('object');
+        expect(i18n.currentData).to.be.an("object");
+    });
 
-    })
-
-    it('#load(unexisting)', async () => {
-
+    it("#load(unexisting)", async () => {
         let i18n = new I18nLoader();
         await i18n.load("ru");
 
         expect(i18n).not.to.be.undefined;
         expect(i18n.currentData.ru).to.be.undefined;
-
-    })
-    it('#translate()', async () => {
-
+    });
+    it("#translate()", async () => {
         let i18n = new I18nLoader();
         await i18n.load();
 
-        let translated = await i18n.translate('test');
+        let translated = await i18n.translate("test");
 
         expect(i18n).not.to.be.undefined;
         expect(i18n.currentData).not.to.be.undefined;
         expect(translated).not.to.be.undefined;
-        expect(translated).to.eq('asdf');
+        expect(translated).to.eq("asdf");
+    });
 
-    })
-
-    it('#unexisting.translate()', async () => {
-
+    it("#unexisting.translate()", async () => {
         let i18n = new I18nLoader();
         await i18n.load();
 
-        let translated = await await i18n.translate('test2');
+        let translated = await await i18n.translate("test2");
 
         expect(i18n).not.to.be.undefined;
         expect(i18n.currentData).not.to.be.undefined;
         expect(translated).not.to.be.undefined;
-
-    })
-
-
-})
+    });
+});
