@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { JwtAuthHandler } from "../src";
+import { JwtAuthHandler } from "../src/index.js";
 
 const UserDao = {
     findByUsername: () => ({ username: "admin", password: "ee7646601f245dc9d098678949753e2e" }),

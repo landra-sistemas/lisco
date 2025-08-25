@@ -39,7 +39,7 @@ export default class AuthController {
             //Rutas ublicas
             for (let path of this.publicPathsList) {
                 const expr = pathToRegexp(path);
-                if (expr.exec(url.parse(request.url).pathname) !== null) {
+                if (expr.exec(request.originalUrl) !== null) {
                     return next();
                 }
             }

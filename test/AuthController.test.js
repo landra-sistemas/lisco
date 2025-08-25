@@ -1,25 +1,23 @@
-import { expect } from 'chai';
-import { AuthController } from '../src';
+import { expect } from "chai";
+import { AuthController } from "../src/index.js";
 
-
-describe('AuthController', async () => {
-    it('#configure()', () => {
+describe("AuthController", async () => {
+    it("#configure()", () => {
         let auth = new AuthController([], {
             UserDao: {
-                findByUsername: () => { }
-            }
+                findByUsername: () => {},
+            },
         });
 
         auth.configure();
 
         expect(auth).not.to.be.null;
-    })
-    it('#check#public()', () => {
-
-        let auth = new AuthController(['/test'], {
+    });
+    it("#check#public()", () => {
+        let auth = new AuthController(["/test"], {
             UserDao: {
-                findByUsername: () => { }
-            }
+                findByUsername: () => {},
+            },
         });
         expect(auth).not.to.be.null;
 
@@ -30,35 +28,35 @@ describe('AuthController', async () => {
             status: (status) => {
                 code = status;
                 return {
-                    json: () => { }
-                }
-            }
+                    json: () => {},
+                };
+            },
         };
         const fakeRequest = {
             headers: { authorization: "" },
-            url: 'http://asdfasd/test'
-        }
-
+            url: "http://asdfasd/test",
+            originalUrl: "/test"
+        };
 
         auth.check(fakeRequest, fakeResponse, function () {
             checked = true;
-        })
+        });
 
         expect(checked).to.eq(true);
-
-
-    })
-    it('#check#private#invalid()', async () => {
-
-        let auth = new AuthController(['/test'], {
+    });
+    it("#check#private#invalid()", async () => {
+        let auth = new AuthController(["/test"], {
             UserDao: {
-                findByUsername: () => { }
+                findByUsername: () => {},
             },
-            check: () => { return false; },
-            validate: () => { return false; }
+            check: () => {
+                return false;
+            },
+            validate: () => {
+                return false;
+            },
         });
         expect(auth).not.to.be.null;
-
 
         let checked = false;
         let code = null;
@@ -67,36 +65,36 @@ describe('AuthController', async () => {
             status: (status) => {
                 code = status;
                 return {
-                    json: () => { }
-                }
-            }
+                    json: () => {},
+                };
+            },
         };
         const fakeRequest = {
             headers: { authorization: "" },
-            url: 'http://asdfasd/testPrivate'
-        }
+            url: "http://asdfasd/testPrivate",
+        };
 
         await auth.check(fakeRequest, fakeResponse, function () {
             checked = true;
-        })
+        });
 
         expect(checked).to.eq(false);
         expect(code).to.eq(403);
+    });
 
-    })
-
-
-    it('#check#private#valid()', async () => {
-
-        let auth = new AuthController(['/test'], {
+    it("#check#private#valid()", async () => {
+        let auth = new AuthController(["/test"], {
             UserDao: {
-                findByUsername: () => { }
+                findByUsername: () => {},
             },
-            check: () => { return true; },
-            validate: () => { return true; }
+            check: () => {
+                return true;
+            },
+            validate: () => {
+                return true;
+            },
         });
         expect(auth).not.to.be.null;
-
 
         let checked = false;
         let code = null;
@@ -105,36 +103,33 @@ describe('AuthController', async () => {
             status: (status) => {
                 code = status;
                 return {
-                    json: () => { }
-                }
-            }
+                    json: () => {},
+                };
+            },
         };
         const fakeRequest = {
             headers: { authorization: "" },
-            url: 'http://asdfasd/testPrivate'
-        }
+            url: "http://asdfasd/testPrivate",
+        };
 
         await auth.check(fakeRequest, fakeResponse, function () {
             checked = true;
-        })
+        });
 
         expect(checked).to.eq(true);
         expect(code).to.be.null;
+    });
 
-    })
-
-
-
-    it('#login#invalid()', async () => {
-
-        let auth = new AuthController(['/test'], {
+    it("#login#invalid()", async () => {
+        let auth = new AuthController(["/test"], {
             UserDao: {
-                findByUsername: () => { }
+                findByUsername: () => {},
             },
-            authorize: () => { return false; }
+            authorize: () => {
+                return false;
+            },
         });
         expect(auth).not.to.be.null;
-
 
         let code = null;
         let data = null;
@@ -143,34 +138,35 @@ describe('AuthController', async () => {
             status: (status) => {
                 code = status;
                 return {
-                    json: (resp) => { data = resp }
-                }
-            }
+                    json: (resp) => {
+                        data = resp;
+                    },
+                };
+            },
         };
         const fakeRequest = {
             headers: { authorization: "" },
             body: {
                 username: "asdf",
-                password: "asdf"
-            }
-        }
+                password: "asdf",
+            },
+        };
 
-        await auth.loginPost(fakeRequest, fakeResponse)
+        await auth.loginPost(fakeRequest, fakeResponse);
 
         expect(code).not.to.eq(200);
         expect(data).not.to.be.null;
-
-    })
-    it('#login#valid()', async () => {
-
-        let auth = new AuthController(['/test'], {
+    });
+    it("#login#valid()", async () => {
+        let auth = new AuthController(["/test"], {
             UserDao: {
-                findByUsername: () => { }
+                findByUsername: () => {},
             },
-            validate: () => { return true; }
+            validate: () => {
+                return true;
+            },
         });
         expect(auth).not.to.be.null;
-
 
         let code = null;
         let data = null;
@@ -179,36 +175,36 @@ describe('AuthController', async () => {
             status: (status) => {
                 code = status;
                 return {
-                    json: (resp) => { data = resp }
-                }
-            }
+                    json: (resp) => {
+                        data = resp;
+                    },
+                };
+            },
         };
         const fakeRequest = {
             headers: { authorization: "" },
             body: {
                 username: "asdf",
-                password: "asdf"
-            }
-        }
+                password: "asdf",
+            },
+        };
 
-        await auth.loginPost(fakeRequest, fakeResponse)
+        await auth.loginPost(fakeRequest, fakeResponse);
 
         expect(code).to.eq(200);
         expect(data).not.to.be.null;
+    });
 
-    })
-
-
-    it('#logout()', async () => {
-
-        let auth = new AuthController(['/test'], {
+    it("#logout()", async () => {
+        let auth = new AuthController(["/test"], {
             UserDao: {
-                findByUsername: () => { }
+                findByUsername: () => {},
             },
-            logout: () => { return true; }
+            logout: () => {
+                return true;
+            },
         });
         expect(auth).not.to.be.null;
-
 
         let code = null;
         let data = null;
@@ -217,25 +213,23 @@ describe('AuthController', async () => {
             status: (status) => {
                 code = status;
                 return {
-                    json: (resp) => { data = resp }
-                }
-            }
+                    json: (resp) => {
+                        data = resp;
+                    },
+                };
+            },
         };
         const fakeRequest = {
             headers: { authorization: "" },
             session: {
                 username: "asdf",
-                password: "asdf"
-            }
-        }
+                password: "asdf",
+            },
+        };
 
-        await auth.logout(fakeRequest, fakeResponse)
+        await auth.logout(fakeRequest, fakeResponse);
 
         expect(code).to.eq(200);
         expect(data).not.to.be.null;
-
-    })
-
-
-
-})
+    });
+});
