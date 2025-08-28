@@ -31,6 +31,7 @@ Framework nodejs con express y knex para el desarrollo de backends.
   - [Traducciones](#traducciones)
   - [Eventos](#eventos)
   - [Filtros](#filtros)
+    - [Ordenación](#ordenación) 
   - [Server Views](#server-views)
   - [Runtime CLI](#runtime-cli)
     - [Opciones adicionales](#opciones-adicionales)
@@ -845,7 +846,22 @@ La clase `KnexFilterParser`  convierte un objeto clave valor en un conjunto de f
     - **likeI**: filtro like ignorando mayusculas y minusculas
 
 > Todos los filtros excepto exists, notexists, fql y full-text-psql tienen una opción 'raw' (dateraw, betweenraw) que permite personalizar mediante sintaxis sql la columna. Esto suele ser util para, en Postgres, ejecutar consultas sobre columnas de tipo Json (`column->>'test'`)
- 
+
+### Ordenación
+
+Para poder ordenar los datos requeridos, es necesario incluir en el payload de la request el siguiente objeto:
+
+```
+{
+    ...
+    "filters": {...},
+    "sort": {
+        "field": "column name",
+        "direction": "ascend|descend"
+    }
+}
+```
+ Siendo `field` el nombre de la columna por la que ordenar y `direction` la dirección.
 
  ## Server Views
 
