@@ -41,14 +41,14 @@ Node.js framework with express and knex for backend development.
 
 
 ## Quick Setup
-Inicializar un proyecto en blanco
+Start a blank project
 
 ``` shell
 > npm init
 ```
-> Introducir los datos del proyecto
+> Enter project info
 
-Instalar dependencias necesarias
+Install the needed dependencies
 ``` shell
 
 > npm install @landra_sistemas/lisco dotenv-defaults
@@ -56,7 +56,7 @@ Instalar dependencias necesarias
 ```
 
 
-Archivo index encargado de aplicar la configuración e inicialización de componentes.
+`index.js` file is responsible for applying configuration and initializing components.
 
 **index.js**
 ``` javascript
@@ -69,35 +69,35 @@ import { App } from '@landra_sistemas/lisco'
 config();
 
 const main = async () => {
-    App.runtime(); //(Opcional) Arranca la runtime para recibir parámetros por consola (ver Runtime)
+    App.runtime(); //(Optional) Start the cli runtime
 
     App.customizeExpress = (app) => { 
-        // En este punto se pueden incluir personalizaciones sobre la app de express como se verá mas adelante
+        // Add here custom express options
     };
-    App.statics = { //Archivos estáticos que serán servidos
+    App.statics = { //Static files to serve
         "/temp": "/temp"
     }
-    App.routes = [ //Controladores que se cargarán para servir la api o las vistas
+    App.routes = [ //Loaded controllers
         //new CustomController()
     ]
 
     App.executeOnlyMain = () => { 
-        //Acciones a ejecutar sobre el mainWorker. Util en modo cluster para ejecutar cosas una única vez
+        //mainWorker executed actions. Useful to execute things once in cluster mode.
         console.log("MainThread")
     }
 
-    await App.init(); //Inicializar la configuración de la App con los parámetros proporcionados
+    await App.init(); //Inits the configuration with the provided params
 
-    App.start(); //Arrancar el servidor
+    App.start(); //Starts the server
     App.server.on('listening', () => {
-        //Evento desencadenado cuando el sistema se encuentra disponible
+        //This event is triggered once the server is running
         console.log('listening');
     })
 };
 
 main();
 
-//!! Se recomienda incluir handlers para errores no controlados:
+//!! //!! It's recommended to use handlers for unhandled exceptions:
 process.on("uncaughtException", (err) => {
     // handle the error safely
     console.error(`Error: ${err || err.stack || err.message}`);
@@ -110,20 +110,20 @@ process.on("unhandledPromiseException", (err) => {
 ```
 
 
-> **Opcional: ESM**
+> **Optional: ESM**
 > 
->  Para la resolución de los import. Ya hay soporte nativo en nodejs para > esto pero en ciertos escenarios puede ser necesario
+>  Node.js already has native support for resolving imports but in certain scenarios it may be necessary.
 > 
 > ``` bash
 > > npm install esm
 > ```
 > 
-> Para esto es necesario arrancar el proyecto desde un archivo previo al index.js. 
-> **Modificar el package.json para que el script start apunte a este archivo.**
-> 
+> Then start the project from a file before index.js.  
+> **Modify package.json so the start script points to this file.**
+>
 > **run.js**
 > ``` javascript
-> require = require("esm")(module/*, options*/) // -> Esto solo no hace > falta si se utiliza CommonJS o se pone type: module en el package json.
+> require = require("esm")(module/*, options*/) // -> Not required if CommonJS is being used or if the type: moodule is configured in the package json file.
 > 
 > //module dependencies.
 > require('./index.js')().then(() => {
@@ -132,7 +132,7 @@ process.on("unhandledPromiseException", (err) => {
 >     console.error(ex)
 > });
 > 
-> //En esta configuración se pueden mover los handlers aqui para asegurar que se ejecutan.
+> //Move the handlers from index.js to here:
 > process.on('uncaughtException', (err) => {
 >     // handle the error safely
 >     console.error(`Error: ${err || err.stack || err.message}`);
@@ -144,7 +144,7 @@ process.on("unhandledPromiseException", (err) => {
 > 
 > ```
 
-Archivo `.env` y `.env.defaults` con las configuraciones de inicio
+`.env` and `.env.defaults` have the init configurations
 
 **.env**
 ``` properties
@@ -192,8 +192,6 @@ JWT_ISSUER=Landra Sistemas
 # subject of the token
 JWT_SUBJECT=MySub
 ```
-
-> El archivo `.env.defaults` es un archivo que contiene las configuraciones por defecto de la aplicación. Este archivo **se debe commitear** y sirve como base para todos los entornos.
 
 > The `.env.defaults` file contains default configurations. This file **must be committed** and serves as the base for all environments.
 
