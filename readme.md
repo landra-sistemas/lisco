@@ -5,36 +5,37 @@
 
 ![alt](https://raw.githubusercontent.com/landra-sistemas/lisco/master/logo.png)
 
-Framework nodejs con express y knex para el desarrollo de backends.
+Node.js framework with express and knex for backend development.
 
 
 - [Lisco Framework](#lisco-framework)
   - [Quick Setup](#quick-setup)
-  - [Arranque del proyecto](#arranque-del-proyecto)
+  - [Project Startup](#project-startup)
   - [VSCode development](#vscode-development)
-  - [Configuración de BD y migraciones](#configuración-de-bd-y-migraciones)
-    - [Ejecutando migraciones al inicio](#ejecutando-migraciones-al-inicio)
-    - [Mas info KNEX](#mas-info-knex)
-- [Descripción de Componentes](#descripción-de-componentes)
-  - [Rutas y Controladores](#rutas-y-controladores)
+  - [DB Configuration and Migrations](#db-configuration-and-migrations)
+    - [Running migrations on startup](#running-migrations-on-startup)
+    - [More info KNEX](#more-info-knex)
+- [Component Description](#component-description)
+  - [Routes and Controllers](#routes-and-controllers)
     - [Shorthands](#shorthands)
     - [Autoconfig](#autoconfig)
     - [Validation](#validation)
-  - [Autenticación](#autenticación)
+  - [Authentication](#authentication)
     - [JWT Authentication](#jwt-authentication)
       - [Token](#token)
     - [Cookie Authentication](#cookie-authentication)
       - [Cookie](#cookie)
-    - [Autenticación Keycloak](#autenticación-keycloak)
-      - [Uso](#uso)
+    - [Keycloak Authentication](#keycloak-authentication)
+      - [Usage](#usage)
   - [Logger](#logger)
-  - [Traducciones](#traducciones)
-  - [Eventos](#eventos)
-  - [Filtros](#filtros)
-    - [Ordenación](#ordenación) 
+  - [Translations](#translations)
+  - [Events](#events)
+  - [Filters](#filters)
+    - [Sorting](#sorting) 
   - [Server Views](#server-views)
   - [Runtime CLI](#runtime-cli)
-    - [Opciones adicionales](#opciones-adicionales)
+    - [Additional options](#additional-options)
+  - [Server Monitoring](#server-monitoring)
   - [SocketIO](#socketio)
 
 
@@ -147,30 +148,30 @@ Archivo `.env` y `.env.defaults` con las configuraciones de inicio
 
 **.env**
 ``` properties
-# Determina el scope actual del producto (development, production)
+# Project environment scope (development, production)
 NODE_ENV=development
-# Puerto http en el que se desplegará la aplicación
+# Http port
 PORT=3700
-# (Opcional) Habilita el modo cluster de forma que se arranquen multiples workers
+# (Optional) Enables clustered mode. The app will be deployed starting multiple workers
 CLUSTERED=false
-# Idioma por defecto de la aplicación
+# Default language
 DEFAULT_LANG='es'
-# (Opcional) Deshabilita el logger para la ejecución de testing 
+# (Optional) Disables logger for testing execution 
 DISABLE_LOGGER=false
-# (Opcional) Habilita la consola remota accesible mediante telnet o lisco_terminal
+# (Optional) Enables remote console by telnet or lisco_terminal
 REPL_ENABLED=false
-# (Opcional) Determina el puerto en el que se desplegará la terminal remota
+# (Optional) Sets the remote console port
 REPL_PORT=5001
 
-# (Opcional) Habilita el servidor SSL 
+# (Optional) Enables the SSL (https) server
 SSL=false
-# (Opcional) Puerto en el que se desplegará el servidor Https
+# (Optional) https port
 PORT_SSL=3443
-# (Opcional) Ruta donde se encuentra el archivo del certificado (por defecto ./cert.pem)
+# (Optional) SSL certificate path (defaults to ./cert.pem)
 SSL_CERT=null
-# (Opcional) Ruta donde se encuentra el archivo key (por defecto ./key.pem)
+# (Optional) SSL key path (defaults to ./key.pem)
 SSL_KEY=null
-# Contraseña establecida en el certificado (Necesaria si se utilizan los anteriores)
+# Cert's SSL password (Not needed if the above are used)
 SSL_PASS=null
 
 # Password encryption (Run Utils.generateKeys())
@@ -194,12 +195,12 @@ JWT_SUBJECT=MySub
 
 > El archivo `.env.defaults` es un archivo que contiene las configuraciones por defecto de la aplicación. Este archivo **se debe commitear** y sirve como base para todos los entornos.
 
+> The `.env.defaults` file contains default configurations. This file **must be committed** and serves as the base for all environments.
 
 
-Archivo `log4js.json` encargado de la configuración del logger. Mas información y configuraciones en: https://log4js-node.github.io/log4js-node/index.html
+**log4js.json** configures the logger. More info at: https://log4js-node.github.io/log4js-node/index.html
 
-**log4js.json**
-``` json
+```json
 {
     "disableClustering": true,
     "appenders": {
@@ -224,14 +225,13 @@ Archivo `log4js.json` encargado de la configuración del logger. Mas informació
         }
     }
 }
-
 ```
-> Este archivo es obligatorio, sin esta configuración la aplicación no arrancará.
+> This file is mandatory. Without it, the app will not start.
 
-## Arranque del proyecto
+## Project Startup
 
-```
-> node run.js o npm start
+``` bash
+> node run.js or npm start
 
 [2021-03-06T19:39:52.987] [INFO] log - MainThread
 [2021-03-06T19:39:53.061] [INFO] log - Started
@@ -242,7 +242,7 @@ Archivo `log4js.json` encargado de la configuración del logger. Mas informació
 
 ## VSCode development
 
-Para hacer que al ejecutar una aplicación los mensajes de log del `consoleApender` aparezcan en el modo debug es necesario configurar en el `launch.json` la ejecución como:
+To display log messages in debug mode setup `launch.json` like:
 
 ``` json
 
@@ -252,21 +252,19 @@ Para hacer que al ejecutar una aplicación los mensajes de log del `consoleApend
     "name": "Launch Program",
     "cwd": "${workspaceFolder}/../lisco_tester",
     "program": "${workspaceFolder}/../lisco_tester/run.js",
-    "outputCapture": "std"  /// <---- Esto es lo importante
+    "outputCapture": "std"  /// <---- This is the important property!
 }
 ```
 
-## Configuración de BD y migraciones
+DB Configuration and Migrations
 
+Create a knexfile with DB connection:
 
-Crear un knexfile con los datos de conexión a BD.
-
-``` shell
+```shell
 > ./node_modules/.bin/knex init
-
 ```
 
-Esto creará un archivo similar a:
+This will create something like:
 
 ``` javascript
 module.exports = {
@@ -301,7 +299,7 @@ module.exports = {
 };
 ```
 
-Conectarse a la base de datos añadiendo al `index.js` de la aplicación:
+Add this to the `index.js` file to connect to the database:
 
 **index.js**
 ``` javascript
@@ -311,7 +309,7 @@ Conectarse a la base de datos añadiendo al `index.js` de la aplicación:
 
     [...] //Antes del App.init()
     KnexConnector.init(knexfile[process.env.NODE_ENV]);
-    await KnexConnector.test(); //Comprueba la conexión con BD
+    await KnexConnector.test(); //Checks the DB connection
 
     [...]
 
@@ -320,9 +318,9 @@ Conectarse a la base de datos añadiendo al `index.js` de la aplicación:
 
 ```
 
-Esto habilita una conexión (o pool) accesible mediante el singleton KnexConnector. Este singleton puede ser accedido desde cualquier punto aunque se recomienda utilizarlo en la capa DAO.
+This opens a connection (or pool, if available) through the KnexConnector singleton. This instance can be accessed from anywhere in the project, but it's strongly recommended to access it only in the repository/DAO layer.
 
-Para la realización de consultas a base de datos basta con:
+Code snippet example for database queries:
 ``` javascript
 import {KnexConnector} from '@landra_sistemas/lisco';
 //const {KnexConnector} = require("@landra_sistemas/lisco");
@@ -331,15 +329,15 @@ import {KnexConnector} from '@landra_sistemas/lisco';
     KnexConnector.connection.[...] // Insert, Where, etc...
     [...]
 ```
-> `connection` es una instancia de knex con lo que dispone de todos los métodos `.from`, `.where`, etc. definidos por su API.
+> `connection` is a knex instance containing all the methods, like `.from`, `.where`, etc. defined in its API.
 
 
-### Ejecutando migraciones al inicio
+### Running migrations on startup
 
-Una vez configurada la conexión con la base de datos, justo después de cargarla (`init`) se puede indicar al sistema que ejecute las migraciones mediante el siguiente comando:
+Once the database connection is set up, right after the connection method in `index` file, the app is capable of running migrations as it follows:
 
 ```js
-    [...] //Antes del App.init()
+    [...] //Before App.init()
     try {
         await KnexConnector.connection.migrate.latest();
     } catch (e) {
@@ -350,33 +348,27 @@ Una vez configurada la conexión con la base de datos, justo después de cargarl
     //
 ```
 
-### Mas info KNEX
+### KNEX info
 [http://knexjs.org/#Installation](http://knexjs.org/#Installation)
 
+# Component Description
 
+## Routes and Controllers
 
-# Descripción de Componentes
+The app loads all controllers in `App.routes` sequentially.  
 
-## Rutas y Controladores
+Controllers define API routes. Options:
+- Extend **BaseController**
+- Create a **custom** one
 
-La aplicación carga todos los controladores añadidos a `App.routes` de forma secuencial.
-
-Un controlador se encarga de desplegar rutas para construir la Api. Existen dos formas de crear un controlador:
-
-- Extender de **BaseController**
-- Crear uno **personalizado**
-
-
-Al extender de BaseController se simplifica el proceso con una interfaz genérica CRUD sobre la entidad configurada.
-
-Por ejemplo si hablamos de la tabla `user` crearíamos
+Example with `user` table:
 
 ``` javascript
 import { BaseController, BaseService } from '@landra_sistemas/lisco'
 
 export default class UserController extends BaseController {
 
-    configure() { //Necesario metodo configure que retorne this.router
+    configure() { //This method is mandatory, as it returns the router object.
         super.configure('user', { service: BaseService, table: 'user' });
         
         return this.router;
@@ -384,22 +376,20 @@ export default class UserController extends BaseController {
 }
 ```
 
-Mediante estas cuatro lineas dispondríamos de los siguientes métodos:
+This provides:
+- `POST` /user/list -> List users
+- `GET` /user/:id -> Get user
+- `POST` /user -> Create user
+- `PUT` /user/:id -> Update user
+- `DELETE` /user/:id -> Delete user
 
-- `POST` /user/list -> Listar usuarios
-- `GET` /user/:id -> Obtener usuario
-- `POST` /user -> Crear usuario
-- `PUT` /user/:id -> Modificar usuario
-- `DELETE` /user/:id -> Borrar usuario
+Custom routes can be added or overridden.
 
-
-Sobre este controlador se podrían crear nuevas rutas para la realización de acciones personalizadas o incluso sobreescribir algunas de ellas.
-
-Ejemplo
+Example
 
 ``` javascript
 export default class UserController extends BaseController {
-    configure() { //Necesario
+    configure() { //Mandatory
         super.configure('user', { service: BaseService, table: 'user', schema: yupSchema /*See validation*/ });
 
         this.router.get('/session',Utils.expressHandler((...args) => { 
@@ -418,21 +408,14 @@ export default class UserController extends BaseController {
 }
 ```
 
-El proceso de creación de un controlador **personalizado** es el mismo que el descrito anteriormente. La única diferencia es que este no tendría que extender de `BaseController` ni llamar al método `super.configure`.
+Custom controllers must implement `configure()` returning an express router. The only difference is that they are not required to extend from `BaseController` and to call `super.configure`. You can check the `BaseController` code in order to learn how to implement custom controllers.
 
-El único criterio para que un controlador pueda ser utilizado por la aplicación es que disponga de un método `configure` y este devuelva un `router` de express (`this.router = express.Router();`)
-
-Visualizar el código de `BaseController` puede ayudar a la creación de controladores personalizados.
-
-
-Durante estos ejemplos se ha utilizado `BaseService` su funcionamiento es similar a lo descrito con el `BaseController` este utiliza el `BaseDaoKnex` para la ejecución de los métodos CRUD básicos.
+`BaseService` works similarly, providing CRUD via `BaseDaoKnex`.
 
 
 ### Shorthands
 
-A partir de la version `0.2.1-rc.0` de lisco se ha añadido la posibilidad de definir las rutas de los controladores con una sintáxis simplificada.
-
-Para esto basta con añadir, al controlador, la propiedad `routes`. Ejemplo:
+Since version `0.2.1-rc.0`, controllers can define simplified routes using `routes` property.
 
 ``` javascript
 class HomeController extends BaseController {
@@ -442,7 +425,7 @@ class HomeController extends BaseController {
         },
     };
 
-    // Si el linter utilizado no soporta attributos de clase
+    // If the linter doesn't support class attributes:
     // constructor() {
     //     super();
     //     this.routes = {
@@ -457,7 +440,8 @@ class HomeController extends BaseController {
     }
 }
 ```
-Su sintáxis es sencilla, se trata de un objeto cuyas claves son las rutas y sus valores son objetos que contienen el método.
+
+Sintax is as simple as an object with paths as keys and values as objects containing the request method.
 
 ``` javascript
 {
@@ -469,28 +453,26 @@ Su sintáxis es sencilla, se trata de un objeto cuyas claves son las rutas y sus
         "get": this.method3.bind(this),
     }
 }
-``` 
+```
 
-Esta forma de definir tiene las siguientes particularidades: 
-
-- Las rutas shorthand se cargan **después** de inicializar el controlador mediante el método configure. 
-- No es necesario definir un método **configure()** en el controlador.
-- Es necesario extender de `BaseController`.
-- Es posible definir callbacks dobles cambiando la sintáxis por: `"get": [keycloak.protect(...), this.method.bind(this)]`. **Solo se pueden introducir dos elementos!**
-
+Particularities:
+- Shorthand routes load **after** `configure()`.
+- No need to define `configure()`.
+- Must extend `BaseController`.
+- Double callbacks are supported modifying the sintax as: `"get": [keycloak.protect(...), this.method.bind(this)]`. **Only two elements allowed!**
 
 ### Autoconfig
 
-A partir de la versión `0.2.1-rc.1` es posible configurar automáticamente los controladores de forma que, especificando a que entidad se refieren, el framework implemente todas las operaciones CRUD de forma automática.
+Since version `0.2.1-rc.1`, automatic CRUD configuration is possible:
 
-Para esto basta con definir en el controlador las siguientes propiedades:
+For this, controller must be defined with the following properties:
 ``` js
 entity = "entity_name";
 service = BaseService; //Class extending base service to perform operations
 table = "table_name";
 ```
 
-Quedando la clase de la siguiente forma:
+So the class will look like:
 
 ``` js
 class HomeController extends BaseController {
@@ -499,7 +481,7 @@ class HomeController extends BaseController {
     table = "user";
     schema: yupSchema /*See validation*/
 
-    // Si el linter utilizado no soporta attributos de clase
+    //  If the linter doesn't support class attributes:
     // constructor() {
     //     super();
     //     this.entity = "user";
@@ -512,9 +494,7 @@ class HomeController extends BaseController {
 ``` 
 ### Validation
 
-Para asegurar la validación de los inputs se define una propiedad general a nivel de basecontroller llamada schema. Esta variable basa su funcionamiento en la librería yup. 
-
-Para crear un esquema de validación se puede hacer de la siguiente forma:
+Input validation can be set up using `yup` library at `BaseController` level. Example schema:
 
 ``` js
 
@@ -525,27 +505,20 @@ const userSchema = object(    {
 });
 
 ```
+This schema will be always used, if assigned to the `BaseController`, in the created and update methods.
 
-Este esquema será utilizado, siempre que se le asigne al BaseController, en los métodos: create y update.
+## Authentication
 
+Framework provides built-in user validation. Supports multiple strategies: JWT and Cookie.
 
+`AuthController` handles:
 
+- `POST`: **/login** `{"username": "", "password": ""}` | Logs is checking the credentials
+- `POST`: **/logout** | Logs out
 
-## Autenticación
+Once configured, this automatically listens all que requests (unless whitelisted) and valitates the session.
 
-El framework implementa un sistema de validación de usuarios de forma nativa. Este sistema permite cargar múltiples métodos de autenticación en base a clases que cumplan un determinado patrón.
-
-Actualmente existen dos implementaciones: JWT y Cookie
-
-
-El controlador `AuthController` es el encargado de proporcionar la funcionalidad para la validación. Dispone de las siguientes rutas:
-
-- `POST`: **/login** `{"username": "", "password": ""}` | Inicia Sesión validando los credenciales
-- `POST`: **/logout** | Cierra la sesión
-
-De forma automática, una vez configurado, este controlador escucha todas las solicitudes recibidas (a excepción de las marcadas como ignoradas) comprobando que la sesión proporcionada es válida.
-
-Para habilitar el sistema es necesario añadir, como primera ruta, lo siguiente:
+To enable this, it's necessary to add the following as the first path:
 
 **index.js** 
 ``` javascript
@@ -568,20 +541,18 @@ App.routes = [
 [...]
 ``` 
 
-- PublicPaths: Sirve para especificar aquellas rutas que no necesitan haber iniciado sesión para ejecutarse.
-- `new AuthController`: Construye el controlador básico que recibe como parámetros la lista de rutas publicas y el manejador para la autenticación
-- `new IAuthHandler`: Es necesario proporcionar una clase que extienda de IAuthHandler e implemente los métodos `validate` y `check`. 
-- `new UserDao`: Es necesario proporcionar un Dao encargado del acceso a la tabla de usuarios y que como mínimo disponga de las columnas **username** y **password**.
-
-
+- PublicPaths: this allows to whitelist paths from authentication.
+- `new AuthController`: instantiates the basic controller and receives the public paths and authentication handler as params.
+- `new IAuthHandler`: It's mandatory to provide a class extending `IAuthHandler`, implementing `validate` and `check` methods. 
+- `new UserDao`: It's mandatory to provide a Dao for the `user` table handling with at least the **username** and **password** columns.
 
 ### JWT Authentication
 
-La implementación JWT utiliza los Json Web Token enviados como cabecera en la solicitud para validar los datos del usuario.
+The implementation uses the JWT params in the request header to validate the user credentials.
 
-Basa su funcionamiento en la librería **jsonwebtoken** y utiliza los parámetros definidos en el archivo `.env` para funcionar.
+Uses `jsonwebtoken` and `.env` parameters.  
 
-Para utilizarla es necesario especificar como manejador la clase JwtAuthHandler:
+Configure with:
 
 ``` javascript
 App.routes = [
@@ -591,24 +562,23 @@ App.routes = [
 
 #### Token
 
-El token será devuelto mediante la llamada `POST /login` descrita anteriormente. 
+Returned by `POST /login`. 
 
-Este token será necesario proporcionarlo en la cabecera `Authorization: Bearer <token>` en todas las llamadas posteriores a la aplicación.
+Must be provided in header `Authorization: Bearer <token>` in subsequent requests.
 
-Este token almacena toda la información de la entidad usuario devuelta por la clase UserDao a excepción del campo `password`
+This token includes all the info of the `user` entity, except the `password` field.
 
 ### Cookie Authentication
 
-Este sistema utiliza cookies para la gestión de las sesiones de la aplicación.
+This implementation uses cookies to handle user sessions.
 
-Utiliza el `express-session` de express y para configurarlo es necesario:
-
-1. Instalar:  connect-session-knex y express-session
-2. Cargar la cookie store en express mediante el método `customizeExpress`
+Config steps:
+1. Install `connect-session-knex` and `express-session`
+2. Configure session in `customizeExpress`
 ``` javascript
 import { ConnectSessionKnexStore }  from "connect-session-knex";
 
-//Configurar la gestion de cookies
+//Configure cookie handling
 App.customizeExpress = (app) => {
     app.use(session({
         store: new ConnectSessionKnexStore({
@@ -624,8 +594,8 @@ App.customizeExpress = (app) => {
     }));
 };
 ```
-3. Añadir al archivo `.env` los parámetros `COOKIE_PASS` y `COOKIE_TIMEOUT`
-4. Cargar el controlador:
+3. Add `.env` vars `COOKIE_PASS` and `COOKIE_TIMEOUT`
+4. Load controller
 ``` javascript
 App.routes = [
     new AuthController(publicPaths, new CookieAuthHandler(new UserDao()))
@@ -634,22 +604,19 @@ App.routes = [
 
 #### Cookie
 
-La cookie se almacenará, mediante esta configuración, en una tabla de postgre. Esto permitirá desplegar la aplicación en cluster ya que se comparte una store común.
+The cookie will be stored in a database table. This will allow the app's clustered execution. This cookie includes all the info of the `user` entity, except the `password` field.
 
-Esta cookie dispondrá de los datos devueltos por la clase UserDao a excepción del campo `password`.
+### Keycloak Authentication
 
+Keycloak is an external user federation system.
 
-### Autenticación Keycloak
-
-Keycloak es un sistema de federación de usuarios que simplifica la implementación de la autenticación y autorización. Este componente se trata de una aplicación externa la cual es necesario instalar siguiendo su documentación. 
-
-Su integración en lisco se realiza de la siguiente forma:
+Its lisco integration can be set up as follows:
 
 ``` bash
-> npm install keycloak-connect@x.x.x //Version de keycloak
+> npm install keycloak-connect@x.x.x //Keycloak version
 ```
 
-Una vez instalado, crear una carpeta `config` en la raiz del proyecto con el siguiente contenido:
+Once installed, add a `config` folder at project's root level with the following content:
 
 `keycloak-config.js`
 ```javascript
@@ -687,7 +654,7 @@ export { initKeycloak, getKeycloak };
 
 ```
 
-Con este archivo creado, modificar el archivo  `index.js` de la aplicación de la siguiente forma:
+Update `index.js` to init Keycloak and attach middleware.
 
 ``` javascript
 import { initKeycloak, getKeycloak } from "./config/keycloak-config";
@@ -710,7 +677,7 @@ import { initKeycloak, getKeycloak } from "./config/keycloak-config";
 [...]
 ```
 
-Añadir al archivo `.env` la configuración mediante los siguientes parámetros:
+Add to `.env`:
 
 ```
 #Keycloak
@@ -718,11 +685,9 @@ KEYCLOAK_REDIRECT_URL=http://localhost:3114/auth
 KEYCLOAK_REALM=REALMNAME
 KEYCLOAK_BACK_CLI=backend-client
 ```
-#### Uso
+#### Usage
 
-Una vez realizados los pasos indicados el sistema ya estará listo para utilizarse.
-
-Para proteger ciertas url en base a los roles de los usuarios autenticados basta con añadir a las rutas de los controladores:
+To protect routes with roles:
 
 ``` javascript
 this.router.get(
@@ -731,63 +696,51 @@ this.router.get(
     exAsync((...args) => this.login(...args))
 );
 ```
+`//TODO add Keycloak login documentation`
 
-El sistema se basa en que el frontend ya ha iniciado sesión y dispone de un token JWT con lo que el backend lo recibe sin mayor problema.
-
-`//TODO documentar como hacer login contra keycloak`
-
-Ver la docu de keycloak para mas info.
-
+For more info, check Keycloak documentation.
 
 ## Logger
 
-El sistema de log de la aplicación utiliza `log4js` como base. Se ha simplificado el uso de la aplicación sobreescribiendo el objeto global `console`.
-
-El sistema esta habilitado por defecto y se utiliza de la siguiente forma:
+Uses `log4js`. Overwrites global `console`. It's enabled by default.
 
 ```
-console.log(mensaje)
-console.error(mensaje)
-console.info(mensaje)
-console.debug(mensaje)
-console.custom(type, level, mensaje)
+console.log(message)
+console.error(message)
+console.info(message)
+console.debug(message)
+console.custom(type, level, message)
 ```
 
-
-El sistema se configura mediante el fichero `log4js.json` situado en la raíz del proyecto el cual permite configurar los appender y los niveles de log para cada uno. Mas información sobre la configuración: [https://log4js-node.github.io/log4js-node/index.html](https://log4js-node.github.io/log4js-node/index.html)
-
-
-## Traducciones
-
-El sistema de traducciones utiliza archivos `json` en los que se almacenan las claves y los valores de las traducciones.
-
-Este sistema dispone del parámetro **DEFAULT_LANG** el cual define el idioma por defecto y permite cargar cualquier archivo json situado en la carpeta **i18n** del proyecto.
-
-Los archivos han de nombrarse de la siguiente forma: `lang_[XX].json`
-
-Siendo `[XX]` el código del idioma
-
-El método `App.i18n.load(XX)` carga el idioma recibido como parámetro.
-
-El método `App.i18n.translate(key, [lang])` traduce una clave en base al idioma proporcionado. Se usa el idioma por defecto en caso de no proporcionarlo.
+It can be configured through the `log4js.json` file at project's root level. More info: [https://log4js-node.github.io/log4js-node/index.html](https://log4js-node.github.io/log4js-node/index.html)
 
 
-## Eventos
+## Translations
 
- La aplicación dispone de un sistema encargado de gestionar eventos. Este sistema permite que los diferentes procesos del modo `clustered` se comuniquen entre si.
+Translations use `json` files in `/i18n`. This files will store keys and values of the translations. The files must be named as follows, where XX is the lang code: `lang_[XX].json`.  
 
- Para iniciar la escucha de un evento es necesario:
+The system has the **DEFAULT_LANG**, which states the default language of the backend instance and allows loading any language in the `ì18n` folder of the project.
+
+- `App.i18n.load(XX)` loads a language.
+- `App.i18n.translate(key, [lang])` translates key. Uses the default language if the lang param is not sent.
+
+
+## Events
+
+The app has a cluster safe event handler system.
+
+To setup the events listener:
  ``` javascript
 import { App } from '@landra_sistemas/lisco'
 
-App.events.on('custom', function cosa(props) {
+App.events.on('custom', function foo(props) {
     console.log(props);
 })
  ```
 
-Esto implica que la aplicación comienza a escuchar el evento 'custom' con unos parámetros y los mostrará en el log.
+This will make the app to listen to 'custom' events and it will print the event props.
 
-Para ejecutar un evento desde otro punto de la aplicación es necesario:
+To emit an event:
 
  ``` javascript
 import { App } from '@landra_sistemas/lisco'
@@ -795,61 +748,61 @@ import { App } from '@landra_sistemas/lisco'
 App.events.emit('custom', { test: "test" })
  ```
 
- Esto lanza el evento con los parámetros `{ test: "test" }`.
+ This will emit an event with props: `{ test: "test" }`.
 
-## Filtros
+## Filters
 
-La clase `KnexFilterParser`  convierte un objeto clave valor en un conjunto de filtros.
+`KnexFilterParser` converts objects into filters. 
      
-- Filtro estandar:
+- Standard filter:
 ``` json
 "filters": {
-    "column": "value" // filtro generico exact
+    "column": "value" // generic 'exact' filter
 }
 ```
-- Filtro Objeto:
+- Oject filter:
 ``` json
 "filters": {
     "column": {
         "type": "date|between|exists|notexists|greater|greaterEq|less|lessEq|exact|exactI|not|null|notnull|like|likeI",
-        "start": "xxx", //inicio de rango para el filtro de date y between
-        "end": "xxx", //fin de rango para el filtro date y between
-        "value": "xxx" //valor a utilizar para el resto de filtros
+        "start": "xxx", //start range of date and between type filters
+        "end": "xxx", //end range of date and between type filters
+        "value": "xxx" //value for filters others than date and between
     }
 }
 ```
-- Filtro Lista:
+- List filter:
 ``` json
 "filters": {
     "column": [1, 2, 3]
 }
-// Filtro de tipo IN, todos los elementos que coincidan
+// IN type filer for all the matching elements
 ```
 
       
-- Definicion de tipos:
-    - **fql**: filtro especial en lenguaje FQL (https://github.com/landra-sistemas/fql_parser)
-    - **date**: filtro de fechas desde y hasta
-    - **between**: filtro entre dos valores concretos
-    - **full-text-psql**: búsqueda especial sobre cualquier columna de una tabla, solo vale para Postgre (`to_tsvector(${prop}::text) @@ to_tsquery(?)`)
-    - **exists**: busca si existe la propiedad
-    - **notexists**: busca si existe la propiedad
-    - **greater**: mayor que
-    - **greaterEq**: mayor o igual que
-    - **less**: menor que
-    - **lessEq**: menor o igual que
-    - **exact**: valor exacto
-    - **not**: distinto de
-    - **null**: igual a null
-    - **notnull**: distinto de null
-    - **like**: filtro like
-    - **likeI**: filtro like ignorando mayusculas y minusculas
+- Types definition:
+    - **fql**: FQL type filter (https://github.com/landra-sistemas/fql_parser)
+    - **date**: date range filter
+    - **between**: filter between to values
+    - **full-text-psql**: fuzzy query for any column of a table, only for PostgreSQL (`to_tsvector(${prop}::text) @@ to_tsquery(?)`)
+    - **exists**: checks if a value exists
+    - **notexists**: checks if a value not exists
+    - **greater**: greater than
+    - **greaterEq**: greater or equal than
+    - **less**: lesser than
+    - **lessEq**: lesser or equal than
+    - **exact**: exact value
+    - **not**: different than
+    - **null**: equal to null
+    - **notnull**: not null
+    - **like**: like filter
+    - **likeI**: case insensitive like
 
-> Todos los filtros excepto exists, notexists, fql y full-text-psql tienen una opción 'raw' (dateraw, betweenraw) que permite personalizar mediante sintaxis sql la columna. Esto suele ser util para, en Postgres, ejecutar consultas sobre columnas de tipo Json (`column->>'test'`)
+> All the filers, except exists, notexists, fql and full-text-psql, have a 'raw' option (dateraw, betweenraw) which allows to use column custom SQL sintax. It's used, for example, with PostgreSQL to run JSON type queries (`column->>'test'`).
 
-### Ordenación
+### Sorting
 
-Para poder ordenar los datos requeridos, es necesario incluir en el payload de la request el siguiente objeto:
+In order to sort required data, it's needed to add the following object in the payload of the request:
 
 ```
 {
@@ -861,20 +814,18 @@ Para poder ordenar los datos requeridos, es necesario incluir en el payload de l
     }
 }
 ```
- Siendo `field` el nombre de la columna por la que ordenar y `direction` la dirección.
 
  ## Server Views
 
- La utilización de `express` permite el uso de cualquier sistema de renderizado del lado de servidor soportado por el. Mas info aqui https://expressjs.com/en/resources/template-engines.html y aqui https://expressjs.com/en/guide/using-template-engines.html
+ The `express` framework allows the use of any server side rendering, supported by it. More info: https://expressjs.com/en/resources/template-engines.html and https://expressjs.com/en/guide/using-template-engines.html
 
- Para su inclusión en **lisco** es necesario:
+ Example with handlebars:
 ``` bash
 > npm install express-handlebars
 ```
-> Para el ejemplo se usará handlebars pero se puede usar la que mas nos guste.
+>
 
-
-Una vez instalada la dependencia es necesario cargarla en App. Para ello:
+Once the dependency is installed, initialize the middleware as follows:
 
 **index.js**
 ``` javascript
@@ -886,7 +837,7 @@ module.exports = async () => {
 
     App.customizeExpress = (app) => {
         const hbs = create({
-            // Estos helpers pueden ser funciones que se llamen posteriormente desde nuestras vistas para renderizar contenido.
+            // This helpers may be functions called from the views to render content.
             helpers: {
                 foo() {
                     return "FOO!";
@@ -905,7 +856,7 @@ module.exports = async () => {
 };
 ```
 
-Crear la carpeta `views` en la raiz del proyecto e introducir nuestras vistas:
+Add the folder `views` to the root content and add the needed views:
 
 **views/home.handlebars**
 ``` handlebars
@@ -937,8 +888,7 @@ Crear la carpeta `views` en la raiz del proyecto e introducir nuestras vistas:
     </body>
 </html>
 ```
-
-Con las vistas creadas lo único que queda es crear los controladores que se encargarán de servirlas. El proceso es el mismo que se describe mas arriba en este mismo documento:
+Controllers must be created to serve the different views.
 
 **controllers/HomeController.js**
 ``` javascript
@@ -956,7 +906,7 @@ export default class HomeController extends BaseController {
         res.render("home", {
             showTitle: true,
 
-            // También se pueden especificar y sobreescribir helpers directamente en el render de cada vista.
+            // Helpers can be overriden from here:
             helpers: {
                 foo() {
                     return "foo.";
@@ -967,7 +917,7 @@ export default class HomeController extends BaseController {
 }
 ```
 
-Este controlador ha de ser añadido a la App como cualquier otro:
+Then, add the controller to the routes array:
 **index.js**
 ``` javascript
 App.routes = [
@@ -977,11 +927,10 @@ App.routes = [
 ];
 ```
 
-
-
 ## Runtime CLI
 
-Lisco proporciona una serie de parámetros de consola útiles para la generación de claves. Esta runtime **no está activada por defecto** pero puede activarse mediante:
+Lisco runtime adds CLI params (not enabled by default). Enable with `App.runtime();`.
+
 ``` javascript
 //module.exports = async () => {
     App.runtime();
@@ -989,47 +938,45 @@ Lisco proporciona una serie de parámetros de consola útiles para la generació
     [...]
 //};
 ```
-> Se recomienda iniciar la runtime como primera llamada del index.js (Antes del resto de cosas)
+> It's recommended to start the runtime as the first call in the `index` file.
 
+Once it's running, it will accept the following params, via terminal:
 
-Una vez que esta runtime se encuentra activada la aplicación aceptará, al arrancar, los siguientes parámetros por terminal:
+- -h o --help: shows help with the available params
+- --generateKeys: generates the app's encryption keys
+- --encrypt string: encrypts a string passed as an argument.
 
-- -h o --help: Muestra la ayuda con los parámetros disponibles
-- --generateKeys: Genera las claves de encriptación únicas para la aplicación (iv y key)
-- --encrypt string: Encripta una cadena pasada como parámetro utilizando las claves proporcionadas. Util para la generación de contraseñas.
+### Optional features
 
-### Opciones adicionales
-
-La este método puede recibir como parámetro una lista de elementos adicionales de forma que se pueda extender la funcionalidad de la runtime. Esta lista tendrá la siguiente estructura:
+This method can receive as params a list of additional elements to extend the runtimes functionalities. It has to have the following structure;
 
 ``` javascript
 [
     {
-        "key": "c", //clave abreviada de la opción
-        "alias": "config", //Alias para llamarlo con --
-        "describe": "Configuración", //Descripción
-        "fn": function(argv) { }, //Función a ejecutar
-        "nargs": 0, //Número de argumentos
-        "required": false, //Indica si es obligatorio
-        "boolean": false, //indica si es un campo boolean (true, false)
-        "choices": ["asdf", "fsa"], //Lista de opciones posibles
+        "key": "c", //param name abbreviation (-c)
+        "alias": "config", //alias (--config)
+        "describe": "Configuration", //description
+        "fn": function(argv) { }, //function called
+        "nargs": 0, //number of arguments
+        "required": false, //mandatory or not
+        "boolean": false, //states if a field is a boolean (true, false)
+        "choices": ["foo", "bar"], //possible cli options
     }   
 ]
 ```	
-> Para poder utilizar funciones asíncronas, será necesario utilizar await al inicializar la runtime (`await App.runtime(extra);`)
-
+> In order to use async functions, an await must be implemented at the runtime init (`await App.runtime(extra);`)
 
 ## Server Monitoring
 
-Se ha adaptado la librería: https://github.com/RafalWilinski/express-status-monitor. Al utilizar CDN's limita bastante el deploy del proyecto, pero esta adaptación la hace perfecta para incluir a modo de monitorización https://github.com/thorin8k/express-status-monitor.
+Adapted from: https://github.com/RafalWilinski/express-status-monitor. CDN's implementation limits the projects deploy, but it's useful to be included as a monitoring tool: https://github.com/thorin8k/express-status-monitor.
 
-Para instalar el fork basta con:
+To install the fork:
 
 ``` bash
 > npm install https://github.com/thorin8k/express-status-monitor
 ``` 
 
-Una vez instalada, para incluirla en el proyecto es necesario incluirla en el método `customizeExpress`:
+Once installed, it must be included in the `customizeExpress` method:
 
 ``` javascript
 App.customizeExpress = (app) => { 
@@ -1038,16 +985,15 @@ App.customizeExpress = (app) => {
         require("express-status-monitor")({
             title: "Server Backend",
             path: '/status',
-            websocket: App.io //Lisco inicia un socketio por defecto, si se desactiva (socketio: false), quitar esta linea
+            websocket: App.io //Lisco inits a socketio by, if disabled (socketio: false), remove this line
         })
     );
 };
 ``` 
 
-En el repositorio existen parámetros adicionales que pueden ser útiles en ciertos casos: https://github.com/thorin8k/express-status-monitor
+More info: https://github.com/thorin8k/express-status-monitor
 
-> Lisco arranca un socketio por defecto en el puerto siguiente al configurado. Si este socketio se desactiva es necesario quitar la linea websocket de la configuración para que el monitor arranque su propio servidor.
-
+> Lisco starts `socketio` by default in the next port number from the configured one. If socketio is disabled, it's needed to remove the `socketio` line, `so the monitor will start it's own server.
 
 ## SocketIO
 
