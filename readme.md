@@ -297,7 +297,7 @@ module.exports = {
 };
 ```
 
-Add this to the `index.js` file to connect to the database:
+Also, add this to the `index.js` file to connect to the database:
 
 **index.js**
 ``` javascript
