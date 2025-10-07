@@ -254,7 +254,7 @@ To display log messages in debug mode setup `launch.json` like:
 }
 ```
 
-DB Configuration and Migrations
+## DB Configuration and Migrations
 
 Create a knexfile with DB connection:
 
