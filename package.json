@@ -63,7 +63,7 @@
         "release:rc": "npm version prerelease --preid=rc -m \"Bump version %s\""
     },
     "devDependencies": {
-        "chai": "^4.3.10",
+        "chai": "^6.2.0",
         "chai-http": "^4.4.0",
         "eslint": "^8.56.0",
         "jsonwebtoken": "^9.0.2",
