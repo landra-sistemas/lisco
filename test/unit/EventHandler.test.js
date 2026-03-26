@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import cluster from "cluster";
-import { EventHandler, App } from "../src/index.js";
+import { EventHandler, App } from "../../src/index.js";
 
 describe("EventHandler", () => {
     it("#simple()", async () => {

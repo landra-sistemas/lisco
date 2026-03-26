@@ -76,6 +76,7 @@ export default class ClusterServer extends EventEmitter {
             } else {
                 this.server.io = new Server(this.server.express_config && this.server.express_config.socketio);
                 this.server.io.listen(server);
+                this.server.io.adapter(createAdapter());
                 setupWorker(this.server.io);
                 this.app.io = this.server.io;
             }

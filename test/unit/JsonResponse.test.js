@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { JsonResponse } from "../src/index.js";
+import { JsonResponse } from "../../src/index.js";
 
 describe("JsonResponse", () => {
     it("#create()", async () => {

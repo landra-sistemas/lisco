@@ -1,5 +1,5 @@
 import { config } from "dotenv-defaults";
-import { App } from "../../dist/lisco.esm.js";//from "@landra_sistemas/lisco"
+import { App } from "../../src/index.js";//from "@landra_sistemas/lisco"
 import HomeController from "./controllers/HomeController.mjs";
 
 //Configure dotenv

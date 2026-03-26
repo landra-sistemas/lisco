@@ -2,7 +2,7 @@ import { expect } from "chai";
 import path from "path";
 import fs from "fs";
 import util from "util";
-import { Logger, Utils } from "../src/index.js";
+import { Logger, Utils } from "../../src/index.js";
 
 describe("Logger", () => {
     it("#log()", async () => {

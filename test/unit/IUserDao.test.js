@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { IUserDao } from "../src/index.js";
+import { IUserDao } from "../../src/index.js";
 
 describe("IUserDao", () => {
     it("#construct()", async () => {

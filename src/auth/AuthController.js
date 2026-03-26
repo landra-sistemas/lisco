@@ -36,10 +36,12 @@ export default class AuthController {
      */
     async check(request, response, next) {
         try {
+            const requestPath = url.parse(request.originalUrl || request.url || "").pathname || "";
+
             //Rutas ublicas
             for (let path of this.publicPathsList) {
-                const expr = pathToRegexp(path);
-                if (expr.exec(request.originalUrl) !== null) {
+                const { regexp } = pathToRegexp(path);
+                if (regexp.exec(requestPath) !== null) {
                     return next();
                 }
             }

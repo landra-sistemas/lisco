@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { AuthController } from "../src/index.js";
+import { AuthController } from "../../src/index.js";
 
 describe("AuthController", async () => {
     it("#configure()", () => {

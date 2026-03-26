@@ -1,0 +1,82 @@
+on:
+    push:
+        branches:
+            - main
+
+permissions:
+    contents: write
+    issues: write
+    pull-requests: write
+
+name: release-please
+
+jobs:
+    release-please:
+        runs-on:
+            group: landra-infra
+        outputs:
+            release_created: ${{ steps.release.outputs.release_created }}
+            tag_name: ${{ steps.release.outputs.tag_name }}
+        steps:
+            - uses: googleapis/release-please-action@v4
+              id: release
+              with:
+                  # this assumes that you have created a personal access token
+                  # (PAT) and configured it as a GitHub action secret named
+                  # `MY_RELEASE_PLEASE_TOKEN` (this secret name is not important).
+                  token: ${{ secrets.CR_PAT }}
+                  # this is a built-in strategy in release-please, see "Action Inputs"
+                  # for more options
+                  release-type: node
+
+            - uses: actions/checkout@v5
+              if: ${{ steps.release.outputs.release_created }}
+
+            - name: Extract version from package.json
+              if: ${{ steps.release.outputs.release_created }}
+              id: extract_version
+              run: echo "version=$(jq -r .version package.json)" >> $GITHUB_OUTPUT
+
+            ## Workaround for sbom generation issues
+            
+            - uses: landra-sistemas/ci-templates/node/setup-env@main
+              if: ${{ steps.release.outputs.release_created }}
+              with:
+                  node-version: 20
+
+            - uses: anchore/sbom-action@v0.20.2
+              if: ${{ steps.release.outputs.release_created }}
+              with:
+                  path: .
+                  upload-artifact: false
+                  format: spdx-json
+                  output-file: sbom.spdx.json
+
+            - name: Install GH CLI
+              uses: dev-hanz-ops/install-gh-cli-action@v0.2.1
+              if: ${{ steps.release.outputs.release_created }}
+              with:
+                  gh-cli-version: 2.83.1
+
+            - name: Upload Release Artifact
+              if: ${{ steps.release.outputs.release_created }}
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: gh release upload ${{ steps.release.outputs.tag_name }} sbom.spdx.json
+
+    publish-npm:
+        needs: release-please
+        if: ${{ needs.release-please.outputs.release_created }}
+        runs-on:
+            group: landra-infra
+        steps:
+            - uses: actions/checkout@v5
+            - uses: landra-sistemas/ci-templates/node/setup-env@main
+              with:
+                  node-version: 20
+            - name: Build package
+              run: npm run build
+            - name: Publish to npm
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+              run: npm publish --access public

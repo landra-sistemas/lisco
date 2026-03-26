@@ -1,11 +1,5 @@
 {
-    "node-option": [
-        "experimental-specifier-resolution=node"
-    ],
-    "require": [
-        "test/mocha.env.js"
-    ],
-    "file": [
-        "./test/run-enviroment.js"
-    ]
+    "exit": true,
+    "node-option": ["experimental-specifier-resolution=node"],
+    "require": ["test/mocha.env.js"]
 }

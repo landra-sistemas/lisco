@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { IAuthHandler } from "../src/index.js";
+import { IAuthHandler } from "../../src/index.js";
 
 describe("IAuthHandler", () => {
     it("#construct()", async () => {

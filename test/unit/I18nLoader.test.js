@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { I18nLoader } from "../src/index.js";
+import { I18nLoader } from "../../src/index.js";
 
 describe("I18nLoader", () => {
     it("#load()", async () => {

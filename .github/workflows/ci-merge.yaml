@@ -1,0 +1,96 @@
+name: CI Merge Pipeline
+
+env:
+    REGISTRY: ghcr.io
+    IMAGE_NAME: ${{ github.repository }}
+
+permissions:
+    contents: write
+    packages: write
+    id-token: write
+    checks: write
+    pull-requests: write
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+    cancel-in-progress: true
+
+on:
+    push:
+        tags: "v*"
+
+    pull_request:
+        branches:
+            - main
+jobs:
+    setup:
+        # Only run on PRs from 'dev' or 'hotfix/*' branches, or on tag pushes
+        if: |
+            (
+                github.event_name == 'pull_request' &&
+                (
+                github.event.pull_request.head.ref == 'dev' ||
+                startsWith(github.event.pull_request.head.ref, 'hotfix/')
+                )
+            ) || (
+                github.event_name == 'push' &&
+                startsWith(github.ref, 'refs/tags/')
+            )
+
+        runs-on:
+            group: landra-infra
+        steps:
+            - uses: actions/checkout@v5
+            - uses: landra-sistemas/ci-templates/node/setup-env@main
+              with:
+                  node-version: 20
+
+    test-and-report:
+        needs: setup
+        runs-on:
+            group: landra-infra
+        steps:
+            - uses: actions/checkout@v5
+            - uses: landra-sistemas/ci-templates/node/test-report@main
+              with:
+                  node-version: 20
+            - uses: landra-sistemas/ci-templates/common/code-quality@main
+              with:
+                  sonar-token: ${{ secrets.SONAR_TOKEN }}
+                  sonar-host-url: ${{ secrets.SONAR_HOST_URL }}
+
+    security-scan:
+        needs: setup
+        runs-on:
+            group: landra-infra
+        steps:
+            - uses: actions/checkout@v5
+            - name: Install build tools for node-gyp
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y --no-install-recommends build-essential python3
+            ## Workaround for sbom generation issues
+            - uses: landra-sistemas/ci-templates/node/setup-env@main
+              with:
+                  node-version: 20
+            - uses: landra-sistemas/ci-templates/common/security-scan@main
+              with:
+                  fail-build: false
+                  severity-cutoff: "high"
+
+            - name: Secret scan
+              uses: landra-sistemas/ci-templates/common/secret-scan@main
+
+    build:
+        needs: [test-and-report, security-scan]
+        runs-on:
+            group: landra-infra
+        steps:
+            - uses: actions/checkout@v5
+            - uses: landra-sistemas/ci-templates/node/setup-env@main
+              with:
+                  node-version: 20
+
+            - name: Run Build
+              shell: bash
+              run: npm run build

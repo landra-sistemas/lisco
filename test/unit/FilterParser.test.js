@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import knex from "knex";
-import { KnexConnector, KnexFilterParser } from "../src/db/index.js";
+import { KnexConnector, KnexFilterParser } from "../../src/db/index.js";
 
 describe("KnexFilterParser", () => {
     it("#parseFiltersSimple()", async () => {

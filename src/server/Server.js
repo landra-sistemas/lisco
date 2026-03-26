@@ -19,7 +19,7 @@ export default class Server {
      * @param {*} statics
      * @param {*} routes
      */
-    constructor(config, statics, routes, ioroutes) {
+    constructor(config, statics, routes, ioevents) {
         this.app = express();
         this.express_config = lodash.defaultsDeep(config, {
             helmet: true,
@@ -34,7 +34,7 @@ export default class Server {
         });
         this.statics = statics;
         this.routes = routes;
-        this.ioroutes = ioroutes;
+        this.ioevents = ioevents;
     }
 
     /**
@@ -83,7 +83,7 @@ export default class Server {
         }
         if (config && config.cors) {
             //Enable cors to allow external references
-            this.app.options("*", cors(config && lodash.isObject(config.cors) && config.cors));
+            this.app.options(/.*/, cors(config && lodash.isObject(config.cors) && config.cors));
             this.app.use(cors(config && lodash.isObject(config.cors) && config.cors));
         }
         if (config && config.fileupload) {
@@ -151,13 +151,14 @@ export default class Server {
                 const exAsync = Utils.expressHandler();
                 for (const path in route.routes) {
                     const cfg = route.routes[path];
+                    const normalizedPath = this.normalizeRoutePath(path);
                     for (const method in cfg) {
                         const handler = cfg[method];
                         if (Array.isArray(handler)) {
                             //Securización (keycloak)
-                            router[method](path, handler[0], exAsync(handler[1]));
+                            router[method](normalizedPath, handler[0], exAsync(handler[1]));
                         } else {
-                            router[method](path, exAsync(handler));
+                            router[method](normalizedPath, exAsync(handler));
                         }
                     }
                 }
@@ -171,6 +172,16 @@ export default class Server {
     }
 
     /**
+     * Compatibilidad de rutas legacy para Express 5/path-to-regexp.
+     */
+    normalizeRoutePath(path) {
+        if (path === "*" || path === "/*") {
+            return /.*/;
+        }
+        return path;
+    }
+
+    /**
      * Configura los eventos por defecto escuchados por el servidor de socketio desde el proceso main. 
      * Sirve principalmente en modo cluster para determinar que eventos serán escuchados por todos los sockets.
      * 
@@ -180,7 +191,7 @@ export default class Server {
      */
     configureIoEvents(ioevents) {
         const io = this.io;
-        if (!io) return;
+        if (!io || !ioevents) return;
 
         for (const eventName in ioevents) {
             const handler = ioevents[eventName];

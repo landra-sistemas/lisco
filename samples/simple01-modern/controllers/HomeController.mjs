@@ -1,4 +1,4 @@
-import { BaseController, Utils } from "../../../dist/lisco.esm.js"; //from "@landra_sistemas/lisco"
+import { BaseController, Utils } from "../../../src/index.js"; //from "@landra_sistemas/lisco"
 
 export default class HomeController extends BaseController {
     configure() {
