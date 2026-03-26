@@ -12,8 +12,7 @@ name: release-please
 
 jobs:
     release-please:
-        runs-on:
-            group: landra-infra
+        runs-on: ubuntu-latest
         outputs:
             release_created: ${{ steps.release.outputs.release_created }}
             tag_name: ${{ steps.release.outputs.tag_name }}
@@ -67,8 +66,7 @@ jobs:
     publish-npm:
         needs: release-please
         if: ${{ needs.release-please.outputs.release_created }}
-        runs-on:
-            group: landra-infra
+        runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v5
             - uses: landra-sistemas/ci-templates/node/setup-env@main

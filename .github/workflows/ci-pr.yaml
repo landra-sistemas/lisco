@@ -18,8 +18,7 @@ concurrency:
 jobs:
 
     test-and-report:
-        runs-on:
-            group: landra-infra
+        runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v5
             - uses: landra-sistemas/ci-templates/node/test-report@main
@@ -27,8 +26,7 @@ jobs:
                   node-version: 20
 
     security-scan:
-        runs-on:
-            group: landra-infra
+        runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v5
             ## Workaround for sbom generation issues
@@ -43,8 +41,7 @@ jobs:
 
     extras:
         needs: security-scan
-        runs-on:
-            group: landra-infra
+        runs-on: ubuntu-latest
         steps:
             - shell: bash
               run: |
