@@ -39,7 +39,7 @@ declare module "@landra_sistemas/lisco" {
         static customizeExpress: (app: Application) => void;
 
         /** Rutas que se cargarán en la aplicación */
-        static routes: BaseController[] | AuthController[];
+        static routes: Array<BaseController | AuthController>;
 
         /** Archivos estáticos */
         static statics: Record<string, string>;
