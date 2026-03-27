@@ -39,7 +39,7 @@ declare module "@landra_sistemas/lisco" {
         static customizeExpress: (app: Application) => void;
 
         /** Rutas que se cargarán en la aplicación */
-        static routes: BaseController[];
+        static routes: BaseController[] | AuthController[];
 
         /** Archivos estáticos */
         static statics: Record<string, string>;
@@ -62,11 +62,11 @@ declare module "@landra_sistemas/lisco" {
         table?: string;
         schema?: any;
         routes?: Record<string, any>;
-        listEntidad?(req: Request, res: Response, next: NextFunction): Promise<unknown>;
-        getEntidad?(req: Request, res: Response, next: NextFunction): Promise<unknown>;
-        saveEntidad?(req: Request, res: Response, next: NextFunction): Promise<unknown>;
-        updateEntidad?(req: Request, res: Response, next: NextFunction): Promise<unknown>;
-        deleteEntidad?(req: Request, res: Response, next: NextFunction): Promise<unknown>;
+        listEntidad(req: Request, res: Response, next: NextFunction): Promise<unknown>;
+        getEntidad(req: Request, res: Response, next: NextFunction): Promise<unknown>;
+        saveEntidad(req: Request, res: Response, next: NextFunction): Promise<unknown>;
+        updateEntidad(req: Request, res: Response, next: NextFunction): Promise<unknown>;
+        deleteEntidad(req: Request, res: Response, next: NextFunction): Promise<unknown>;
     }
 
     export class BaseService<T = any, D extends BaseKnexDao<T> = BaseKnexDao<T>> {
