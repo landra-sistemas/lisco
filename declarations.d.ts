@@ -57,11 +57,11 @@ declare module "@landra_sistemas/lisco" {
     }
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     export class BaseController<T = any> {
-        entity: string;
-        service: new (...args: any[]) => T;
-        table: string;
-        schema: any;
-        routes: Record<string, any>;
+        entity?: string;
+        service?: new (...args: any[]) => T;
+        table?: string;
+        schema?: any;
+        routes?: Record<string, any>;
         listEntidad(req: Request, res: Response, next: NextFunction): Promise<unknown>;
         getEntidad(req: Request, res: Response, next: NextFunction): Promise<unknown>;
         saveEntidad(req: Request, res: Response, next: NextFunction): Promise<unknown>;
