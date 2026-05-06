@@ -74,12 +74,17 @@ declare module "@landra_sistemas/lisco" {
 
         constructor(dao: new (...args: any[]) => D);
 
-        list(params?: Record<string, any>): Promise<T[]>;
+        list(params?: Record<string, any>): Promise<SearchResponse<T>[]>;
         loadById(id: string | number): Promise<T>;
         save(data: Partial<T>): Promise<T[]>;
         update(id: string | number, data: Partial<T>): Promise<T[]>;
         delete(id: string | number): Promise<void>;
     }
+    export class SearchResponse<T = any>  {
+        total: number;
+        data: T[];
+    }
+
     export class JsonResponse {
         constructor(success: boolean, data?: any, message?: string, total?: number);
         toJson(): object;
